@@ -1,0 +1,58 @@
+name: "🛠 작업 사항"
+description: "작업 사항 및 변경 로직을 작성해주세요."
+title: "[FEAT/REFACTOR/FIX/DOCS/TEST/CHORE]: "
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: "작업 종류"
+      description: "작업 종류를 선택해주세요."
+      options:
+        - "FEAT: 새로운 기능 추가"
+        - "REFACTOR: 코드 리팩토링"
+        - "FIX: 버그 수정"
+        - "DOCS: 문서 작성"
+        - "TEST: 테스트 코드 작성"
+        - "CHORE: 기타 작업"
+    validations:
+      required: true
+
+  - type: textarea
+    id: task-details
+    attributes:
+      label: "설명"
+      description: "작업에 대한 설명을 적어주세요."
+      placeholder: "예: 로그인 기능 구현"
+    validations:
+      required: true
+
+  - type: textarea
+    id: todo
+    attributes:
+      label: "TODO"
+      description: "해야 할 일을 적어주세요."
+      value: |
+        - [ ] 할 일 1
+        - [ ] 할 일 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: etc
+    attributes:
+      label: "기타"
+      description: "기타 사항이 있다면 적어주세요."
+      placeholder: |
+        - 기타 사항 1
+        - 기타 사항 2
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: "체크리스트"
+      description: "작업 전 확인해야 할 사항들입니다."
+      options:
+        - label: "assignee 설정"
+          required: true
+        - label: "label 설정"
+          required: true
