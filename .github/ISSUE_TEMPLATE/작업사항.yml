@@ -1,6 +1,6 @@
 name: "🛠 작업 사항"
 description: "작업 사항 및 변경 로직을 작성해주세요."
-title: "[FEAT/REFACTOR/FIX/DOCS/TEST/CHORE]: "
+title: "[FEAT/REFACTOR/FIX/DOCS/TEST/CHORE] "
 body:
   - type: dropdown
     id: type
