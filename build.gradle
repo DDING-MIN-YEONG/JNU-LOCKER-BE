@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.3'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.diffplug.spotless' version '7.0.2'
 }
 
 group = 'com'
@@ -45,4 +46,20 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+// compileJava task가 실행되기 전에 spotlessApply task를 실행하도록 설정: spotlessApply -> compileJava
+tasks.named('compileJava') {
+    dependsOn 'spotlessApply'
+}
+
+spotless {
+    java {
+        googleJavaFormat().aosp()   // Google Java Format 적용 AOSP(Andriod Open Source Project) 스타일: 탭은 4칸
+        removeUnusedImports()       // 사용하지 않는 import문 제거
+        leadingTabsToSpaces(4)      // 탭을 4칸 공백으로 변경
+        importOrder()               // import문 정렬
+        trimTrailingWhitespace()    // 뒤에 공백 제거
+        endWithNewline()            // 파일 끝에 개행 추가
+    }
 }
