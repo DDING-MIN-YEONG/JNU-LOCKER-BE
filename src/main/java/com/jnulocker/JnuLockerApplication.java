@@ -9,5 +9,4 @@ public class JnuLockerApplication {
     public static void main(String[] args) {
         SpringApplication.run(JnuLockerApplication.class, args);
     }
-
 }
