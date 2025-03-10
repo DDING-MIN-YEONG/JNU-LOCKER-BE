@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.3'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.diffplug.spotless' version '7.0.2'
 }
 
 group = 'com'
@@ -31,6 +32,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
+    implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.10.0'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'com.mysql:mysql-connector-j'
@@ -45,4 +48,47 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+// compileJava task가 실행되기 전에 spotlessApply task를 실행하도록 설정: spotlessApply -> compileJava
+tasks.named('compileJava') {
+    dependsOn 'spotlessApply'
+}
+
+spotless {
+    java {
+        googleJavaFormat().aosp()   // Google Java Format 적용 AOSP(Andriod Open Source Project) 스타일: 탭은 4칸
+        removeUnusedImports()       // 사용하지 않는 import문 제거
+        leadingTabsToSpaces(4)      // 탭을 4칸 공백으로 변경
+        importOrder()               // import문 정렬
+        trimTrailingWhitespace()    // 뒤에 공백 제거
+        endWithNewline()            // 파일 끝에 개행 추가
+    }
+}
+
+// .env 파일의 내용을 읽어서 Map으로 반환하는 함수
+// 빌드 시 환경 변수를 적용하기 위함
+def loadDotEnv() {
+    def envMap = [:]
+    def envFile = file('.env')
+    if (envFile.exists()) {
+        envFile.eachLine { line ->
+            line = line.trim()
+            if (line && !line.startsWith("#") && line.contains("=")) {
+                def (key, value) = line.split("=", 2)
+                envMap[key.trim()] = value.trim()
+            }
+        }
+    }
+    return envMap
+}
+
+def dotEnv = loadDotEnv()
+
+tasks.withType(Test).configureEach {
+    environment dotEnv
+}
+
+tasks.named('bootRun').configure {
+    environment dotEnv
 }

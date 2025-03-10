@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: jnu-locker
+
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+logging:
+  level:
+    root: ${LOGGING_LEVEL}  # TRACE < DEBUG < INFO < WARN < ERROR < FATAL < OFF
+
+  file:
+    name: ${LOGGING_DIR}/${LOGGING_FILE}
+
+  logback:
+    rollingpolicy:
+      max-history: 30       # default: 7
+      max-file-size: 10MB   # default: 10MB
+      total-size-cap: 5GB   # default: 제한 없음
+      file-name-pattern: ${LOGGING_DIR}/${LOGGING_FILE_NAME_PATTERN} # 압축해서 보관 -> 디스크 절약
+
+# p6spy 로깅 활성화 (JDBC 이벤트 로깅)
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+# 프로덕션 환경에서는 p6spy 로깅을 비활성화
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: false
