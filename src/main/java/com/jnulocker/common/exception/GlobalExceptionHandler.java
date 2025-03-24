@@ -35,7 +35,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             MethodArgumentNotValidException ex, ErrorCode errorCode) {
         List<ValidationError> invalidParams =
                 ex.getBindingResult().getFieldErrors().stream().map(ValidationError::of).toList();
-        ResponseEntity<ErrorResponse> responseEntity = ResponseEntityGenerator.fail(errorCode, invalidParams);
-        return new ResponseEntity<>(responseEntity.getBody(), responseEntity.getStatusCode());
+        return ResponseEntityGenerator.fail(errorCode, invalidParams);
     }
 }

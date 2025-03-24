@@ -17,14 +17,13 @@ public class ResponseEntityGenerator {
     }
 
     public static ResponseEntity<ErrorResponse> fail(ErrorCode errorCode) {
-        return fail(errorCode, null);
+        ErrorResponse errorResponse = new ErrorResponse(errorCode);
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(errorResponse);
     }
 
-    public static ResponseEntity<ErrorResponse> fail(ErrorCode errorCode, List<ValidationError> invalidParams) {
-        ErrorResponse errorResponse = new ErrorResponse(errorCode, invalidParams);
-        return ResponseEntity
-                .status(errorCode.getHttpStatus())
-                .body(errorResponse);
+    public static ResponseEntity<Object> fail(
+            ErrorCode errorCode, List<ValidationError> invalidParams) {
+        return ResponseEntity.status(errorCode.getHttpStatus())
+                .body(new ErrorResponse(errorCode, invalidParams));
     }
-
 }
