@@ -13,7 +13,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @MappedSuperclass
-@EntityListeners({AuditingEntityListener.class, SoftDeleteListener.class})
+@EntityListeners({AuditingEntityListener.class})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public abstract class BaseEntity {
@@ -24,13 +24,4 @@ public abstract class BaseEntity {
     @Column(name = "updated_at", nullable = false)
     @LastModifiedDate
     private LocalDateTime updatedAt;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
-    public void delete() {
-        if (this.deletedAt == null) {
-            this.deletedAt = LocalDateTime.now();
-        }
-    }
 }
