@@ -1,3 +1,7 @@
+server:
+  servlet:
+    context-path: /api
+
 spring:
   application:
     name: jnu-locker
@@ -29,6 +33,10 @@ logging:
       max-file-size: 10MB   # default: 10MB
       total-size-cap: 5GB   # default: 제한 없음
       file-name-pattern: ${LOGGING_DIR}/${LOGGING_FILE_NAME_PATTERN} # 압축해서 보관 -> 디스크 절약
+
+springdoc:
+  api-docs:
+    path: /api-docs # default: /v3/api-docs
 
 # p6spy 로깅 활성화 (JDBC 이벤트 로깅)
 decorator:
