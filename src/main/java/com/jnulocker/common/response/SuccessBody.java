@@ -7,5 +7,4 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public final class SuccessBody<D> extends ApiResponseBody {
     private final D data;
-    private final String message;
 }

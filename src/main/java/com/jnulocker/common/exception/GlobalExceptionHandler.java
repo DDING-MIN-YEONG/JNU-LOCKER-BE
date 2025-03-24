@@ -1,5 +1,6 @@
 package com.jnulocker.common.exception;
 
+import com.jnulocker.common.response.ResponseEntityGenerator;
 import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -35,8 +36,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             MethodArgumentNotValidException ex, ErrorCode errorCode) {
         List<ValidationError> invalidParams =
                 ex.getBindingResult().getFieldErrors().stream().map(ValidationError::of).toList();
-
-        return ResponseEntity.status(errorCode.getHttpStatus())
-                .body(new ErrorResponse(errorCode, invalidParams));
+        return ResponseEntityGenerator.fail(errorCode, invalidParams);
     }
 }
