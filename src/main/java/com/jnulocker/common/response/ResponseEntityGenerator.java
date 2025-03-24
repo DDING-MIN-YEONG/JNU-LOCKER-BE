@@ -17,13 +17,24 @@ public class ResponseEntityGenerator {
         return success(null, status);
     }
 
-    public static ResponseEntity<Object> fail(ErrorCode errorCode, List<ValidationError> invalidParams) {
-        return ResponseEntity
-                .status(errorCode.getHttpStatus())
-                .body(new ErrorResponse(errorCode, invalidParams));
-    }
-
-    public static ResponseEntity<Object> fail(ErrorCode errorCode) {
+//    public static ResponseEntity<Object> fail(ErrorCode errorCode, List<ValidationError> invalidParams) {
+//        return ResponseEntity
+//                .status(errorCode.getHttpStatus())
+//                .body(new ErrorResponse(errorCode, invalidParams));
+//    }
+//
+//    public static ResponseEntity<ErrorResponse> fail(ErrorCode errorCode) {
+//        return fail(errorCode, null);
+//    }
+    public static ResponseEntity<ErrorResponse> fail(ErrorCode errorCode) {
         return fail(errorCode, null);
     }
+
+    public static ResponseEntity<ErrorResponse> fail(ErrorCode errorCode, List<ValidationError> invalidParams) {
+        ErrorResponse errorResponse = new ErrorResponse(errorCode, invalidParams);
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(errorResponse);
+    }
+
 }
