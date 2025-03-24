@@ -20,9 +20,7 @@ public class SecurityConfig {
                                 .requestMatchers(CorsUtils::isPreFlightRequest)
                                 .permitAll()
                                 .requestMatchers(
-                                        "/api-docs/**",
-                                        "/swagger-resources/**",
-                                        "/swagger-ui/**")
+                                        "/api-docs/**", "/swagger-resources/**", "/swagger-ui/**")
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated());
