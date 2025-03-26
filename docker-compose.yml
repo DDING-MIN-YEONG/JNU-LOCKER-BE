@@ -1,0 +1,50 @@
+services:
+  mysql:
+    container_name: mysql-jnu-locker
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      TZ: Asia/Seoul
+      LC_ALL: C.UTF-8
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USERNAME}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mysql", "-u", "$MYSQL_USERNAME", "-p$MYSQL_PASSWORD", "-e", "SELECT 1;"]
+      start_period: 10s
+      start_interval: 3s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ${MYSQL_DATA_PATH}:/var/lib/mysql
+    networks:
+      - jnu-locker-network
+
+  was:
+    container_name: was-jnu-locker
+    image: ${DOCKER_USERNAME}/${DOCKER_REPO}:${IMAGE_TAG}
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q --spider http://localhost:8080$MANAGEMENT_BASE_PATH$HEALTH_CHECK_PATH || exit 1" ]
+      start_period: 20s
+      start_interval: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ${WAS_LOG_PATH}:${LOGGING_DIR}
+    networks:
+      - jnu-locker-network
+
+networks:
+  jnu-locker-network:
+    driver: bridge
