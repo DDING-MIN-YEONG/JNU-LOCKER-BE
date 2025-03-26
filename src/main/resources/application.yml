@@ -1,7 +1,3 @@
-server:
-  servlet:
-    context-path: /api
-
 spring:
   application:
     name: jnu-locker
@@ -19,6 +15,16 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
+
+management:
+  endpoints:
+    web:
+      base-path: ${MANAGEMENT_BASE_PATH}
+    access:
+      default: none
+  endpoint:
+    health:
+      access: unrestricted
 
 logging:
   level:
