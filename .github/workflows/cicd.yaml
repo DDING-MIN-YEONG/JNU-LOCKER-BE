@@ -13,3 +13,7 @@ jobs:
   call-build-workflow:
     name: 이미지 빌드
     uses: ./.github/workflows/build.yaml
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      DOCKER_REPO: ${{ secrets.DOCKER_REPO }}

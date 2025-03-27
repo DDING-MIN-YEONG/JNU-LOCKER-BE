@@ -2,13 +2,13 @@ name: image build and push
 
 on:
   workflow_call:
-#    secrets:
-#      DOCKER_USERNAME:
-#        required: true
-#      DOCKER_PASSWORD:
-#        required: true
-#      DOCKER_REPO:
-#        required: true
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
+      DOCKER_REPO:
+        required: true
 
 jobs:
   build:
