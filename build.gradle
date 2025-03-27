@@ -79,7 +79,7 @@ jib {
 
     // 기본 이미지 태그가 없으면 tags 명시해도 latest 태그로 이미지가 생성됨
     def imageTag = System.getenv('IMAGE_TAG') ?: ''
-    def imageName = dockerUsername && dockerRepo ? "$dockerUsername/$dockerRepo:$imageTag" : ''
+    def imageName = dockerUsername && dockerRepo ? "$dockerUsername/$dockerRepo-$profile:$imageTag" : ''
 
     from {
         image = 'amazoncorretto:21-alpine-jdk'
