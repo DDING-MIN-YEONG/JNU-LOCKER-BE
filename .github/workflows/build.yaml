@@ -35,7 +35,7 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           DOCKER_REPO: ${{ secrets.DOCKER_REPO }}
-          IMAGE_TAG: ${{ github.ref }}
+          IMAGE_TAG: ${{ github.sha }}
 
         run: |
           echo "PROFILE=$PROFILE" &&
