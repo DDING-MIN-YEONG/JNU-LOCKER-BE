@@ -39,4 +39,5 @@ jobs:
 
         run: |
           echo "PROFILE=$PROFILE" &&
+          echo "DOCKER_USERNAME=$DOCKER_USERNAME" &&
           ./gradlew jib
