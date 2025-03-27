@@ -15,10 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     name: 이미지 빌드하기
 
-    permissions:
-      id-token: write
-      contents: read
-
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
