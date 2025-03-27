@@ -1,0 +1,15 @@
+name: Spring Boot CI/CD
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cicd-test
+
+concurrency:
+    group: ${{ github.ref }} # 동일한 브랜치에서는 한 번에 한 워크플로우만 실행
+
+jobs:
+  call-build-workflow:
+    name: 이미지 빌드
+    uses: ./.github/workflows/build.yaml
