@@ -3,11 +3,11 @@ name: image build and push
 on:
   workflow_call:
     secrets:
-      DOCKER_REPO:
-        required: true
       DOCKER_USERNAME:
         required: true
       DOCKER_PASSWORD:
+        required: true
+      DOCKER_REPO:
         required: true
 
 jobs:
