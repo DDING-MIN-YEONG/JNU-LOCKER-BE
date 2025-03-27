@@ -37,4 +37,6 @@ jobs:
           DOCKER_REPO: ${{ secrets.DOCKER_REPO }}
           IMAGE_TAG: ${{ github.ref }}
 
-        run: ./gradlew jib
+        run: |
+          echo "PROFILE=$PROFILE" &&
+          ./gradlew jib
