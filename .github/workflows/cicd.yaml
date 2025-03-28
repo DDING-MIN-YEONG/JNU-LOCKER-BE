@@ -27,3 +27,5 @@ jobs:
       SSH_USERNAME: ${{ github.ref_name == 'cicd-test' && secrets.DEV_SSH_USERNAME || secrets.PROD_SSH_USERNAME }}
       SSH_KEY: ${{ github.ref_name == 'cicd-test' && secrets.DEV_SSH_KEY || secrets.PROD_SSH_KEY }}
       SSH_PORT: ${{ github.ref_name == 'cicd-test' && secrets.DEV_SSH_PORT || secrets.PROD_SSH_PORT }}
+      WORKSPACE: ${{ secrets.WORKSPACE }}
+      DEPLOY_SCRIPT: ${{ secrets.DEPLOY_SCRIPT }}

@@ -10,6 +10,10 @@ on:
         required: true
       SSH_PORT:
         required: true
+      WORKSPACE:
+        required: true
+      DEPLOY_SCRIPT:
+        required: true
 
 jobs:
   deploy:
@@ -25,7 +29,5 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            echo "Deploying to ${{ secrets.SSH_HOST }}"
-            echo ${{ github.workspace }}
-            cd ${{ github.workspace }}
+            cd ${{ secrets.WORKSPACE }}
             bash ${{ secrets.DEPLOY_SCRIPT }}
