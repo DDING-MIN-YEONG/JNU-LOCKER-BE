@@ -1,12 +1,10 @@
 package com.jnulocker.organization.domain.model;
 
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.UUID;
 
-public record OrganizationId(Long id) {
-    private static final AtomicLong counter = new AtomicLong(1);
-
+public record OrganizationId(UUID id) {
     public OrganizationId() {
-        this(counter.getAndIncrement());
+        this(UUID.randomUUID());
     }
 
     @Override
