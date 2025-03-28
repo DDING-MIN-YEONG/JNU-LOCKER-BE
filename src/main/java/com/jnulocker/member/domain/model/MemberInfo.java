@@ -10,5 +10,5 @@ public class MemberInfo {
     private final String name;
     private final String affiliation;
     private final String department;
-    private final String phoneNumber;
+    private final String phone;
 }
