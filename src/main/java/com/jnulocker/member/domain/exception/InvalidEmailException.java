@@ -5,7 +5,7 @@ import com.jnulocker.common.exception.BusinessException;
 public class InvalidEmailException extends BusinessException {
     public static final BusinessException EXCEPTION = new InvalidEmailException();
 
-    public InvalidEmailException() {
+    private InvalidEmailException() {
         super(AuthErrorCode.INVALID_PASSWORD);
     }
 }
