@@ -26,3 +26,6 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             echo "Deploying to ${{ secrets.SSH_HOST }}"
+            echo ${{ github.workspace }}
+            cd ${{ github.workspace }}
+            bash ${{ secrets.DEPLOY_SCRIPT }}
