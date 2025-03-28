@@ -17,14 +17,6 @@ public class AuthInfo {
     private static final Pattern patternPassword =
             Pattern.compile("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*(),.?\":{}|<>]).{9,}$");
 
-    private static boolean isValidEmail(String email) {
-        return patternEmail.matcher(email).matches();
-    }
-
-    private static boolean isValidPassword(String password) {
-        return patternPassword.matcher(password).matches();
-    }
-
     public static AuthInfo create(String email, String password) {
         if (!isValidEmail(email)) {
             throw InvalidEmailException.EXCEPTION;
@@ -33,5 +25,13 @@ public class AuthInfo {
             throw InvalidPasswordException.EXCEPTION;
         }
         return new AuthInfo(email, password);
+    }
+
+    private static boolean isValidEmail(String email) {
+        return patternEmail.matcher(email).matches();
+    }
+
+    private static boolean isValidPassword(String password) {
+        return patternPassword.matcher(password).matches();
     }
 }
