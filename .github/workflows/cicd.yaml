@@ -17,3 +17,13 @@ jobs:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       DOCKER_REPO: ${{ secrets.DOCKER_REPO }}
+
+  call-deploy-workflow:
+    needs: call-build-workflow
+    name: 서비스 배포
+    uses: ./.github/workflows/deploy.yaml
+    secrets:
+      SSH_HOST: ${{ github.ref_name == 'dev' && secrets.DEV_SSH_HOST || secrets.PROD_SSH_HOST }}
+      SSH_USERNAME: ${{ github.ref_name == 'dev' && secrets.DEV_SSH_USERNAME || secrets.PROD_SSH_USERNAME }}
+      SSH_KEY: ${{ github.ref_name == 'dev' && secrets.DEV_SSH_KEY || secrets.PROD_SSH_KEY }}
+      SSH_PORT: ${{ github.ref_name == 'dev' && secrets.DEV_SSH_PORT || secrets.PROD_SSH_PORT }}

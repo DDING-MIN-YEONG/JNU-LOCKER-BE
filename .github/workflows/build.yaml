@@ -29,10 +29,11 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.12.1' # 사용할 버전 명시해 캐싱 및 숫자로 변하지 않게 따옴표 처리
-          # main, dev 브랜치일 때는 false로 설정하여 캐시 쓰기를 허용
           # 다른 브랜치에서는 true로 설정하여 읽기만 허용
           cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/dev' && github.ref != 'refs/heads/cicd-test' }}
-
+          # 불필요한 로컬 캐시 제외
+          gradle-home-cache-excludes: |
+            caches/build-cache-1
 
       - name: Run Jib
         id: build-image
