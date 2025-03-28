@@ -20,20 +20,37 @@ public class Organization {
     private final String name;
     private final List<MemberId> managers;
 
-    public static Organization create(String email, String phone, String affiliation, String department, String name) {
-        Organization organization = Organization.builder()
-                .id(new OrganizationId())
+    public static Organization create(
+            String email, String phone, String affiliation, String department, String name) {
+        Organization organization =
+                Organization.builder()
+                        .id(new OrganizationId())
+                        .email(email)
+                        .phone(phone)
+                        .affiliation(affiliation)
+                        .department(department)
+                        .name(name)
+                        .managers(new ArrayList<>())
+                        .build();
+        return organization;
+    }
+
+    public static Organization load(
+            OrganizationId id,
+            String email,
+            String phone,
+            String affiliation,
+            String department,
+            String name,
+            List<MemberId> managers) {
+        return Organization.builder()
+                .id(id)
                 .email(email)
                 .phone(phone)
                 .affiliation(affiliation)
                 .department(department)
                 .name(name)
-                .managers(new ArrayList<>())
+                .managers(managers)
                 .build();
-        return organization;
-    }
-
-    public static Organization load(OrganizationId id, String email, String phone, String affiliation, String department, String name, List<MemberId> managers) {
-        return Organization.builder().id(id).email(email).phone(phone).affiliation(affiliation).department(department).name(name).managers(managers).build();
     }
 }
