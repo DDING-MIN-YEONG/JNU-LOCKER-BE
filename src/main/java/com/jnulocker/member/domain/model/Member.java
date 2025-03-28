@@ -15,14 +15,12 @@ public class Member {
     private final Role role;
 
     public static Member create(MemberInfo memberInfo, AuthInfo authInfo) {
-        Member member =
-                Member.builder()
-                        .id(new MemberId())
-                        .memberInfo(memberInfo)
-                        .authInfo(authInfo)
-                        .role(Role.USER)
-                        .build();
-        return member;
+        return Member.builder()
+                .id(new MemberId())
+                .memberInfo(memberInfo)
+                .authInfo(authInfo)
+                .role(Role.USER)
+                .build();
     }
 
     public static Member load(MemberId id, MemberInfo memberInfo, AuthInfo authInfo, Role role) {
