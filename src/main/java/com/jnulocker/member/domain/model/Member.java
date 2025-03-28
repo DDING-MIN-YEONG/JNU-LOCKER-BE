@@ -14,12 +14,13 @@ public class Member {
     private final AuthInfo authInfo;
     private final Role role;
 
-    public static Member create(MemberInfo memberInfo, AuthInfo authInfo, Role role) {
+    public static Member create(MemberInfo memberInfo, AuthInfo authInfo) {
         Member member =
                 Member.builder()
                         .id(new MemberId())
                         .memberInfo(memberInfo)
                         .authInfo(authInfo)
+                        .role(Role.USER)
                         .build();
         return member;
     }
