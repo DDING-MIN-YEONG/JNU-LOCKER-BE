@@ -1,0 +1,39 @@
+name: Deploy Server
+
+on:
+  workflow_call:
+    secrets:
+      SSH_HOST:
+        required: true
+      SSH_USERNAME:
+        required: true
+      SSH_KEY:
+        required: true
+      SSH_PORT:
+        required: true
+      REPO:
+        required: true
+      WORKSPACE:
+        required: true
+      DEPLOY_SCRIPT:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: 서비스 배포하기
+
+    steps:
+      - name: 배포 스크립트 실행
+        uses: appleboy/ssh-action@master
+        env:
+          REPO: ${{ secrets.REPO }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          envs: REPO
+          script: |
+            cd ${{ secrets.WORKSPACE }}
+            bash ${{ secrets.DEPLOY_SCRIPT }}
