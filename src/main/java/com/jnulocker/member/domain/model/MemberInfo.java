@@ -13,12 +13,12 @@ public class MemberInfo {
     private final String phone;
 
     public static MemberInfo create(
-            String name, String affiliatiion, String department, String phone) {
-        return new MemberInfo(name, affiliatiion, department, name);
+            String name, String affiliation, String department, String phone) {
+        return new MemberInfo(name, affiliation, department, name);
     }
 
     public static MemberInfo load(
-            String name, String affiliatiion, String department, String phone) {
-        return new MemberInfo(name, affiliatiion, department, name);
+            String name, String affiliation, String department, String phone) {
+        return new MemberInfo(name, affiliation, department, name);
     }
 }
