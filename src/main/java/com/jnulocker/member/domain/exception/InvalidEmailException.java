@@ -6,6 +6,6 @@ public class InvalidEmailException extends BusinessException {
     public static final BusinessException EXCEPTION = new InvalidEmailException();
 
     private InvalidEmailException() {
-        super(AuthErrorCode.INVALID_PASSWORD);
+        super(AuthErrorCode.INVALID_EMAIL);
     }
 }
