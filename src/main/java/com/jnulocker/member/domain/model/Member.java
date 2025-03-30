@@ -24,6 +24,6 @@ public class Member {
     }
 
     public static Member load(MemberId id, MemberInfo memberInfo, AuthInfo authInfo, Role role) {
-        return Member.builder().id(id).memberInfo(memberInfo).authInfo(authInfo).build();
+        return Member.builder().id(id).memberInfo(memberInfo).authInfo(authInfo).role(role).build();
     }
 }
