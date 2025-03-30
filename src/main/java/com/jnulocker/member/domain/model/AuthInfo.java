@@ -13,4 +13,8 @@ public class AuthInfo {
     public static AuthInfo create(String email, String password) {
         return new AuthInfo(email, password);
     }
+
+    public static AuthInfo load(String email, String password) {
+        return new AuthInfo(email, password);
+    }
 }

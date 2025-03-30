@@ -22,17 +22,15 @@ public class Organization {
 
     public static Organization create(
             String email, String phone, String affiliation, String department, String name) {
-        Organization organization =
-                Organization.builder()
-                        .id(new OrganizationId())
-                        .email(email)
-                        .phone(phone)
-                        .affiliation(affiliation)
-                        .department(department)
-                        .name(name)
-                        .managers(new ArrayList<>())
-                        .build();
-        return organization;
+        return Organization.builder()
+                .id(new OrganizationId())
+                .email(email)
+                .phone(phone)
+                .affiliation(affiliation)
+                .department(department)
+                .name(name)
+                .managers(new ArrayList<>())
+                .build();
     }
 
     public static Organization load(

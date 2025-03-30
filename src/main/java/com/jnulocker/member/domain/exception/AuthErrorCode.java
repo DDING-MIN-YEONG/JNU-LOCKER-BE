@@ -1,8 +1,8 @@
 package com.jnulocker.member.domain.exception;
 
+import com.jnulocker.common.exception.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import com.jnulocker.common.exception.ErrorCode;
 import org.springframework.http.HttpStatus;
 
 @Getter
