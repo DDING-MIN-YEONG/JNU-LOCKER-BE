@@ -1,1 +1,5 @@
 blank_issues_enabled: false
+contact_links:
+  - name: Dev Server Swagger UI
+    url: https://api.dev.jnu-locker.site/swagger-ui/index.html
+    about: 개발 서버 Swagger UI

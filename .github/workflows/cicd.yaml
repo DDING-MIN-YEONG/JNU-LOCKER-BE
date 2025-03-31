@@ -1,0 +1,33 @@
+name: Spring Boot CI/CD
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - dev
+
+concurrency:
+  group: ${{ github.ref }} # 동일한 브랜치에서는 한 번에 한 워크플로우만 실행
+
+jobs:
+  call-build-workflow:
+    name: 이미지 빌드
+    uses: ./.github/workflows/build.yaml
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      DOCKER_REPO: ${{ secrets.DOCKER_REPO }}
+
+  call-deploy-workflow:
+    needs: call-build-workflow
+    name: 서비스 배포
+    uses: ./.github/workflows/deploy.yaml
+    secrets:
+      SSH_HOST: ${{ github.ref_name == 'dev' && secrets.DEV_SSH_HOST || github.ref_name == 'main' && secrets.PROD_SSH_HOST }}
+      SSH_USERNAME: ${{ github.ref_name == 'dev' && secrets.DEV_SSH_USERNAME || github.ref_name == 'main' && secrets.PROD_SSH_USERNAME }}
+      SSH_KEY: ${{ github.ref_name == 'dev' && secrets.DEV_SSH_KEY || github.ref_name == 'main' && secrets.PROD_SSH_KEY }}
+      SSH_PORT: ${{ github.ref_name == 'dev' && secrets.DEV_SSH_PORT || github.ref_name == 'main' && secrets.PROD_SSH_PORT }}
+      REPO: ${{ github.ref_name == 'dev' && secrets.DEV_REPO || github.ref_name == 'main' && secrets.PROD_REPO }}
+      WORKSPACE: ${{ secrets.WORKSPACE }}
+      DEPLOY_SCRIPT: ${{ secrets.DEPLOY_SCRIPT }}
