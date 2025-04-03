@@ -21,23 +21,19 @@ public class Organization extends BaseEntity {
     private Long id;
 
     // 공통연락망1
-    @Column(name = "email")
-    private String email;
+    @Column private String email;
 
     // 공통연락망2
-    @Column(name = "phone_number")
-    private String phoneNumber;
+    @Column private String phoneNumber;
 
-    @Column(name = "affiliation", nullable = false)
+    @Column(nullable = false)
     private String affiliation;
 
-    @Column(name = "department")
-    private String department;
+    @Column private String department;
 
-    @Column(name = "name")
-    private String name;
+    @Column private String name;
 
-    @Column(name = "type")
+    @Column
     @Enumerated(EnumType.STRING)
     private Type type;
 
