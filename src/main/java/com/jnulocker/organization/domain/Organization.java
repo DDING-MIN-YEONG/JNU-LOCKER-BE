@@ -3,6 +3,8 @@ package com.jnulocker.organization.domain;
 import com.jnulocker.common.persistence.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -36,6 +38,7 @@ public class Organization extends BaseEntity {
     private String name;
 
     @Column(name = "type")
+    @Enumerated(EnumType.STRING)
     private Type type;
 
     public void updateEmail(String email) {
