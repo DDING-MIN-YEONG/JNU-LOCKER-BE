@@ -27,7 +27,7 @@ public class Organization extends BaseEntity {
     private String phoneNumber;
 
     @Column(name = "affiliation", nullable = false)
-    private String affiliatiion;
+    private String affiliation;
 
     @Column(name = "department")
     private String department;
