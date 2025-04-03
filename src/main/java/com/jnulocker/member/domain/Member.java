@@ -69,19 +69,6 @@ public class Member extends BaseEntity {
                 .build();
     }
 
-    public Member(
-            String email,
-            String password,
-            String phoneNumber,
-            Role role,
-            Organization organization) {
-        this.email = email;
-        this.password = password;
-        this.phoneNumber = phoneNumber;
-        this.role = role;
-        this.organization = organization;
-    }
-
     public void acceptManager() {
         this.role = Role.MANAGER;
     }
