@@ -14,13 +14,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Builder(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PUBLIC)
 public class Member extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,13 +48,25 @@ public class Member extends BaseEntity {
     // 관리자 회원가입시 사용
     public static Member createManager(
             String email, String password, String phoneNumber, Organization organization) {
-        return new Member(email, password, phoneNumber, Role.GUEST, organization);
+        return Member.builder()
+                .email(email)
+                .password(password)
+                .phoneNumber(phoneNumber)
+                .role(Role.GUEST)
+                .organization(organization)
+                .build();
     }
 
     // 유저 회원가입시 사용
     public static Member createUser(
             String email, String password, String phoneNumber, Organization organization) {
-        return new Member(email, password, phoneNumber, Role.USER, organization);
+        return Member.builder()
+                .email(email)
+                .password(password)
+                .phoneNumber(phoneNumber)
+                .role(Role.USER)
+                .organization(organization)
+                .build();
     }
 
     public Member(
