@@ -1,4 +1,4 @@
-package com.jnulocker.memebr.domain;
+package com.jnulocker.member.domain;
 
 import com.jnulocker.common.persistence.BaseEntity;
 import com.jnulocker.organization.domain.Organization;

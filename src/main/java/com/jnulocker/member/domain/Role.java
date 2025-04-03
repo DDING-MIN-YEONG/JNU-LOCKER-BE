@@ -1,4 +1,4 @@
-package com.jnulocker.memebr.domain;
+package com.jnulocker.member.domain;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
