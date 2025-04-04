@@ -13,7 +13,6 @@ public class OrganizationPersistenceAdapter implements OrganizationLoadPort {
 
     @Override
     public List<Organization> findAll() {
-        List<Organization> organization = organizationRepository.findAll();
-        return organization;
+        return organizationRepository.findAll();
     }
 }
