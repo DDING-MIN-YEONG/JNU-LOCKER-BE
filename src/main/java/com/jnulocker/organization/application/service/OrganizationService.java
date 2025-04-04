@@ -18,7 +18,7 @@ public class OrganizationService implements GetAffiliationQuery, GetDepartmentQu
 
     @Override
     public Set<String> getAffiliations() {
-        List<Organization> organizations = organizationLoadPort.findAll();
+        List<Organization> organizations = organizationLoadPort.getAll();
         return organizations.stream()
                 .map(Organization::getAffiliation)
                 .collect(Collectors.toUnmodifiableSet());
@@ -26,7 +26,7 @@ public class OrganizationService implements GetAffiliationQuery, GetDepartmentQu
 
     @Override
     public List<String> getDepartments(String affiliation) {
-        List<Organization> organizations = organizationLoadPort.findByAffiliation(affiliation);
+        List<Organization> organizations = organizationLoadPort.getByAffiliation(affiliation);
         return organizations.stream()
                 .map(Organization::getDepartment)
                 .filter(Objects::nonNull)

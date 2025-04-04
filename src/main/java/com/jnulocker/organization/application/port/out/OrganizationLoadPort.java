@@ -4,7 +4,7 @@ import com.jnulocker.organization.domain.Organization;
 import java.util.List;
 
 public interface OrganizationLoadPort {
-    List<Organization> findAll();
+    List<Organization> getAll();
 
-    List<Organization> loadByAffiliation(String affiliation);
+    List<Organization> getByAffiliation(String affiliation);
 }
