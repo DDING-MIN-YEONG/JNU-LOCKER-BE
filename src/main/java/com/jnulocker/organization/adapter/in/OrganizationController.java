@@ -1,6 +1,6 @@
 package com.jnulocker.organization.adapter.in;
 
-import com.jnulocker.organization.application.port.in.OrganizationUseCase;
+import com.jnulocker.organization.application.port.in.GetAffiliationQuery;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -14,17 +14,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/organizations")
 @RequiredArgsConstructor
 public class OrganizationController {
-    private final OrganizationUseCase organizationUseCase;
+    private final GetAffiliationQuery getAffiliationQuery;
 
     @GetMapping("/affiliations")
     public ResponseEntity<Set<String>> getAffiliations() {
-        Set<String> affiliations = organizationUseCase.findAffiliations();
+        Set<String> affiliations = getAffiliationQuery.findAffiliations();
         return ResponseEntity.ok(affiliations);
     }
 
     @GetMapping("/departments")
     public ResponseEntity<List<String>> getDepartment(@RequestParam String affiliation) {
-        List<String> departments = organizationUseCase.findDepartments(affiliation);
+        List<String> departments = getAffiliationQuery.findDepartments(affiliation);
         return ResponseEntity.ok(departments);
     }
 }
