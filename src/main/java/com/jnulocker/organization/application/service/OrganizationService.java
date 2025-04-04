@@ -23,7 +23,7 @@ public class OrganizationService implements OrganizationUseCase {
     public Set<String> findAffiliations() {
         List<Organization> organizations = organizationLoadPort.findAll();
         return organizations.stream()
-                .map(Organization::getAffiliation) // Organization에서 affiliation 필드만 추출
-                .collect(Collectors.toSet()); //
+                .map(Organization::getAffiliation)
+                .collect(Collectors.toSet());
     }
 }
