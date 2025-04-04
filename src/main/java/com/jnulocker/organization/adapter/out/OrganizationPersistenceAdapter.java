@@ -1,18 +1,23 @@
 package com.jnulocker.organization.adapter.out;
 
+import com.jnulocker.common.annotation.PersistenceAdapter;
 import com.jnulocker.organization.application.port.out.OrganizationLoadPort;
 import com.jnulocker.organization.domain.Organization;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
-@Component
+@PersistenceAdapter
 @RequiredArgsConstructor
 public class OrganizationPersistenceAdapter implements OrganizationLoadPort {
     private final OrganizationRepository organizationRepository;
 
     @Override
-    public List<Organization> findAll() {
+    public List<Organization> getAll() {
         return organizationRepository.findAll();
+    }
+
+    @Override
+    public List<Organization> getByAffiliation(String affiliation) {
+        return organizationRepository.findByAffiliation(affiliation);
     }
 }
