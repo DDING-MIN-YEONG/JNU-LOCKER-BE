@@ -13,5 +13,5 @@ public interface OrganizationApi {
     ResponseEntity<Set<String>> getAffiliations();
 
     @Operation(summary = "소속학과 조회", description = "소속학과 목록을 조회합니다.")
-    ResponseEntity<List<String>> getDepartment(@RequestParam String affiliation);
+    ResponseEntity<List<String>> getDepartments(@RequestParam String affiliation);
 }

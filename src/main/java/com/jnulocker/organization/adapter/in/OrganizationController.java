@@ -1,5 +1,6 @@
 package com.jnulocker.organization.adapter.in;
 
+import com.jnulocker.organization.adapter.in.docs.OrganizationApi;
 import com.jnulocker.organization.application.port.in.GetAffiliationQuery;
 import com.jnulocker.organization.application.port.in.GetDepartmentQuery;
 import java.util.List;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/organizations")
 @RequiredArgsConstructor
-public class OrganizationController {
+public class OrganizationController implements OrganizationApi {
     private final GetAffiliationQuery getAffiliationQuery;
     private final GetDepartmentQuery getDepartmentQuery;
 
@@ -25,7 +26,7 @@ public class OrganizationController {
     }
 
     @GetMapping("/departments")
-    public ResponseEntity<List<String>> getDepartment(@RequestParam String affiliation) {
+    public ResponseEntity<List<String>> getDepartments(@RequestParam String affiliation) {
         List<String> departments = getDepartmentQuery.getDepartments(affiliation);
         return ResponseEntity.ok(departments);
     }
