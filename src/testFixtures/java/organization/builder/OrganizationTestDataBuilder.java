@@ -10,6 +10,8 @@ public class OrganizationTestDataBuilder {
     private String department = "테스트 학과";
     private String name = "테스트 조직명";
 
+    private OrganizationTestDataBuilder() {}
+
     public static OrganizationTestDataBuilder builder() {
         return new OrganizationTestDataBuilder();
     }

@@ -15,6 +15,8 @@ public class EventTestDataBuilder {
     private EventStatus eventStatus = EventStatus.OPEN;
     private Boolean publish = true;
 
+    private EventTestDataBuilder() {}
+
     public static EventTestDataBuilder builder() {
         return new EventTestDataBuilder();
     }
