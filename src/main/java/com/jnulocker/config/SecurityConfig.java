@@ -27,10 +27,12 @@ public class SecurityConfig {
                                         "/api-docs/**", "/swagger-resources/**", "/swagger-ui/**")
                                 .permitAll()
                                 .requestMatchers( // actuator TODO: 접근 권한 설정 (ADMIN)
-                                        actuatorBasePath + "/health")
+                                        actuatorBasePath,
+                                        actuatorBasePath + "/health",
+                                        actuatorBasePath + "/prometheus")
                                 .permitAll()
                                 .anyRequest()
-                                //                                .authenticated());
+                                // TODO: 인증 구현 후 이 부분을 .authenticated()로 되돌릴 것
                                 .permitAll());
 
         return http.build();
