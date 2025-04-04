@@ -27,6 +27,6 @@ public class OrganizationService implements OrganizationUseCase {
         return organizations.stream()
                 .map(Organization::getDepartment)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 }
