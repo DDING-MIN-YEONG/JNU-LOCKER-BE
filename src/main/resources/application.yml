@@ -14,7 +14,7 @@ spring:
       ddl-auto: create
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: org.hibernate.dialect.MySQLDialect
 
 management:
   endpoints:
@@ -61,3 +61,19 @@ decorator:
   datasource:
     p6spy:
       enable-logging: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  datasource:
+    url: jdbc:tc:mysql:8.0:///
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+
+logging:
+  level:
+    p6spy: info
+    org.springframework:
+      transaction.interceptor: trace
