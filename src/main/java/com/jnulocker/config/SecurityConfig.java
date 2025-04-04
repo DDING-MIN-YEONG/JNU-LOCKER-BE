@@ -30,7 +30,8 @@ public class SecurityConfig {
                                         actuatorBasePath + "/health")
                                 .permitAll()
                                 .anyRequest()
-                                .authenticated());
+                                //                                .authenticated());
+                                .permitAll());
 
         return http.build();
     }
