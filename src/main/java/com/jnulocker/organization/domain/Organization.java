@@ -9,11 +9,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Builder(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Organization extends BaseEntity {
     @Id
@@ -36,6 +40,17 @@ public class Organization extends BaseEntity {
     @Column
     @Enumerated(EnumType.STRING)
     private Type type;
+
+    public static Organization create(
+            String email, String phoneNumber, String affiliation, String department, String name) {
+        return Organization.builder()
+                .email(email)
+                .phoneNumber(phoneNumber)
+                .affiliation(affiliation)
+                .department(department)
+                .name(name)
+                .build();
+    }
 
     public void updateEmail(String email) {
         this.email = email;
