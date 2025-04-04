@@ -4,7 +4,7 @@ import com.jnulocker.organization.domain.Organization;
 
 public class OrganizationTestDataBuilder {
 
-    private String email = "테스트 이메일";
+    private String email = "test@example.com";
     private String phoneNumber = "010-1234-5678";
     private String affiliation = "테스트 소속";
     private String department = "테스트 학과";
