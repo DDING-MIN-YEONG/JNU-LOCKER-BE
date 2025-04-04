@@ -15,15 +15,8 @@ public class OrganizationService implements OrganizationUseCase {
     private final OrganizationLoadPort organizationLoadPort;
 
     @Override
-    public List<Organization> findAll() {
-        return organizationLoadPort.findAll();
-    }
-
-    @Override
     public Set<String> findAffiliations() {
         List<Organization> organizations = organizationLoadPort.findAll();
-        return organizations.stream()
-                .map(Organization::getAffiliation)
-                .collect(Collectors.toSet());
+        return organizations.stream().map(Organization::getAffiliation).collect(Collectors.toSet());
     }
 }
