@@ -1,6 +1,7 @@
 package com.jnulocker.organization.application.service;
 
 import com.jnulocker.organization.application.port.in.GetAffiliationQuery;
+import com.jnulocker.organization.application.port.in.GetDepartmentQuery;
 import com.jnulocker.organization.application.port.out.OrganizationLoadPort;
 import com.jnulocker.organization.domain.Organization;
 import java.util.List;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class OrganizationService implements GetAffiliationQuery {
+public class OrganizationService implements GetAffiliationQuery, GetDepartmentQuery {
     private final OrganizationLoadPort organizationLoadPort;
 
     @Override

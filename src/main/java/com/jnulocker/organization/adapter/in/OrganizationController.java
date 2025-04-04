@@ -1,6 +1,7 @@
 package com.jnulocker.organization.adapter.in;
 
 import com.jnulocker.organization.application.port.in.GetAffiliationQuery;
+import com.jnulocker.organization.application.port.in.GetDepartmentQuery;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class OrganizationController {
     private final GetAffiliationQuery getAffiliationQuery;
+    private final GetDepartmentQuery getDepartmentQuery;
 
     @GetMapping("/affiliations")
     public ResponseEntity<Set<String>> getAffiliations() {
@@ -24,7 +26,7 @@ public class OrganizationController {
 
     @GetMapping("/departments")
     public ResponseEntity<List<String>> getDepartment(@RequestParam String affiliation) {
-        List<String> departments = getAffiliationQuery.findDepartments(affiliation);
+        List<String> departments = getDepartmentQuery.findDepartments(affiliation);
         return ResponseEntity.ok(departments);
     }
 }
