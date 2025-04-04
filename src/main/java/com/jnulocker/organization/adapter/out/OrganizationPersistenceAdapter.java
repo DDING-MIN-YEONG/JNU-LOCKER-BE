@@ -15,4 +15,9 @@ public class OrganizationPersistenceAdapter implements OrganizationLoadPort {
     public List<Organization> findAll() {
         return organizationRepository.findAll();
     }
+
+    @Override
+    public List<Organization> loadByAffiliation(String affiliation) {
+        return organizationRepository.findByAffiliation(affiliation);
+    }
 }

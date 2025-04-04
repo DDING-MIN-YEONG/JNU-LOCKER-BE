@@ -5,4 +5,6 @@ import java.util.List;
 
 public interface OrganizationLoadPort {
     List<Organization> findAll();
+
+    List<Organization> loadByAffiliation(String affiliation);
 }

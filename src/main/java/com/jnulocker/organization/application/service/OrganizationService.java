@@ -4,6 +4,7 @@ import com.jnulocker.organization.application.port.in.OrganizationUseCase;
 import com.jnulocker.organization.application.port.out.OrganizationLoadPort;
 import com.jnulocker.organization.domain.Organization;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -18,5 +19,14 @@ public class OrganizationService implements OrganizationUseCase {
     public Set<String> findAffiliations() {
         List<Organization> organizations = organizationLoadPort.findAll();
         return organizations.stream().map(Organization::getAffiliation).collect(Collectors.toSet());
+    }
+
+    @Override
+    public List<String> findDepartments(String affiliation) {
+        List<Organization> organizations = organizationLoadPort.loadByAffiliation(affiliation);
+        return organizations.stream()
+                .map(Organization::getDepartment)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 }
