@@ -20,10 +20,16 @@ management:
   endpoints:
     web:
       base-path: ${MANAGEMENT_BASE_PATH}
+      exposure:
+        include:
+          - health
+          - prometheus
     access:
       default: none
   endpoint:
     health:
+      access: unrestricted
+    prometheus:
       access: unrestricted
 
 logging:
