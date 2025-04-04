@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrganizationController {
     private final OrganizationUseCase organizationUseCase;
 
-    @GetMapping("/affiliation")
+    @GetMapping("/affiliations")
     public ResponseEntity<Set<String>> getAffiliations() {
         Set<String> affiliations = organizationUseCase.findAffiliations();
         return new ResponseEntity<>(affiliations, HttpStatus.OK);
