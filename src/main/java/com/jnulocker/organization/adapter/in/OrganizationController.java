@@ -20,13 +20,13 @@ public class OrganizationController {
 
     @GetMapping("/affiliations")
     public ResponseEntity<Set<String>> getAffiliations() {
-        Set<String> affiliations = getAffiliationQuery.findAffiliations();
+        Set<String> affiliations = getAffiliationQuery.getAffiliations();
         return ResponseEntity.ok(affiliations);
     }
 
     @GetMapping("/departments")
     public ResponseEntity<List<String>> getDepartment(@RequestParam String affiliation) {
-        List<String> departments = getDepartmentQuery.findDepartments(affiliation);
+        List<String> departments = getDepartmentQuery.getDepartments(affiliation);
         return ResponseEntity.ok(departments);
     }
 }
