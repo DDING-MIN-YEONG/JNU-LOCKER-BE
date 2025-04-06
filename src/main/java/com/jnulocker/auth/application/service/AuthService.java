@@ -26,25 +26,20 @@ public class AuthService implements UserSignupUseCase {
     @Override
     @Transactional
     public void signupUser(UserSignupReqDto userSignupReqDto) {
-        // 이미 존재하는 회원이면 예외 던지기
         if (memberLoadPort.existsByEmail(userSignupReqDto.email())) {
             throw UserAlreadyExistException.EXCEPTION;
         }
 
-        // role이 USER인지
         if (!userSignupReqDto.role().equals(Role.USER)) {
             throw RoleNotCorrectException.EXCEPTION;
         }
 
-        // 비밀번호 복호화
         String encodedPassword = passwordEncoder.encode(userSignupReqDto.password());
 
-        // Organization 불려오기
         Organization organization =
                 organizationLoadPort.getByAffiliationAndDepartment(
                         userSignupReqDto.affiliation(), userSignupReqDto.department());
 
-        // save
         Member member =
                 Member.createUser(
                         userSignupReqDto.email(),
