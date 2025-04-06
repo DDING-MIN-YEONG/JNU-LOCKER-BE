@@ -12,7 +12,7 @@ public class MemberPersistenceAdapter implements MemberLoadPort, UserRecordPort 
     private final MemberRepository memberRepository;
 
     @Override
-    public boolean existByEmail(String email) {
+    public boolean existsByEmail(String email) {
         return memberRepository.existsByEmail(email);
     }
 

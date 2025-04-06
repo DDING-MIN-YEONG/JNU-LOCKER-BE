@@ -25,7 +25,7 @@ public class AuthService implements UserSignupUseCase {
     @Override
     public void signupUser(UserSignupReqDto userSignupReqDto) {
         // 이미 존재하는 회원이면 예외 던지기
-        if (memberLoadPort.existByEmail(userSignupReqDto.email())) {
+        if (memberLoadPort.existsByEmail(userSignupReqDto.email())) {
             throw UserAlreadyExistException.EXCEPTION;
         }
 
