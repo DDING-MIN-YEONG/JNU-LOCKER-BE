@@ -1,5 +1,6 @@
 package com.jnulocker.auth.adapter.in.docs;
 
+import com.jnulocker.auth.exception.RoleNotCorrectException;
 import com.jnulocker.auth.exception.UserAlreadyExistException;
 import com.jnulocker.common.exception.BusinessException;
 import com.jnulocker.common.swagger.ExceptionDoc;
@@ -20,5 +21,5 @@ public class SignupExceptionDocs implements SwaggerExceptionDoc {
     public static final BusinessException 소속대학_소속학과_불일치 = OrganizationNotFoundException.EXCEPTION;
 
     @ExplainError("요청시 보낸 권한에 대한 접근이 부적절할 때 발생하는 예외입니다.")
-    public static final BusinessException 권한에_대한_접근_부적절 = OrganizationNotFoundException.EXCEPTION;
+    public static final BusinessException 권한에_대한_접근_부적절 = RoleNotCorrectException.EXCEPTION;
 }
