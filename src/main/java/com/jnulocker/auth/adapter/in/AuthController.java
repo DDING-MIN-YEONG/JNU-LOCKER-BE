@@ -18,7 +18,7 @@ public class AuthController implements AuthApi {
     private final UserSignupUseCase userSignupUseCase;
 
     @Override
-    @PostMapping("/signup/user")
+    @PostMapping("/signup/users")
     public ResponseEntity<Void> signupUser(@Valid @RequestBody UserSignupReqDto userSignupReqDto) {
         userSignupUseCase.signupUser(userSignupReqDto);
         return ResponseEntity.ok().build();
