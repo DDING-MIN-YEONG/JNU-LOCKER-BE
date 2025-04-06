@@ -14,5 +14,4 @@ public interface AuthApi {
     @ApiExceptionExamples(SignupExceptionDocs.class)
     @Operation(summary = "USER 회원가입", description = "사물함을 신청하는 사용자인 USER에 대한 회원가입입니다.")
     ResponseEntity<Void> signupUser(@Valid @RequestBody UserSignupReqDto userSignupReqDto);
-
 }
