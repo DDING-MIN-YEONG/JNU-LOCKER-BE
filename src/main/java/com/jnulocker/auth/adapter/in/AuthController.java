@@ -5,6 +5,7 @@ import com.jnulocker.auth.adapter.in.request.UserSignupReqDto;
 import com.jnulocker.auth.application.port.in.UserSignupUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +22,6 @@ public class AuthController implements AuthApi {
     @PostMapping("/signup/users")
     public ResponseEntity<Void> signupUser(@Valid @RequestBody UserSignupReqDto userSignupReqDto) {
         userSignupUseCase.signupUser(userSignupReqDto);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
