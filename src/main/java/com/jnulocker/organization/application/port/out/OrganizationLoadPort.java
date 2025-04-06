@@ -7,4 +7,6 @@ public interface OrganizationLoadPort {
     List<Organization> getAll();
 
     List<Organization> getByAffiliation(String affiliation);
+
+    Organization getByAffiliationAndDepartment(String affiliation, String department);
 }
