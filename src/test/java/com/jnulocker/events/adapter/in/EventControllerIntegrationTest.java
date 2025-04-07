@@ -11,6 +11,7 @@ import com.jnulocker.events.application.port.in.response.FloorWithLockersRespons
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.exception.EventErrorCode;
 import com.jnulocker.events.utils.EventTestUtil;
+import com.jnulocker.organization.adapter.out.DepartmentRepository;
 import com.jnulocker.organization.adapter.out.OrganizationRepository;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
@@ -44,6 +45,8 @@ class EventControllerIntegrationTest {
 
     @Autowired private OrganizationRepository organizationRepository;
 
+    @Autowired private DepartmentRepository departmentRepository;
+
     @Autowired private EventRepository eventRepository;
 
     @Autowired private FloorRepository floorRepository;
@@ -67,6 +70,7 @@ class EventControllerIntegrationTest {
         lockerRepository.deleteAll();
         floorRepository.deleteAll();
         eventRepository.deleteAll();
+        departmentRepository.deleteAll();
         organizationRepository.deleteAll();
     }
 
