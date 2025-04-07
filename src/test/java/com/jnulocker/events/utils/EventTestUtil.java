@@ -6,19 +6,24 @@ import com.jnulocker.events.adapter.out.LockerRepository;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.Floor;
 import com.jnulocker.events.domain.Locker;
+import com.jnulocker.organization.adapter.out.DepartmentRepository;
 import com.jnulocker.organization.adapter.out.OrganizationRepository;
+import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.domain.Organization;
 import events.builder.EventTestDataBuilder;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import organization.builder.DepartmentTestDataBuilder;
 import organization.builder.OrganizationTestDataBuilder;
 
 @Component
 public class EventTestUtil {
 
     @Autowired private OrganizationRepository organizationRepository;
+
+    @Autowired private DepartmentRepository departmentRepository;
 
     @Autowired private EventRepository eventRepository;
 
@@ -31,8 +36,13 @@ public class EventTestUtil {
         Organization organization = OrganizationTestDataBuilder.builder().build();
         Organization savedOrganization = organizationRepository.save(organization);
 
+        // 학과 생성 및 저장
+        Department department =
+                DepartmentTestDataBuilder.builder().withOrganization(savedOrganization).build();
+        Department savedDepartment = departmentRepository.save(department);
+
         // 이벤트 생성 및 저장
-        Event event = EventTestDataBuilder.builder().withOrganization(savedOrganization).build();
+        Event event = EventTestDataBuilder.builder().withDepartment(savedDepartment).build();
         Event savedEvent = eventRepository.save(event);
 
         // 층 생성 및 저장
