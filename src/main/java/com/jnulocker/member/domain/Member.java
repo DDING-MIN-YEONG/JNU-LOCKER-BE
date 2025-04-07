@@ -71,7 +71,7 @@ public class Member extends BaseEntity {
     }
 
     public void approveManager() {
-        if (role == Role.GUEST) {
+        if (role != Role.GUEST) {
             throw OnlyGuestCanBeManagerException.EXCEPTION;
         }
         role = Role.MANAGER;
