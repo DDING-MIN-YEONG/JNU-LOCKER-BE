@@ -1,7 +1,7 @@
 package com.jnulocker.member.domain;
 
 import com.jnulocker.common.persistence.BaseEntity;
-import com.jnulocker.organization.domain.Organization;
+import com.jnulocker.organization.domain.Department;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -42,34 +42,36 @@ public class Member extends BaseEntity {
     private Role role;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id")
-    private Organization organization;
+    @JoinColumn(name = "department_id")
+    private Department department;
 
     // 관리자 회원가입시 사용
     public static Member createManager(
-            String email, String password, String phoneNumber, Organization organization) {
+            String email, String password, String phoneNumber, Department department) {
         return Member.builder()
                 .email(email)
                 .password(password)
                 .phoneNumber(phoneNumber)
                 .role(Role.GUEST)
-                .organization(organization)
+                .department(department)
                 .build();
     }
 
     // 유저 회원가입시 사용
     public static Member createUser(
-            String email, String password, String phoneNumber, Organization organization) {
+            String email, String password, String phoneNumber, Department department) {
         return Member.builder()
                 .email(email)
                 .password(password)
                 .phoneNumber(phoneNumber)
                 .role(Role.USER)
-                .organization(organization)
+                .department(department)
                 .build();
     }
 
     public void acceptManager() {
-        this.role = Role.MANAGER;
+        if (role == Role.GUEST) {
+            role = Role.MANAGER;
+        }
     }
 }
