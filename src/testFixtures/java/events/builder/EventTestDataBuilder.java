@@ -2,14 +2,14 @@ package events.builder;
 
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.EventStatus;
-import com.jnulocker.organization.domain.Organization;
+import com.jnulocker.organization.domain.Department;
 import java.time.LocalDateTime;
-import organization.builder.OrganizationTestDataBuilder;
+import organization.builder.DepartmentTestDataBuilder;
 
 public class EventTestDataBuilder {
 
     private String title = "테스트 이벤트";
-    private Organization organization = OrganizationTestDataBuilder.builder().build();
+    private Department department = DepartmentTestDataBuilder.builder().build();
     private LocalDateTime startAt = LocalDateTime.now();
     private LocalDateTime endAt = LocalDateTime.now().plusHours(1);
     private EventStatus eventStatus = EventStatus.OPEN;
@@ -26,8 +26,8 @@ public class EventTestDataBuilder {
         return this;
     }
 
-    public EventTestDataBuilder withOrganization(Organization organization) {
-        this.organization = organization;
+    public EventTestDataBuilder withDepartment(Department department) {
+        this.department = department;
         return this;
     }
 
@@ -52,6 +52,6 @@ public class EventTestDataBuilder {
     }
 
     public Event build() {
-        return Event.create(title, organization, startAt, endAt, eventStatus, publish);
+        return Event.create(title, department, startAt, endAt, eventStatus, publish);
     }
 }
