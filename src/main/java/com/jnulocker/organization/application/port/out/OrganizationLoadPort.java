@@ -9,4 +9,7 @@ public interface OrganizationLoadPort {
     List<Organization> getByAffiliation(String affiliation);
 
     Organization getByAffiliationAndDepartment(String affiliation, String department);
+    List<Organization> getAllByType(OrganizationType type);
+
+    boolean existsById(Long organizationId);
 }

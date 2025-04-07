@@ -5,8 +5,6 @@ build/
 !**/src/test/**/build/
 
 .env
-schema.sql
-data.sql
 
 ### STS ###
 .apt_generated

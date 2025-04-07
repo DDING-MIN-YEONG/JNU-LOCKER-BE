@@ -15,6 +15,11 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: always
 
 management:
   endpoints:
@@ -60,7 +65,21 @@ decorator:
 spring:
   config:
     activate:
+      on-profile: dev
+
+  sql:
+    init:
+      mode: never
+
+---
+spring:
+  config:
+    activate:
       on-profile: prod
+
+  sql:
+    init:
+      mode: never
 
 # 프로덕션 환경에서는 p6spy 로깅을 비활성화
 decorator:
@@ -77,6 +96,10 @@ spring:
   datasource:
     url: jdbc:tc:mysql:8.0:///
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+
+  sql:
+    init:
+      mode: never
 
 logging:
   level:

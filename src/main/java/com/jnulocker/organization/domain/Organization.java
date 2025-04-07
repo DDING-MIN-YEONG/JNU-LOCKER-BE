@@ -24,43 +24,14 @@ public class Organization extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 공통연락망1
-    @Column private String email;
-
-    // 공통연락망2
-    @Column private String phoneNumber;
+    @Column(nullable = false)
+    private String name;
 
     @Column(nullable = false)
-    private String affiliation;
-
-    @Column private String department;
-
-    @Column private String name;
-
-    @Column
     @Enumerated(EnumType.STRING)
-    private Type type;
+    private OrganizationType type;
 
-    public static Organization create(
-            String email, String phoneNumber, String affiliation, String department, String name) {
-        return Organization.builder()
-                .email(email)
-                .phoneNumber(phoneNumber)
-                .affiliation(affiliation)
-                .department(department)
-                .name(name)
-                .build();
-    }
-
-    public void updateEmail(String email) {
-        this.email = email;
-    }
-
-    public void updatePhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public void updateName(String name) {
-        this.name = name;
+    public static Organization create(String name, OrganizationType type) {
+        return Organization.builder().name(name).type(type).build();
     }
 }

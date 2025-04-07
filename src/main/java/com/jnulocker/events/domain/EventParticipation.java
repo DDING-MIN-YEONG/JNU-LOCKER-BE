@@ -1,7 +1,7 @@
 package com.jnulocker.events.domain;
 
 import com.jnulocker.common.persistence.BaseEntity;
-import com.jnulocker.organization.domain.Organization;
+import com.jnulocker.organization.domain.Department;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -33,10 +33,10 @@ public class EventParticipation extends BaseEntity {
     private Event event;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id")
-    private Organization organization;
+    @JoinColumn(name = "department_id")
+    private Department department;
 
-    public static EventParticipation create(Event event, Organization organization) {
-        return EventParticipation.builder().event(event).organization(organization).build();
+    public static EventParticipation create(Event event, Department department) {
+        return EventParticipation.builder().event(event).department(department).build();
     }
 }

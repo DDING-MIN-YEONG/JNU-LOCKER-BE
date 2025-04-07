@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum Type {
+public enum OrganizationType {
     COUNCIL("council"),
     COMMITTEE("committee");
 

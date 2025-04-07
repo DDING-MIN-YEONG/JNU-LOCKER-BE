@@ -1,7 +1,7 @@
 package com.jnulocker.events.domain;
 
 import com.jnulocker.common.persistence.BaseEntity;
-import com.jnulocker.organization.domain.Organization;
+import com.jnulocker.organization.domain.Department;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -35,8 +35,8 @@ public class Event extends BaseEntity {
     private String title;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id")
-    private Organization organization;
+    @JoinColumn(name = "department_id")
+    private Department department;
 
     @Embedded private EventSchedule eventSchedule;
 
@@ -47,14 +47,14 @@ public class Event extends BaseEntity {
 
     public static Event create(
             String title,
-            Organization organization,
+            Department department,
             LocalDateTime startAt,
             LocalDateTime endAt,
             EventStatus eventStatus,
             Boolean publish) {
         return Event.builder()
                 .title(title)
-                .organization(organization)
+                .department(department)
                 .eventSchedule(EventSchedule.of(startAt, endAt))
                 .eventStatus(eventStatus)
                 .publish(publish)
