@@ -8,7 +8,9 @@ import com.jnulocker.auth.exception.UserAlreadyExistException;
 import com.jnulocker.member.application.port.out.MemberLoadPort;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
+import com.jnulocker.organization.application.port.out.DepartmentLoadPort;
 import com.jnulocker.organization.application.port.out.OrganizationLoadPort;
+import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.domain.Organization;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +24,7 @@ public class AuthService implements UserSignupUseCase {
     private final PasswordEncoder passwordEncoder;
     private final UserRecordPort userRecordPort;
     private final OrganizationLoadPort organizationLoadPort;
+    private final DepartmentLoadPort departmentLoadPort;
 
     @Override
     @Transactional
@@ -36,16 +39,18 @@ public class AuthService implements UserSignupUseCase {
 
         String encodedPassword = passwordEncoder.encode(userSignupReqDto.password());
 
-        Organization organization =
-                organizationLoadPort.getByAffiliationAndDepartment(
-                        userSignupReqDto.affiliation(), userSignupReqDto.department());
+        Organization organization = organizationLoadPort.getByName(userSignupReqDto.affiliation());
+        Department department =
+                departmentLoadPort.getByOrganizationAndName(
+                        organization, userSignupReqDto.department());
 
         Member member =
                 Member.createUser(
                         userSignupReqDto.email(),
                         encodedPassword,
                         userSignupReqDto.phoneNumber(),
-                        organization);
+                        department);
+
         userRecordPort.save(member);
     }
 }

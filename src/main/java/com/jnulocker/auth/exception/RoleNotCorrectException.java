@@ -5,7 +5,7 @@ import com.jnulocker.common.exception.BusinessException;
 public class RoleNotCorrectException extends BusinessException {
     public static final BusinessException EXCEPTION = new RoleNotCorrectException();
 
-    public RoleNotCorrectException() {
+    private RoleNotCorrectException() {
         super(AuthErrorCode.ROLE_NOT_CORRECT);
     }
 }

@@ -5,7 +5,7 @@ import com.jnulocker.common.exception.BusinessException;
 public class UserAlreadyExistException extends BusinessException {
     public static final BusinessException EXCEPTION = new UserAlreadyExistException();
 
-    public UserAlreadyExistException() {
+    private UserAlreadyExistException() {
         super(AuthErrorCode.USER_ALREADY_EXIST);
     }
 }
