@@ -1,6 +1,7 @@
 package com.jnulocker.member.domain;
 
 import com.jnulocker.common.persistence.BaseEntity;
+import com.jnulocker.member.exception.OnlyGuestCanBeManagerException;
 import com.jnulocker.organization.domain.Department;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -69,9 +70,10 @@ public class Member extends BaseEntity {
                 .build();
     }
 
-    public void acceptManager() {
+    public void approveManager() {
         if (role == Role.GUEST) {
-            role = Role.MANAGER;
+            throw OnlyGuestCanBeManagerException.EXCEPTION;
         }
+        role = Role.MANAGER;
     }
 }
