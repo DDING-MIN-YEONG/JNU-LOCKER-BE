@@ -39,18 +39,7 @@ public class Organization extends BaseEntity {
 
     @Column
     @Enumerated(EnumType.STRING)
-    private Type type;
-
-    public static Organization create(
-            String email, String phoneNumber, String affiliation, String department, String name) {
-        return Organization.builder()
-                .email(email)
-                .phoneNumber(phoneNumber)
-                .affiliation(affiliation)
-                .department(department)
-                .name(name)
-                .build();
-    }
+    private OrganizationType type;
 
     public void updateEmail(String email) {
         this.email = email;
