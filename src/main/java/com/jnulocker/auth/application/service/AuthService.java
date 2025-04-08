@@ -2,7 +2,7 @@ package com.jnulocker.auth.application.service;
 
 import com.jnulocker.auth.application.port.in.UserSignupUseCase;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
-import com.jnulocker.auth.application.port.out.UserRecordPort;
+import com.jnulocker.auth.application.port.out.MemberRecordPort;
 import com.jnulocker.auth.exception.RoleNotCorrectException;
 import com.jnulocker.auth.exception.UserAlreadyExistException;
 import com.jnulocker.member.application.port.out.MemberLoadPort;
@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService implements UserSignupUseCase {
     private final MemberLoadPort memberLoadPort;
     private final PasswordEncoder passwordEncoder;
-    private final UserRecordPort userRecordPort;
+    private final MemberRecordPort memberRecordPort;
     private final OrganizationLoadPort organizationLoadPort;
     private final DepartmentLoadPort departmentLoadPort;
 
@@ -55,6 +55,6 @@ public class AuthService implements UserSignupUseCase {
                         userSignupRequest.phoneNumber(),
                         department);
 
-        userRecordPort.save(member);
+        memberRecordPort.save(member);
     }
 }
