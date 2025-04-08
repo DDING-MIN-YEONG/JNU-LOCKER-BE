@@ -1,6 +1,6 @@
 package com.jnulocker.auth.application.service;
 
-import com.jnulocker.auth.application.port.in.UserSignupUseCase;
+import com.jnulocker.auth.application.port.in.UserSignupCommand;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.out.MemberRecordPort;
 import com.jnulocker.auth.exception.RoleNotCorrectException;
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class AuthService implements UserSignupUseCase {
+public class AuthService implements UserSignupCommand {
     private final MemberLoadPort memberLoadPort;
     private final PasswordEncoder passwordEncoder;
     private final MemberRecordPort memberRecordPort;
