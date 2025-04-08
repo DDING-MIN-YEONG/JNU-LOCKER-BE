@@ -1,11 +1,12 @@
 package com.jnulocker.events.application.service;
 
-import com.jnulocker.events.application.port.in.GetEventLockerQuery;
+import com.jnulocker.events.application.port.in.EventQuery;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import com.jnulocker.events.application.port.in.response.LockerResponse;
-import com.jnulocker.events.application.port.out.LoadEventPort;
-import com.jnulocker.events.application.port.out.LoadFloorPort;
-import com.jnulocker.events.application.port.out.LoadLockerPort;
+import com.jnulocker.events.application.port.out.EventLoadPort;
+import com.jnulocker.events.application.port.out.FloorLoadPort;
+import com.jnulocker.events.application.port.out.LockerLoadPort;
+import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.Floor;
 import com.jnulocker.events.exception.EventNotFoundException;
 import java.util.List;
@@ -14,19 +15,19 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class GetEventLockerService implements GetEventLockerQuery {
+public class EventQueryService implements EventQuery {
 
-    private final LoadEventPort loadEventPort;
-    private final LoadFloorPort loadFloorPort;
-    private final LoadLockerPort loadLockerPort;
+    private final EventLoadPort eventLoadPort;
+    private final FloorLoadPort floorLoadPort;
+    private final LockerLoadPort lockerLoadPort;
 
     @Override
     public List<FloorWithLockersResponse> getLockersByEventId(Long eventId) {
-        if (!loadEventPort.existsById(eventId)) {
+        if (!eventLoadPort.existsById(eventId)) {
             throw EventNotFoundException.EXCEPTION;
         }
 
-        List<Floor> floors = loadFloorPort.getFloorsByEventId(eventId);
+        List<Floor> floors = floorLoadPort.getFloorsByEventId(eventId);
 
         return floors.stream()
                 .map(
@@ -39,8 +40,13 @@ public class GetEventLockerService implements GetEventLockerQuery {
     }
 
     private List<LockerResponse> getLockerResponsesByFloor(Floor floor) {
-        return loadLockerPort.getLockersByFloorId(floor.getId()).stream()
+        return lockerLoadPort.getLockersByFloorId(floor.getId()).stream()
                 .map(LockerResponse::from)
                 .toList();
+    }
+
+    @Override
+    public Event getByIdOrThrow(Long eventId) {
+        return eventLoadPort.getById(eventId).orElseThrow(() -> EventNotFoundException.EXCEPTION);
     }
 }
