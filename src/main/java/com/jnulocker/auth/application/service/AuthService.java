@@ -12,6 +12,7 @@ import com.jnulocker.organization.application.port.out.DepartmentLoadPort;
 import com.jnulocker.organization.application.port.out.OrganizationLoadPort;
 import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.domain.Organization;
+import com.jnulocker.organization.exception.InvalidOrganizationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -53,7 +54,9 @@ public class AuthService implements UserSignupCommand {
     }
 
     public void validOrganization(Long organizationId, Organization organization) {
-        Organization organization1 = organizationLoadPort.getById(organizationId);
-        if (organization1 != organization) {}
+        Organization foundOrgan = organizationLoadPort.getById(organizationId);
+        if (foundOrgan != organization) {
+            throw InvalidOrganizationException.EXCEPTION;
+        }
     }
 }
