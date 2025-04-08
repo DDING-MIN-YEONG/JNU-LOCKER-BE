@@ -1,7 +1,7 @@
 package com.jnulocker.events.adapter.in;
 
 import com.jnulocker.events.adapter.in.docs.EventApi;
-import com.jnulocker.events.application.port.in.GetEventLockerQuery;
+import com.jnulocker.events.application.port.in.EventQuery;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/events")
 public class EventController implements EventApi {
 
-    private final GetEventLockerQuery getEventLockerQuery;
+    private final EventQuery eventQuery;
 
     @Override
     @GetMapping("/{event-id}/lockers")
     public ResponseEntity<List<FloorWithLockersResponse>> getLockers(
             @PathVariable("event-id") Long eventId) {
-        return ResponseEntity.ok(getEventLockerQuery.getLockersByEventId(eventId));
+        return ResponseEntity.ok(eventQuery.getLockersByEventId(eventId));
     }
 }
