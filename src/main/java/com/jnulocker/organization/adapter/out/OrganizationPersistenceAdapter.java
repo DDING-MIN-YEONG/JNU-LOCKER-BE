@@ -4,7 +4,6 @@ import com.jnulocker.common.annotation.PersistenceAdapter;
 import com.jnulocker.organization.application.port.out.OrganizationLoadPort;
 import com.jnulocker.organization.domain.Organization;
 import com.jnulocker.organization.domain.OrganizationType;
-import com.jnulocker.organization.exception.OrganizationNotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 
@@ -21,12 +20,5 @@ public class OrganizationPersistenceAdapter implements OrganizationLoadPort {
     @Override
     public boolean existsById(Long organizationId) {
         return organizationRepository.existsById(organizationId);
-    }
-
-    @Override
-    public Organization getById(Long id) {
-        return organizationRepository
-                .findById(id)
-                .orElseThrow(() -> OrganizationNotFoundException.EXCEPTION);
     }
 }

@@ -9,6 +9,4 @@ public interface OrganizationLoadPort {
     List<Organization> getAllByType(OrganizationType type);
 
     boolean existsById(Long organizationId);
-
-    Organization getById(Long id);
 }
