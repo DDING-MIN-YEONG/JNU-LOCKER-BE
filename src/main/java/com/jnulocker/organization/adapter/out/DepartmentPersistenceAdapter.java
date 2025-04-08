@@ -3,7 +3,7 @@ package com.jnulocker.organization.adapter.out;
 import com.jnulocker.common.annotation.PersistenceAdapter;
 import com.jnulocker.organization.application.port.out.DepartmentLoadPort;
 import com.jnulocker.organization.domain.Department;
-import com.jnulocker.organization.exception.OrganizationNotFoundException;
+import com.jnulocker.organization.exception.DepartmentNotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 
@@ -22,6 +22,6 @@ public class DepartmentPersistenceAdapter implements DepartmentLoadPort {
     public Department getById(Long id) {
         return departmentRepository
                 .findById(id)
-                .orElseThrow(() -> OrganizationNotFoundException.EXCEPTION);
+                .orElseThrow(() -> DepartmentNotFoundException.EXCEPTION);
     }
 }
