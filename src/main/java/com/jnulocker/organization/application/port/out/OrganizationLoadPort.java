@@ -10,5 +10,6 @@ public interface OrganizationLoadPort {
 
     boolean existsById(Long organizationId);
 
-    Organization getByName(String name);
+    //    Organization getByName(String name);
+    Organization getById(Long id);
 }

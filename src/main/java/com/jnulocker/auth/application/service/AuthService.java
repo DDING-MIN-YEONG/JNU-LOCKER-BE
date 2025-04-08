@@ -39,10 +39,10 @@ public class AuthService implements UserSignupUseCase {
 
         String encodedPassword = passwordEncoder.encode(userSignupRequest.password());
 
-        Organization organization = organizationLoadPort.getByName(userSignupRequest.affiliation());
+        Organization organization = organizationLoadPort.getById(userSignupRequest.affiliationId());
         Department department =
-                departmentLoadPort.getByOrganizationAndName(
-                        organization, userSignupRequest.department());
+                departmentLoadPort.getByOrganizationAndId(
+                        organization, userSignupRequest.departmentId());
 
         Member member =
                 Member.createUser(
