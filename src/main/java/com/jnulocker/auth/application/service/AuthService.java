@@ -40,7 +40,7 @@ public class AuthService implements UserSignupUseCase {
 
         String encodedPassword = passwordEncoder.encode(userSignupRequest.password());
 
-        Organization organization = organizationLoadPort.getById(userSignupRequest.affiliationId());
+        Organization organization = organizationLoadPort.getById(userSignupRequest.organizationId());
         Department department =
                 departmentLoadPort.getByOrganizationAndId(
                         organization, userSignupRequest.departmentId());

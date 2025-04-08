@@ -17,7 +17,7 @@ public record UserSignupRequest(
                                 "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{9,}$",
                         message = "비밀번호는 영문, 숫자, 특수문자를 각각 최소 1자 이상 포함하고 9자 이상이어야 합니다.")
                 String password,
-        @NotNull(message = "소속은 필수입니다.") Long affiliationId,
+        @NotNull(message = "소속은 필수입니다.") Long organizationId,
         @NotNull(message = "소속은 필수입니다.") Long departmentId,
         @NotBlank(message = "전화번호는 필수입니다.")
                 @Pattern(regexp = "^010-\\d{4}-\\d{4}$", message = "전화번호 형식이 올바르지 않습니다.")
