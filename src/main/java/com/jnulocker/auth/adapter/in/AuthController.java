@@ -1,8 +1,8 @@
 package com.jnulocker.auth.adapter.in;
 
 import com.jnulocker.auth.adapter.in.docs.AuthApi;
-import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.UserSignupUseCase;
+import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

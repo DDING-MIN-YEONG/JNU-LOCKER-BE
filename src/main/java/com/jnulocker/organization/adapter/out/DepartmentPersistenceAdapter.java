@@ -18,10 +18,6 @@ public class DepartmentPersistenceAdapter implements DepartmentLoadPort {
         return departmentRepository.findAllByOrganizationId(organizationId);
     }
 
-    //    @Override
-    //    public Department getByOrganizationAndName(Organization organization, String name) {
-    //        return departmentRepository.findByOrganizationAndName(organization, name);
-    //    }
     @Override
     public Department getByOrganizationAndId(Organization organization, Long id) {
         return departmentRepository.findByOrganizationAndId(organization, id);

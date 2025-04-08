@@ -8,6 +8,5 @@ public interface DepartmentLoadPort {
 
     List<Department> getDepartmentsByOrganizationId(Long organizationId);
 
-    //    Department getByOrganizationAndName(Organization organization, String name);
     Department getByOrganizationAndId(Organization organization, Long Id);
 }

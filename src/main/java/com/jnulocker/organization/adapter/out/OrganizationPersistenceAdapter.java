@@ -23,10 +23,6 @@ public class OrganizationPersistenceAdapter implements OrganizationLoadPort {
         return organizationRepository.existsById(organizationId);
     }
 
-    //    @Override
-    //    public Organization getByName(String name) {
-    //        return organizationRepository.findByName(name);
-    //    }
     @Override
     public Organization getById(Long id) {
         return organizationRepository
