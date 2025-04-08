@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
-public record UserSignupReqDto(
+public record UserSignupRequest(
         @NotBlank(message = "이메일은 필수입니다.")
                 @Email(message = "올바른 이메일 형식이 아닙니다.")
                 @Pattern(regexp = "^[A-Za-z0-9._%+-]+@jnu\\.ac\\.kr$", message = "전남대학교 메일이 아닙니다.")

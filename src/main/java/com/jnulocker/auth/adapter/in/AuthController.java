@@ -1,7 +1,7 @@
 package com.jnulocker.auth.adapter.in;
 
 import com.jnulocker.auth.adapter.in.docs.AuthApi;
-import com.jnulocker.auth.adapter.in.request.UserSignupReqDto;
+import com.jnulocker.auth.adapter.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.UserSignupUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +20,9 @@ public class AuthController implements AuthApi {
 
     @Override
     @PostMapping("/signup/users")
-    public ResponseEntity<Void> signupUser(@Valid @RequestBody UserSignupReqDto userSignupReqDto) {
-        userSignupUseCase.signupUser(userSignupReqDto);
+    public ResponseEntity<Void> signupUser(
+            @Valid @RequestBody UserSignupRequest userSignupRequest) {
+        userSignupUseCase.signupUser(userSignupRequest);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

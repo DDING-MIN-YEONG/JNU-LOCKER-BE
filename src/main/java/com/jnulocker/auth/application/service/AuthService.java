@@ -1,6 +1,6 @@
 package com.jnulocker.auth.application.service;
 
-import com.jnulocker.auth.adapter.in.request.UserSignupReqDto;
+import com.jnulocker.auth.adapter.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.UserSignupUseCase;
 import com.jnulocker.auth.application.port.out.UserRecordPort;
 import com.jnulocker.auth.exception.RoleNotCorrectException;
@@ -28,27 +28,27 @@ public class AuthService implements UserSignupUseCase {
 
     @Override
     @Transactional
-    public void signupUser(UserSignupReqDto userSignupReqDto) {
-        if (memberLoadPort.existsByEmail(userSignupReqDto.email())) {
+    public void signupUser(UserSignupRequest userSignupRequest) {
+        if (memberLoadPort.existsByEmail(userSignupRequest.email())) {
             throw UserAlreadyExistException.EXCEPTION;
         }
 
-        if (!userSignupReqDto.role().equals(Role.USER)) {
+        if (!userSignupRequest.role().equals(Role.USER)) {
             throw RoleNotCorrectException.EXCEPTION;
         }
 
-        String encodedPassword = passwordEncoder.encode(userSignupReqDto.password());
+        String encodedPassword = passwordEncoder.encode(userSignupRequest.password());
 
-        Organization organization = organizationLoadPort.getByName(userSignupReqDto.affiliation());
+        Organization organization = organizationLoadPort.getByName(userSignupRequest.affiliation());
         Department department =
                 departmentLoadPort.getByOrganizationAndName(
-                        organization, userSignupReqDto.department());
+                        organization, userSignupRequest.department());
 
         Member member =
                 Member.createUser(
-                        userSignupReqDto.email(),
+                        userSignupRequest.email(),
                         encodedPassword,
-                        userSignupReqDto.phoneNumber(),
+                        userSignupRequest.phoneNumber(),
                         department);
 
         userRecordPort.save(member);
