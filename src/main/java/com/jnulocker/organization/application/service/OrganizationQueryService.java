@@ -6,7 +6,9 @@ import com.jnulocker.organization.application.port.in.response.DepartmentRespons
 import com.jnulocker.organization.application.port.in.response.OrganizationResponse;
 import com.jnulocker.organization.application.port.out.DepartmentLoadPort;
 import com.jnulocker.organization.application.port.out.OrganizationLoadPort;
+import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.domain.OrganizationType;
+import com.jnulocker.organization.exception.DepartmentNotFoundException;
 import com.jnulocker.organization.exception.OrganizationNotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,13 @@ public class OrganizationQueryService implements GetOrganizationQuery, GetDepart
         return organizationLoadPort.getAllByType(organizationType).stream()
                 .map(OrganizationResponse::from)
                 .toList();
+    }
+
+    @Override
+    public Department getDepartmentByIdOrThrow(Long departmentId) {
+        return departmentLoadPort
+                .getDepartmentById(departmentId)
+                .orElseThrow(() -> DepartmentNotFoundException.EXCEPTION);
     }
 
     @Override
