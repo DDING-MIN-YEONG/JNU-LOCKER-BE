@@ -20,9 +20,8 @@ public class AuthController implements AuthApi {
 
     @Override
     @PostMapping("/signup/users")
-    public ResponseEntity<Void> signupUser(
-            @Valid @RequestBody UserSignupRequest userSignupRequest) {
-        userSignupCommand.signupUser(userSignupRequest);
+    public ResponseEntity<Void> signupUser(@Valid @RequestBody UserSignupRequest request) {
+        userSignupCommand.signupUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
