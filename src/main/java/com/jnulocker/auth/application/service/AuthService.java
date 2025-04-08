@@ -12,7 +12,6 @@ import com.jnulocker.organization.application.port.out.DepartmentLoadPort;
 import com.jnulocker.organization.application.port.out.OrganizationLoadPort;
 import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.domain.Organization;
-import com.jnulocker.organization.exception.OrganizationNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -40,14 +39,8 @@ public class AuthService implements UserSignupUseCase {
 
         String encodedPassword = passwordEncoder.encode(userSignupRequest.password());
 
-        Organization organization =
-                organizationLoadPort.getById(userSignupRequest.organizationId());
-        Department department =
-                departmentLoadPort.getByOrganizationAndId(
-                        organization, userSignupRequest.departmentId());
-        if (department == null) {
-            throw OrganizationNotFoundException.EXCEPTION;
-        }
+        Department department = departmentLoadPort.getById(userSignupRequest.departmentId());
+        validOrganization(userSignupRequest.organizationId(), department.getOrganization());
 
         Member member =
                 Member.createUser(
@@ -57,5 +50,10 @@ public class AuthService implements UserSignupUseCase {
                         department);
 
         memberRecordPort.save(member);
+    }
+
+    public void validOrganization(Long organizationId, Organization organization) {
+        Organization organization1 = organizationLoadPort.getById(organizationId);
+        if (organization1 != organization) {}
     }
 }
