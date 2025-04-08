@@ -60,4 +60,12 @@ public class Event extends BaseEntity {
                 .publish(publish)
                 .build();
     }
+
+    public void openEvent() {
+        eventStatus = EventStatus.OPEN;
+    }
+
+    public void closeEvent() {
+        eventStatus = EventStatus.CLOSED;
+    }
 }
