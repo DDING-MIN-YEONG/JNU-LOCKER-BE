@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum OrganizationErrorCode implements ErrorCode {
     ORGANIZATION_NOT_FOUND("O001", HttpStatus.NOT_FOUND, "단과대학 혹은 위원회가 존재하지 않습니다"),
+    INVALID_ORGANIZATION("O002", HttpStatus.BAD_REQUEST, "잘못된 접근입니다."),
     ;
 
     private final String code;

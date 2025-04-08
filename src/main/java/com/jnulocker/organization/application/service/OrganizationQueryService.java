@@ -28,6 +28,13 @@ public class OrganizationQueryService implements OrganizationQuery, DepartmentQu
     }
 
     @Override
+    public Department getDepartmentByIdOrThrow(Long departmentId) {
+        return departmentLoadPort
+                .getDepartmentById(departmentId)
+                .orElseThrow(() -> DepartmentNotFoundException.EXCEPTION);
+    }
+
+    @Override
     public List<DepartmentResponse> getDepartmentsByOrganizationId(Long organizationId) {
         if (!organizationLoadPort.existsById(organizationId)) {
             throw OrganizationNotFoundException.EXCEPTION;
