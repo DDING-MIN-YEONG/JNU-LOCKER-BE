@@ -2,6 +2,7 @@ package com.jnulocker.events.application.port.in.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -27,4 +28,10 @@ public record CreateEventRequest(
                 @NotEmpty(message = "참여 학과/학부는 최소 1개 이상이어야 합니다.")
                 List<Long> participationDepartmentIds,
         @Schema(description = "층 정보 목록") @NotEmpty(message = "층 정보는 최소 1개 이상이어야 합니다.")
-                List<FloorInfo> floors) {}
+                List<FloorInfo> floors) {
+
+    @AssertTrue(message = "이벤트 종료 시간은 시작 시간 이후여야 합니다.")
+    private boolean isEndAtAfterStartAt() {
+        return startAt == null || endAt == null || !endAt.isBefore(startAt);
+    }
+}
