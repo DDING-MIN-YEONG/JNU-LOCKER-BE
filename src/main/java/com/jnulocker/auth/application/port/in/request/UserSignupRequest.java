@@ -1,4 +1,4 @@
-package com.jnulocker.auth.adapter.in.request;
+package com.jnulocker.auth.application.port.in.request;
 
 import com.jnulocker.member.domain.Role;
 import jakarta.validation.constraints.Email;

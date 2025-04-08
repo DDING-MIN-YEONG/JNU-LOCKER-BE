@@ -1,7 +1,7 @@
 package com.jnulocker.auth.adapter.in;
 
 import com.jnulocker.auth.adapter.in.docs.AuthApi;
-import com.jnulocker.auth.adapter.in.request.UserSignupRequest;
+import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.UserSignupUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.jnulocker.auth.adapter.in.docs;
 
-import com.jnulocker.auth.adapter.in.request.UserSignupRequest;
+import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.common.swagger.ApiExceptionExamples;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
