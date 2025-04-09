@@ -30,6 +30,9 @@ public class Member extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
     private String email;
 
     @Column(nullable = false)
@@ -48,8 +51,9 @@ public class Member extends BaseEntity {
 
     // 관리자 회원가입시 사용
     public static Member createManager(
-            String email, String password, String phoneNumber, Department department) {
+            String name, String email, String password, String phoneNumber, Department department) {
         return Member.builder()
+                .name(name)
                 .email(email)
                 .password(password)
                 .phoneNumber(phoneNumber)
@@ -60,8 +64,9 @@ public class Member extends BaseEntity {
 
     // 유저 회원가입시 사용
     public static Member createUser(
-            String email, String password, String phoneNumber, Department department) {
+            String name, String email, String password, String phoneNumber, Department department) {
         return Member.builder()
+                .name(name)
                 .email(email)
                 .password(password)
                 .phoneNumber(phoneNumber)
