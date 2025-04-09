@@ -40,7 +40,11 @@ public class AuthService implements UserSignupCommand {
 
         Member member =
                 Member.createUser(
-                        request.email(), encodedPassword, request.phoneNumber(), department);
+                        request.name(),
+                        request.email(),
+                        encodedPassword,
+                        request.phoneNumber(),
+                        department);
 
         memberCommand.save(member);
     }
