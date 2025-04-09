@@ -13,7 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("USER 회원가입 요청 본문 검증 테스트")
-public class UserSignupRequestTest {
+class UserSignupRequestTest {
 
     private static Validator validator;
 
