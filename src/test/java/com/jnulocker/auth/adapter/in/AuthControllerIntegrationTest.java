@@ -149,7 +149,7 @@ class AuthControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
-                .post(AUTH_URL + "/signup/users")
+                .post(AUTH_URL + "/users/signup")
                 .then()
                 .log()
                 .all();
@@ -160,7 +160,7 @@ class AuthControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
-                .post(AUTH_URL + "/signup/managers")
+                .post(AUTH_URL + "/managers/signup")
                 .then()
                 .log()
                 .all();

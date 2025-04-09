@@ -22,14 +22,14 @@ public class AuthController implements AuthApi {
     private final ManagerSignupCommand managerSignupCommand;
 
     @Override
-    @PostMapping("/signup/users")
+    @PostMapping("/users/signup")
     public ResponseEntity<Void> signupUser(@Valid @RequestBody UserSignupRequest request) {
         userSignupCommand.signupUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @Override
-    @PostMapping("/signup/managers")
+    @PostMapping("/managers/signup")
     public ResponseEntity<Void> signupManager(@Valid @RequestBody ManagerSignupRequest request) {
         managerSignupCommand.signupManager((request));
         return ResponseEntity.status(HttpStatus.CREATED).build();
