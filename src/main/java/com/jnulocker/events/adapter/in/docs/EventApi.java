@@ -1,7 +1,9 @@
 package com.jnulocker.events.adapter.in.docs;
 
 import com.jnulocker.common.swagger.ApiExceptionExamples;
+import com.jnulocker.common.swagger.model.CustomPageable;
 import com.jnulocker.events.application.port.in.request.CreateEventRequest;
+import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -11,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +21,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "사물함 신청 이벤트", description = "사물함 신청 이벤트 관련 API")
 public interface EventApi {
+
+    @Operation(summary = "사물함 신청 이벤트 목록 조회", description = "사물함 신청 이벤트 목록을 조회합니다. 페이지네이션이 지원됩니다.")
+    @ApiResponse(
+            responseCode = "200",
+            description = "이벤트 목록 조회 성공",
+            content =
+                    @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = EventCustomPage.class)))
+    ResponseEntity<EventCustomPage> getEvents(
+            @Valid @ParameterObject CustomPageable customPageable);
+
     @ApiExceptionExamples(CreateEventExceptionDocs.class)
     @Operation(
             summary = "이벤트 생성",

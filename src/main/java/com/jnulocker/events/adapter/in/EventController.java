@@ -1,13 +1,17 @@
 package com.jnulocker.events.adapter.in;
 
+import com.jnulocker.common.swagger.model.CustomPageable;
 import com.jnulocker.events.adapter.in.docs.EventApi;
 import com.jnulocker.events.application.port.in.EventCommand;
 import com.jnulocker.events.application.port.in.EventQuery;
 import com.jnulocker.events.application.port.in.request.CreateEventRequest;
+import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +28,14 @@ public class EventController implements EventApi {
 
     private final EventQuery eventQuery;
     private final EventCommand eventCommand;
+
+    @Override
+    @GetMapping
+    public ResponseEntity<EventCustomPage> getEvents(
+            @Valid @ParameterObject CustomPageable customPageable) {
+        Pageable pageable = customPageable.toPageable();
+        return ResponseEntity.ok(eventQuery.getAllEvents(pageable));
+    }
 
     @Override
     @PostMapping
