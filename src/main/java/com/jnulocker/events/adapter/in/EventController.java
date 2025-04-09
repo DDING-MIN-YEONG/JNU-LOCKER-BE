@@ -26,16 +26,16 @@ public class EventController implements EventApi {
     private final EventCommand eventCommand;
 
     @Override
-    @GetMapping("/{event-id}/lockers")
-    public ResponseEntity<List<FloorWithLockersResponse>> getLockers(
-            @PathVariable("event-id") Long eventId) {
-        return ResponseEntity.ok(eventQuery.getLockersByEventId(eventId));
-    }
-
-    @Override
     @PostMapping
     public ResponseEntity<Void> createEvent(@Valid @RequestBody CreateEventRequest request) {
         eventCommand.createEvent(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @Override
+    @GetMapping("/{event-id}/lockers")
+    public ResponseEntity<List<FloorWithLockersResponse>> getLockers(
+            @PathVariable("event-id") Long eventId) {
+        return ResponseEntity.ok(eventQuery.getLockersByEventId(eventId));
     }
 }
