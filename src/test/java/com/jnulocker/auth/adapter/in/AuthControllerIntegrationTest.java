@@ -1,9 +1,11 @@
 package com.jnulocker.auth.adapter.in;
 
+import static auth.application.port.in.request.ManagerSignupRequestTestDataBuilder.managerSignupRequestBuilder;
 import static auth.application.port.in.request.UserSignupRequestTestDataBuilder.userSignupRequestBuilder;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.exception.AuthErrorCode;
 import com.jnulocker.common.exception.ErrorResponse;
@@ -72,16 +74,7 @@ class AuthControllerIntegrationTest {
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
 
         // when
-        ValidatableResponse response =
-                given().port(port)
-                        .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .body(request)
-                        .when()
-                        .post(AUTH_URL + "/signup/users")
-                        .then()
-                        .log()
-                        .all();
-        //                signupUser(port, request);
+        ValidatableResponse response = signupUser(port, request);
 
         // then
         response.statusCode(HttpStatus.CREATED.value());
@@ -127,6 +120,30 @@ class AuthControllerIntegrationTest {
                 .isEqualTo(AuthErrorCode.USER_ALREADY_EXIST.getMessage());
     }
 
+    // MANAGER 회원가입 테스트
+    @Test
+    void MANAGER_회원가입을_할_수_있다() {
+        // given
+        Department department = setDepartment();
+        ManagerSignupRequest request =
+                managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
+
+        // when
+        ValidatableResponse response = signupManager(port, request);
+
+        // then
+        response.statusCode(HttpStatus.CREATED.value());
+    }
+
+    Department setDepartment() {
+        Organization organization = OrganizationTestDataBuilder.builder().build();
+        Organization savedOrganization = organizationRepository.save(organization);
+        Department department =
+                DepartmentTestDataBuilder.builder().withOrganization(savedOrganization).build();
+        departmentRepository.save(department);
+        return department;
+    }
+
     public static ValidatableResponse signupUser(int port, UserSignupRequest request) {
         return given().port(port)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -138,12 +155,14 @@ class AuthControllerIntegrationTest {
                 .all();
     }
 
-    Department setDepartment() {
-        Organization organization = OrganizationTestDataBuilder.builder().build();
-        Organization savedOrganization = organizationRepository.save(organization);
-        Department department =
-                DepartmentTestDataBuilder.builder().withOrganization(savedOrganization).build();
-        departmentRepository.save(department);
-        return department;
+    public static ValidatableResponse signupManager(int port, ManagerSignupRequest request) {
+        return given().port(port)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(request)
+                .when()
+                .post(AUTH_URL + "/signup/managers")
+                .then()
+                .log()
+                .all();
     }
 }
