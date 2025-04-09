@@ -6,7 +6,7 @@ public class UserSignupRequestTestDataBuilder {
     private String name = "서영우";
     private String email = "222222@jnu.ac.kr";
     private String password = "abcde12345!";
-    private Long departmentId = 128L;
+    private Long departmentId = 1L;
     private String phoneNumber = "010-1234-1234";
 
     private UserSignupRequestTestDataBuilder() {}
