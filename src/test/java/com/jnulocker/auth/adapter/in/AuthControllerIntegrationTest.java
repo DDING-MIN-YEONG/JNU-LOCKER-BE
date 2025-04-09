@@ -81,7 +81,7 @@ class AuthControllerIntegrationTest {
     }
 
     @Test
-    void 존재하지_않는_학과로_회원가입하면_Department_Not_Found_에러_응답을_받는다() {
+    void USER_존재하지_않는_학과로_회원가입하면_Department_Not_Found_에러_응답을_받는다() {
         // given
         Long nonexistentDepartmentId = -1L;
         UserSignupRequest request =
@@ -101,7 +101,7 @@ class AuthControllerIntegrationTest {
     }
 
     @Test
-    void 동일메일로_회원가입하면_User_Already_Exist_에러_응답을_받는다() {
+    void USER_동일메일로_회원가입하면_User_Already_Exist_에러_응답을_받는다() {
         // given
         Department department = setDepartment();
         UserSignupRequest request =
@@ -133,6 +133,46 @@ class AuthControllerIntegrationTest {
 
         // then
         response.statusCode(HttpStatus.CREATED.value());
+    }
+
+    @Test
+    void MANAGER_존재하지_않는_학과로_회원가입하면_Department_Not_Found_에러_응답을_받는다() {
+        // given
+        Long nonexistentDepartmentId = -1L;
+        ManagerSignupRequest request =
+                managerSignupRequestBuilder().withDepartmentId(nonexistentDepartmentId).build();
+
+        // when
+        ErrorResponse errorResponse =
+                signupManager(port, request)
+                        .statusCode(
+                                DepartmentErrorCode.DEPARTMENT_NOT_FOUND.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(DepartmentErrorCode.DEPARTMENT_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void MANAGER_동일메일로_회원가입하면_User_Already_Exist_에러_응답을_받는다() {
+        // given
+        Department department = setDepartment();
+        ManagerSignupRequest request =
+                managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
+
+        // when
+        signupManager(port, request).statusCode(HttpStatus.CREATED.value());
+        ErrorResponse errorResponse =
+                signupManager(port, request)
+                        .statusCode(AuthErrorCode.USER_ALREADY_EXIST.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(AuthErrorCode.USER_ALREADY_EXIST.getMessage());
     }
 
     Department setDepartment() {
