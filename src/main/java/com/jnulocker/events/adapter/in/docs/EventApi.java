@@ -35,7 +35,7 @@ public interface EventApi {
     @ApiExceptionExamples(CreateEventExceptionDocs.class)
     @Operation(
             summary = "이벤트 생성",
-            description = "새로운 사물함 신청 이벤트를 생성합니다. 이벤트 상태는 기본적으로 READY, 공개 상태는 false로 설정됩니다.")
+            description = "새로운 사물함 신청 이벤트를 생성합니다. 이벤트 상태는 기본적으로 READY, 게시 상태는 false로 설정됩니다.")
     @ApiResponse(responseCode = "201", description = "이벤트 생성 성공")
     ResponseEntity<Void> createEvent(@Valid @RequestBody CreateEventRequest request);
 
