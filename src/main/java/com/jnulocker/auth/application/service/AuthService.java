@@ -26,9 +26,7 @@ public class AuthService implements UserSignupCommand, ManagerSignupCommand {
     @Override
     @Transactional
     public void signupUser(UserSignupRequest request) {
-        if (memberQuery.existsByEmail(request.email())) {
-            throw UserAlreadyExistException.EXCEPTION;
-        }
+        validateDuplicateEmail(request.email());
 
         String encodedPassword = passwordEncoder.encode(request.password());
 
@@ -48,17 +46,26 @@ public class AuthService implements UserSignupCommand, ManagerSignupCommand {
     @Override
     @Transactional
     public void signupManager(ManagerSignupRequest request) {
+        validateDuplicateEmail(request.email());
+
         String encodedPassword = passwordEncoder.encode(request.password());
 
         Department department = departmentQuery.getDepartmentByIdOrThrow(request.departmentId());
 
         Member member =
                 Member.createManager(
-                        request.name(),
+                        request.nickName(),
                         request.email(),
                         request.password(),
                         encodedPassword,
                         department);
+
         memberCommand.save(member);
+    }
+
+    private void validateDuplicateEmail(String email) {
+        if (memberQuery.existsByEmail(email)) {
+            throw UserAlreadyExistException.EXCEPTION;
+        }
     }
 }
