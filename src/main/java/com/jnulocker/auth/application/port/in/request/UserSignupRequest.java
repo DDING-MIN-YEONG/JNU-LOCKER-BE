@@ -21,9 +21,9 @@ public record UserSignupRequest(
                                 "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{9,}$",
                         message = "비밀번호는 영문, 숫자, 특수문자를 각각 최소 1자 이상 포함하고 9자 이상이어야 합니다.")
                 String password,
-        @Schema(description = "소속대학", example = "자연과학대학") @NotNull(message = "소속은 필수입니다.")
+        @Schema(description = "소속대학", example = "16") @NotNull(message = "소속은 필수입니다.")
                 Long organizationId,
-        @Schema(description = "소속학과", example = "수학과") @NotNull(message = "소속은 필수입니다.")
+        @Schema(description = "소속학과", example = "128") @NotNull(message = "소속은 필수입니다.")
                 Long departmentId,
         @Schema(description = "전화번호", example = "010-1234-1234")
                 @NotBlank(message = "전화번호는 필수입니다.")
