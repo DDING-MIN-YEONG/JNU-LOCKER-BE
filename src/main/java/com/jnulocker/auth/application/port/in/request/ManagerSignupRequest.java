@@ -7,9 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 public record ManagerSignupRequest(
-        @Schema(description = "소속 이름", example = "디자인학과 학생회 아트")
-                @NotBlank(message = "소속 이름은 필수입니다.")
-                String nickName,
+        @Schema(description = "이름", example = "서영우") @NotBlank(message = "이름은 필수입니다.") String name,
         @Schema(description = "이메일", example = "design@gmail.com")
                 @NotBlank(message = "이메일은 필수입니다.")
                 @Email(message = "올바른 이메일 형식이 아닙니다.")

@@ -32,19 +32,19 @@ class ManagerSignupRequestTest {
     }
 
     @Test
-    void 닉네임이_null이면_검증에_실패한다() {
-        ManagerSignupRequest request = managerSignupRequestBuilder().withNickName(null).build();
+    void 이름이_null이면_검증에_실패한다() {
+        ManagerSignupRequest request = managerSignupRequestBuilder().withName(null).build();
 
         Set<ConstraintViolation<ManagerSignupRequest>> violations = validator.validate(request);
-        assertThat(violations).anyMatch(v -> v.getMessage().equals("소속 이름은 필수입니다."));
+        assertThat(violations).anyMatch(v -> v.getMessage().equals("이름은 필수입니다."));
     }
 
     @Test
-    void 닉네임이_공백이면_검증에_실패한다() {
-        ManagerSignupRequest request = managerSignupRequestBuilder().withNickName("").build();
+    void 이름이_공백이면_검증에_실패한다() {
+        ManagerSignupRequest request = managerSignupRequestBuilder().withName("").build();
 
         Set<ConstraintViolation<ManagerSignupRequest>> violations = validator.validate(request);
-        assertThat(violations).anyMatch(v -> v.getMessage().equals("소속 이름은 필수입니다."));
+        assertThat(violations).anyMatch(v -> v.getMessage().equals("이름은 필수입니다."));
     }
 
     @Test

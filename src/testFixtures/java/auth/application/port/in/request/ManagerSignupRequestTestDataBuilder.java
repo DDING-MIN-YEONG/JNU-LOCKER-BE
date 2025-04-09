@@ -3,7 +3,7 @@ package auth.application.port.in.request;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 
 public class ManagerSignupRequestTestDataBuilder {
-    private String nickName = "디자인학과 학생회 아트";
+    private String name = "서영우";
     private String email = "design@gmail.com";
     private String password = "abcde12345!";
     private Long departmentId = 1L;
@@ -15,8 +15,8 @@ public class ManagerSignupRequestTestDataBuilder {
         return new ManagerSignupRequestTestDataBuilder();
     }
 
-    public ManagerSignupRequestTestDataBuilder withNickName(String nickName) {
-        this.nickName = nickName;
+    public ManagerSignupRequestTestDataBuilder withName(String name) {
+        this.name = name;
         return this;
     }
 
@@ -41,6 +41,6 @@ public class ManagerSignupRequestTestDataBuilder {
     }
 
     public ManagerSignupRequest build() {
-        return new ManagerSignupRequest(nickName, email, password, departmentId, phoneNumber);
+        return new ManagerSignupRequest(name, email, password, departmentId, phoneNumber);
     }
 }
