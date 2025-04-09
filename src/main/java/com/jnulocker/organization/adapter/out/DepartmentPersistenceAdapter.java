@@ -22,4 +22,9 @@ public class DepartmentPersistenceAdapter implements DepartmentLoadPort {
     public Optional<Department> getDepartmentById(Long departmentId) {
         return departmentRepository.findById(departmentId);
     }
+
+    @Override
+    public List<Department> getDepartmentsByIdIn(List<Long> departmentIds) {
+        return departmentRepository.findAllByIdIn(departmentIds);
+    }
 }

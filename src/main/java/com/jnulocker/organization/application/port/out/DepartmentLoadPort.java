@@ -9,4 +9,6 @@ public interface DepartmentLoadPort {
     List<Department> getDepartmentsByOrganizationId(Long organizationId);
 
     Optional<Department> getDepartmentById(Long departmentId);
+
+    List<Department> getDepartmentsByIdIn(List<Long> departmentIds);
 }

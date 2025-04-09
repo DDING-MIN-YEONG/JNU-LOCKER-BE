@@ -94,7 +94,7 @@ spring:
       on-profile: test
 
   datasource:
-    url: jdbc:tc:mysql:8.0:///
+    url: jdbc:tc:mysql:8.0:///test-database
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
 
   sql:

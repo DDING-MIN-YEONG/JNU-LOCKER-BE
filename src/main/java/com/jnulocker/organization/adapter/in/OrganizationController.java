@@ -1,8 +1,8 @@
 package com.jnulocker.organization.adapter.in;
 
 import com.jnulocker.organization.adapter.in.docs.OrganizationApi;
-import com.jnulocker.organization.application.port.in.GetDepartmentQuery;
-import com.jnulocker.organization.application.port.in.GetOrganizationQuery;
+import com.jnulocker.organization.application.port.in.DepartmentQuery;
+import com.jnulocker.organization.application.port.in.OrganizationQuery;
 import com.jnulocker.organization.application.port.in.response.DepartmentResponse;
 import com.jnulocker.organization.application.port.in.response.OrganizationResponse;
 import com.jnulocker.organization.domain.OrganizationType;
@@ -19,13 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/organizations")
 @RequiredArgsConstructor
 public class OrganizationController implements OrganizationApi {
-    private final GetOrganizationQuery getOrganizationQuery;
-    private final GetDepartmentQuery getDepartmentQuery;
+    private final OrganizationQuery organizationQuery;
+    private final DepartmentQuery departmentQuery;
 
     @GetMapping
     public ResponseEntity<List<OrganizationResponse>> getOrganizations(
             @RequestParam OrganizationType type) {
-        List<OrganizationResponse> organizations = getOrganizationQuery.getOrganizations(type);
+        List<OrganizationResponse> organizations = organizationQuery.getOrganizations(type);
         return ResponseEntity.ok(organizations);
     }
 
@@ -33,7 +33,7 @@ public class OrganizationController implements OrganizationApi {
     public ResponseEntity<List<DepartmentResponse>> getDepartments(
             @PathVariable("organization-id") Long organizationId) {
         List<DepartmentResponse> departmentNames =
-                getDepartmentQuery.getDepartmentsByOrganizationId(organizationId);
+                departmentQuery.getDepartmentsByOrganizationId(organizationId);
         return ResponseEntity.ok(departmentNames);
     }
 }

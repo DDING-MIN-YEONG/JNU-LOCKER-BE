@@ -8,7 +8,7 @@ import com.jnulocker.member.application.port.in.MemberCommand;
 import com.jnulocker.member.application.port.in.MemberQuery;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
-import com.jnulocker.organization.application.port.in.GetDepartmentQuery;
+import com.jnulocker.organization.application.port.in.DepartmentQuery;
 import com.jnulocker.organization.domain.Department;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,7 +21,7 @@ public class AuthService implements UserSignupCommand {
     private final PasswordEncoder passwordEncoder;
     private final MemberQuery memberQuery;
     private final MemberCommand memberCommand;
-    private final GetDepartmentQuery getDepartmentQuery;
+    private final DepartmentQuery departmentQuery;
 
     @Override
     @Transactional
@@ -36,7 +36,7 @@ public class AuthService implements UserSignupCommand {
 
         String encodedPassword = passwordEncoder.encode(request.password());
 
-        Department department = getDepartmentQuery.getDepartmentByIdOrThrow(request.departmentId());
+        Department department = departmentQuery.getDepartmentByIdOrThrow(request.departmentId());
 
         Member member =
                 Member.createUser(
