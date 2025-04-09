@@ -31,7 +31,7 @@ public class AuthController implements AuthApi {
     @Override
     @PostMapping("/managers/signup")
     public ResponseEntity<Void> signupManager(@Valid @RequestBody ManagerSignupRequest request) {
-        managerSignupCommand.signupManager((request));
+        managerSignupCommand.signupManager(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

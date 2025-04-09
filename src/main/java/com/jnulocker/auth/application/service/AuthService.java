@@ -56,7 +56,7 @@ public class AuthService implements UserSignupCommand, ManagerSignupCommand {
                 Member.createManager(
                         request.nickName(),
                         request.email(),
-                        request.password(),
+                        encodedPassword,
                         encodedPassword,
                         department);
 
