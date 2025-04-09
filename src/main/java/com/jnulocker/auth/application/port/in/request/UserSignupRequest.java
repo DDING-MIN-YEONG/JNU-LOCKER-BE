@@ -1,6 +1,5 @@
 package com.jnulocker.auth.application.port.in.request;
 
-import com.jnulocker.member.domain.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -28,6 +27,4 @@ public record UserSignupRequest(
         @Schema(description = "전화번호", example = "010-1234-1234")
                 @NotBlank(message = "전화번호는 필수입니다.")
                 @Pattern(regexp = "^010-\\d{4}-\\d{4}$", message = "전화번호 형식이 올바르지 않습니다.")
-                String phoneNumber,
-        @Schema(description = "ROLE", example = "USER") @NotNull(message = "역할은 필수입니다.")
-                Role role) {}
+                String phoneNumber) {}

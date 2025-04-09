@@ -24,4 +24,8 @@ public class AuthController implements AuthApi {
         userSignupCommand.signupUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    //    @PostMapping("/signup/managers")
+    //    public ResponseEntity<Void> signupManager(@Valid @RequestBody ManagerSignupRequest
+    // request) {}
 }
