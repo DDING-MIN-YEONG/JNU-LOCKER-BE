@@ -6,7 +6,6 @@ import com.jnulocker.events.application.port.in.request.FloorInfo;
 import com.jnulocker.events.application.port.out.EventRecordPort;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.EventParticipation;
-import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.domain.Floor;
 import com.jnulocker.events.domain.Locker;
 import com.jnulocker.events.event.LockerEventCreatedEvent;
@@ -59,12 +58,7 @@ public class EventCommandService implements EventCommand {
         // 이벤트 생성 및 저장
         return eventRecordPort.saveEvent(
                 Event.create(
-                        request.title(),
-                        organizerDepartment,
-                        request.startAt(),
-                        request.endAt(),
-                        EventStatus.READY,
-                        false));
+                        request.title(), organizerDepartment, request.startAt(), request.endAt()));
     }
 
     private void setupEventParticipations(Event event, List<Long> participationDepartmentIds) {

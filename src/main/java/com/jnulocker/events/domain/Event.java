@@ -46,18 +46,13 @@ public class Event extends BaseEntity {
     private Boolean publish;
 
     public static Event create(
-            String title,
-            Department department,
-            LocalDateTime startAt,
-            LocalDateTime endAt,
-            EventStatus eventStatus,
-            Boolean publish) {
+            String title, Department department, LocalDateTime startAt, LocalDateTime endAt) {
         return Event.builder()
                 .title(title)
                 .department(department)
                 .eventSchedule(EventSchedule.of(startAt, endAt))
-                .eventStatus(eventStatus)
-                .publish(publish)
+                .eventStatus(EventStatus.READY)
+                .publish(false)
                 .build();
     }
 
