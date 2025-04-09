@@ -7,6 +7,7 @@ import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.events.adapter.out.EventRepository;
 import com.jnulocker.events.adapter.out.FloorRepository;
 import com.jnulocker.events.adapter.out.LockerRepository;
+import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.exception.EventErrorCode;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -72,6 +74,58 @@ class EventControllerIntegrationTest {
         eventRepository.deleteAll();
         departmentRepository.deleteAll();
         organizationRepository.deleteAll();
+    }
+
+    // 이벤트 목록 조회 테스트
+    @ParameterizedTest(name = "[{index}] 조회[총: {0}, 크기: {1}, 페이지: {2}] -> 마지막: {3}")
+    @CsvSource({
+        "10, 5, 0, false", // 10개 생성, 5개씩, 0페이지(1~5), 마지막 아님
+        "10, 5, 1, true", // 10개 생성, 5개씩, 1페이지(6~10), 마지막
+        "8, 3, 0, false", // 8개 생성, 3개씩, 0페이지(1~3), 마지막 아님
+        "8, 3, 2, true", // 8개 생성, 3개씩, 2페이지(7~8), 마지막
+        "5, 10, 0, true" // 5개 생성, 10개씩, 0페이지(1~5), 마지막
+    })
+    void 이벤트_목록을_조회할_수_있다(int createCount, int pageSize, int page, boolean expectedLast) {
+        // given
+        for (int i = 0; i < createCount; i++) {
+            eventTestUtil.createEventWithFloorAndLockers(List.of(1));
+        }
+
+        // when
+        EventCustomPage eventCustomPage =
+                getEvents(port, page, pageSize)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(EventCustomPage.class);
+
+        // then
+        int expectedSize = calculateExpectedSize(createCount, pageSize, page);
+        assertThat(eventCustomPage.content()).hasSize(expectedSize);
+        assertThat(eventCustomPage.totalElements()).isEqualTo(createCount);
+        assertThat(eventCustomPage.last()).isEqualTo(expectedLast);
+    }
+
+    private int calculateExpectedSize(int totalCount, int pageSize, int page) {
+        int startIndex = page * pageSize;
+        if (startIndex >= totalCount) {
+            return 0; // 페이지가 범위를 벗어나면 빈 리스트
+        }
+        int remainingItems = totalCount - startIndex;
+        return Math.min(remainingItems, pageSize);
+    }
+
+    public static ValidatableResponse getEvents(int port, int page, int size) {
+        return given().port(port)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .queryParam("page", page)
+                .queryParam("size", size)
+                .queryParam("direction", "DESC")
+                .queryParam("sort", "createdAt")
+                .when()
+                .get(EVENT_URL)
+                .then()
+                .log()
+                .all();
     }
 
     @ParameterizedTest(name = "층별 사물함 수: {0}")

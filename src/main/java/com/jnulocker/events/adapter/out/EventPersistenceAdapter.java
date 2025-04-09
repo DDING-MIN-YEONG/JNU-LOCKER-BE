@@ -10,6 +10,8 @@ import com.jnulocker.events.domain.Locker;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @PersistenceAdapter
 @RequiredArgsConstructor
@@ -28,6 +30,11 @@ public class EventPersistenceAdapter implements EventLoadPort, EventRecordPort {
     @Override
     public Optional<Event> getById(Long eventId) {
         return eventRepository.findById(eventId);
+    }
+
+    @Override
+    public Page<Event> getAllEvents(Pageable pageable) {
+        return eventRepository.findAll(pageable);
     }
 
     @Override
