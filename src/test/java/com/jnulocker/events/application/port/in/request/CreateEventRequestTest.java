@@ -13,8 +13,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+@DisplayName("이벤트 생성 요청 본문 검증 테스트")
 class CreateEventRequestTest {
 
     private static Validator validator;
