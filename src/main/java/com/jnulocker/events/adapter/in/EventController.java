@@ -1,11 +1,11 @@
 package com.jnulocker.events.adapter.in;
 
-import com.jnulocker.common.swagger.model.CustomPageable;
 import com.jnulocker.events.adapter.in.docs.EventApi;
 import com.jnulocker.events.application.port.in.EventCommand;
 import com.jnulocker.events.application.port.in.EventQuery;
 import com.jnulocker.events.application.port.in.request.CreateEventRequest;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
+import com.jnulocker.events.application.port.in.response.EventPageable;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -32,8 +32,8 @@ public class EventController implements EventApi {
     @Override
     @GetMapping
     public ResponseEntity<EventCustomPage> getEvents(
-            @Valid @ParameterObject CustomPageable customPageable) {
-        Pageable pageable = customPageable.toPageable();
+            @Valid @ParameterObject EventPageable eventPageable) {
+        Pageable pageable = eventPageable.toPageable();
         return ResponseEntity.ok(eventQuery.getAllEvents(pageable));
     }
 

@@ -1,9 +1,9 @@
 package com.jnulocker.events.adapter.in.docs;
 
 import com.jnulocker.common.swagger.ApiExceptionExamples;
-import com.jnulocker.common.swagger.model.CustomPageable;
 import com.jnulocker.events.application.port.in.request.CreateEventRequest;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
+import com.jnulocker.events.application.port.in.response.EventPageable;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -30,8 +30,7 @@ public interface EventApi {
                     @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = EventCustomPage.class)))
-    ResponseEntity<EventCustomPage> getEvents(
-            @Valid @ParameterObject CustomPageable customPageable);
+    ResponseEntity<EventCustomPage> getEvents(@Valid @ParameterObject EventPageable eventPageable);
 
     @ApiExceptionExamples(CreateEventExceptionDocs.class)
     @Operation(
