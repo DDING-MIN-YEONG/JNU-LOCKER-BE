@@ -57,7 +57,7 @@ public class AuthService implements UserSignupCommand, ManagerSignupCommand {
                         request.name(),
                         request.email(),
                         encodedPassword,
-                        encodedPassword,
+                        request.phoneNumber(),
                         department);
 
         memberCommand.save(member);
