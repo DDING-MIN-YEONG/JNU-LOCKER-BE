@@ -6,15 +6,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
-public record UserSignupRequest(
+public record ManagerSignupRequest(
         @Schema(description = "이름", example = "서영우") @NotBlank(message = "이름은 필수입니다.") String name,
-        @Schema(description = "전남대학교 학생 계정 메일", example = "222222@jnu.ac.kr")
+        @Schema(description = "이메일", example = "design@gmail.com")
                 @NotBlank(message = "이메일은 필수입니다.")
                 @Email(message = "올바른 이메일 형식이 아닙니다.")
-                @Pattern(regexp = "^[A-Za-z0-9._%+-]+@jnu\\.ac\\.kr$", message = "전남대학교 메일이 아닙니다.")
                 String email,
-        @Schema(description = "비밀번호", example = "abcde12345!")
-                @NotBlank(message = "비밀번호는 필수입니다.")
+        @NotBlank(message = "비밀번호는 필수입니다.")
                 @Pattern(
                         regexp =
                                 "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{9,}$",
@@ -22,7 +20,6 @@ public record UserSignupRequest(
                 String password,
         @Schema(description = "소속학과", example = "128") @NotNull(message = "소속은 필수입니다.")
                 Long departmentId,
-        @Schema(description = "전화번호", example = "010-1234-1234")
-                @NotBlank(message = "전화번호는 필수입니다.")
+        @NotBlank(message = "전화번호는 필수입니다.")
                 @Pattern(regexp = "^010-\\d{4}-\\d{4}$", message = "전화번호 형식이 올바르지 않습니다.")
                 String phoneNumber) {}
