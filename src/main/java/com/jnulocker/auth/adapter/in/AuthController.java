@@ -42,11 +42,13 @@ public class AuthController implements AuthApi {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @Override
     @PostMapping("/login")
     public ResponseEntity<AuthToken> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(loginCommand.login(request));
     }
 
+    @Override
     @PostMapping("/reissue")
     public ResponseEntity<AuthToken> reissue(@RequestParam String refreshToken) {
         return ResponseEntity.ok(reissueCommand.reissue(refreshToken));
