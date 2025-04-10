@@ -10,7 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@Tag(name = "인증인가", description = "인증인가 관련 API")
+@Tag(name = "인증", description = "인증 관련 API")
 public interface AuthApi {
 
     @ApiExceptionExamples(SignupExceptionDocs.class)
