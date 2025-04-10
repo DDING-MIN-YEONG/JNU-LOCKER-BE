@@ -2,6 +2,7 @@ package com.jnulocker.auth.application.service;
 
 import com.jnulocker.auth.application.port.in.LoginCommand;
 import com.jnulocker.auth.application.port.in.ManagerSignupCommand;
+import com.jnulocker.auth.application.port.in.ReissueCommand;
 import com.jnulocker.auth.application.port.in.UserSignupCommand;
 import com.jnulocker.auth.application.port.in.request.LoginRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
@@ -9,12 +10,14 @@ import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.response.AuthToken;
 import com.jnulocker.auth.exception.UserAlreadyExistException;
 import com.jnulocker.auth.jwt.TokenProvider;
+import com.jnulocker.auth.jwt.exception.InvalidRefreshTokenException;
 import com.jnulocker.member.application.port.in.MemberCommand;
 import com.jnulocker.member.application.port.in.MemberQuery;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.organization.application.port.in.DepartmentQuery;
 import com.jnulocker.organization.domain.Department;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -24,13 +27,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class AuthService implements UserSignupCommand, ManagerSignupCommand, LoginCommand {
+public class AuthService
+        implements UserSignupCommand, ManagerSignupCommand, LoginCommand, ReissueCommand {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final PasswordEncoder passwordEncoder;
     private final MemberQuery memberQuery;
     private final MemberCommand memberCommand;
     private final DepartmentQuery departmentQuery;
     private final TokenProvider tokenProvider;
+
+    private static final String GRANT_TYPE = "Bearer";
+
+    @Value("${custom.jwt.access-token-expire-time}")
+    private Long accessTokenExpireTime;
 
     @Override
     @Transactional
@@ -84,6 +93,23 @@ public class AuthService implements UserSignupCommand, ManagerSignupCommand, Log
 
         AuthToken authToken = tokenProvider.createAuthToken(authentication, member.getRole());
         return authToken;
+    }
+
+    @Override
+    @Transactional
+    public AuthToken reissue(String refreshToken) {
+        // validRefreshToken
+
+        Long memberId = tokenProvider.getUserIdFromRefreshToken(refreshToken);
+        Member member = memberQuery.findByIdOrThrow(memberId);
+
+        if (!tokenProvider.existsByUserIdAndRefreshToken(refreshToken)) {
+            throw InvalidRefreshTokenException.EXCEPTION;
+        }
+
+        String newAccessToken = tokenProvider.generateAccessToken(memberId, member.getRole());
+        String newRefreshToken = tokenProvider.generateRefreshToken(memberId);
+        return AuthToken.of(newAccessToken, newRefreshToken, GRANT_TYPE, accessTokenExpireTime);
     }
 
     private void validateDuplicateEmail(String email) {

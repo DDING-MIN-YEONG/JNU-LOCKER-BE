@@ -26,4 +26,9 @@ public class MemberPersistenceAdapter implements MemberLoadPort, MemberRecordPor
     public Optional<Member> findByEmail(String email) {
         return memberRepository.findByEmail(email);
     }
+
+    @Override
+    public Optional<Member> findById(Long id) {
+        return memberRepository.findById(id);
+    }
 }

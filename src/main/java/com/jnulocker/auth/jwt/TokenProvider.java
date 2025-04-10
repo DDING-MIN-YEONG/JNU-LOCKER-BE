@@ -107,6 +107,15 @@ public class TokenProvider {
         return true;
     }
 
+    public Long getUserIdFromRefreshToken(String refreshToken) {
+        Claims claims = parseClaims(refreshToken, TokenType.REFRESH);
+        return claims.get("id", Long.class);
+    }
+
+    public boolean existsByUserIdAndRefreshToken(String refreshToken) {
+        return tokenRepository.existsByToken(refreshToken);
+    }
+
     private Claims parseClaims(String token, TokenType tokenType) {
         SecretKey secretKey =
                 tokenType.equals(TokenType.ACCESS) ? accessSecretKey : refreshSecretKey;

@@ -3,6 +3,7 @@ package com.jnulocker.auth.adapter.in;
 import com.jnulocker.auth.adapter.in.docs.AuthApi;
 import com.jnulocker.auth.application.port.in.LoginCommand;
 import com.jnulocker.auth.application.port.in.ManagerSignupCommand;
+import com.jnulocker.auth.application.port.in.ReissueCommand;
 import com.jnulocker.auth.application.port.in.UserSignupCommand;
 import com.jnulocker.auth.application.port.in.request.LoginRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -24,6 +26,7 @@ public class AuthController implements AuthApi {
     private final UserSignupCommand userSignupCommand;
     private final ManagerSignupCommand managerSignupCommand;
     private final LoginCommand loginCommand;
+    private final ReissueCommand reissueCommand;
 
     @Override
     @PostMapping("/users/signup")
@@ -42,5 +45,10 @@ public class AuthController implements AuthApi {
     @PostMapping("/login")
     public ResponseEntity<AuthToken> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(loginCommand.login(request));
+    }
+
+    @PostMapping("/reissue")
+    public ResponseEntity<AuthToken> reissue(@RequestParam String refreshToken) {
+        return ResponseEntity.ok(reissueCommand.reissue(refreshToken));
     }
 }

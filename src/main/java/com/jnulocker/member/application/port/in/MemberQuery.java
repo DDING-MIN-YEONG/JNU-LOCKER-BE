@@ -7,4 +7,6 @@ public interface MemberQuery {
     boolean existsByEmail(String email);
 
     Member findByEmailOrThrow(String email);
+
+    Member findByIdOrThrow(Long id);
 }
