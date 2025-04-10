@@ -1,0 +1,8 @@
+package com.jnulocker.auth.application.port.in.response;
+
+public record AuthToken(String accessToken, String refreshToken, String grantType, Long expiresIn) {
+    public static AuthToken of(
+            String accessToken, String refreshToken, String grantType, Long expiresIn) {
+        return new AuthToken(accessToken, refreshToken, grantType, expiresIn);
+    }
+}

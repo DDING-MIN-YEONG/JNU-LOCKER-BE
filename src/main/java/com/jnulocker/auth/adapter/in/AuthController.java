@@ -1,10 +1,13 @@
 package com.jnulocker.auth.adapter.in;
 
 import com.jnulocker.auth.adapter.in.docs.AuthApi;
+import com.jnulocker.auth.application.port.in.LoginCommand;
 import com.jnulocker.auth.application.port.in.ManagerSignupCommand;
 import com.jnulocker.auth.application.port.in.UserSignupCommand;
+import com.jnulocker.auth.application.port.in.request.LoginRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
+import com.jnulocker.auth.application.port.in.response.AuthToken;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController implements AuthApi {
     private final UserSignupCommand userSignupCommand;
     private final ManagerSignupCommand managerSignupCommand;
+    private final LoginCommand loginCommand;
 
     @Override
     @PostMapping("/users/signup")
@@ -33,5 +37,10 @@ public class AuthController implements AuthApi {
     public ResponseEntity<Void> signupManager(@Valid @RequestBody ManagerSignupRequest request) {
         managerSignupCommand.signupManager(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthToken> login(@RequestBody LoginRequest request) {
+        return ResponseEntity.ok(loginCommand.login(request));
     }
 }

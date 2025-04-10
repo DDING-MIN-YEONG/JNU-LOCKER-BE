@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum MemberErrorCode implements ErrorCode {
     ONLY_GUEST_CAN_BE_MANAGER("M001", HttpStatus.BAD_REQUEST, "게스트만 매니저로 승인될 수 있습니다"),
+    MEMBER_NOT_FOUND("M002", HttpStatus.NOT_FOUND, "회원 정보를 조회할 수 없습니다."),
     ;
 
     private final String code;
