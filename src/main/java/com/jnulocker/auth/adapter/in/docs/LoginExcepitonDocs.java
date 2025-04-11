@@ -1,7 +1,6 @@
 package com.jnulocker.auth.adapter.in.docs;
 
 import com.jnulocker.auth.jwt.exception.ExpiredTokenException;
-import com.jnulocker.auth.jwt.exception.InvalidAccessTokenException;
 import com.jnulocker.auth.jwt.exception.InvalidRefreshTokenException;
 import com.jnulocker.common.exception.BusinessException;
 import com.jnulocker.common.swagger.ExceptionDoc;

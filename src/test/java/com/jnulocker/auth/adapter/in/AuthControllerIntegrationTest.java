@@ -5,9 +5,13 @@ import static auth.application.port.in.request.UserSignupRequestTestDataBuilder.
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import com.jnulocker.auth.application.port.in.request.LoginRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
+import com.jnulocker.auth.application.port.in.response.AuthToken;
 import com.jnulocker.auth.exception.AuthErrorCode;
+import com.jnulocker.auth.jwt.TokenProvider;
+import com.jnulocker.auth.jwt.exception.JwtErrorCode;
 import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.member.adapter.out.MemberRepository;
 import com.jnulocker.organization.adapter.out.DepartmentRepository;
@@ -47,6 +51,8 @@ class AuthControllerIntegrationTest {
     @Autowired private OrganizationRepository organizationRepository;
 
     @Autowired private DepartmentRepository departmentRepository;
+
+    @Autowired private TokenProvider tokenProvider;
 
     @BeforeEach
     void setUp() {
@@ -173,6 +179,117 @@ class AuthControllerIntegrationTest {
         // then
         assertThat(errorResponse.message())
                 .isEqualTo(AuthErrorCode.USER_ALREADY_EXIST.getMessage());
+    }
+
+    @Test
+    void USER_로그인_성공시_토큰을_반환한다() {
+        // given
+        Department department = setDepartment();
+        UserSignupRequest signupRequest =
+                userSignupRequestBuilder().withDepartmentId(department.getId()).build();
+        signupUser(port, signupRequest);
+
+        LoginRequest loginRequest =
+                new LoginRequest(signupRequest.email(), signupRequest.password());
+
+        // when
+        AuthToken authToken =
+                loginUser(port, loginRequest)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(AuthToken.class);
+
+        // then
+        assertThat(authToken.accessToken()).isNotBlank();
+        assertThat(authToken.refreshToken()).isNotBlank();
+    }
+
+    @Test
+    void 토큰_재발급_요청시_새로운_AccessToken을_받는다() {
+        // given
+        Department department = setDepartment();
+        UserSignupRequest signupRequest =
+                userSignupRequestBuilder().withDepartmentId(department.getId()).build();
+        signupUser(port, signupRequest);
+
+        LoginRequest loginRequest =
+                new LoginRequest(signupRequest.email(), signupRequest.password());
+        AuthToken authToken =
+                loginUser(port, loginRequest)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(AuthToken.class);
+
+        // when
+        AuthToken reissuedToken =
+                reissueToken(port, authToken.refreshToken())
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(AuthToken.class);
+
+        // then
+        assertThat(reissuedToken.accessToken()).isNotBlank();
+    }
+
+    @Test
+    void 유효하지_않은_리프레시_토큰으로_재발급하면_InvalidRefreshToken_에러가_발생한다() {
+        // given
+        String invalidRefreshToken = "invalid.refresh.token";
+
+        // when
+        ErrorResponse errorResponse =
+                reissueToken(port, invalidRefreshToken)
+                        .statusCode(JwtErrorCode.INVALID_REFRESH_TOKEN.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(JwtErrorCode.INVALID_REFRESH_TOKEN.getMessage());
+    }
+
+    @Test
+    void 만료된_토큰으로_재발급하면_Token_Expired_에러가_발생한다() {
+        String expiredRefreshToken =
+                "eyJhbGciOiJIUzUxMiJ9.eyJpZCI6MSwiaWF0IjoxNzQ0MzU5MjA2LCJleHAiOjE3NDQzNTkyMDd9.4NG8_xBmEuk2HUGAOsek8_31qzxfL5g4DeanNxJPTm25iVfz1sSDUCe_zPNFthiadg7whhHzLaCm_e-hIsgx-Q";
+
+        // when
+        ErrorResponse errorResponse =
+                given().port(port)
+                        .queryParam("refreshToken", expiredRefreshToken)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .when()
+                        .post(AUTH_URL + "/reissue")
+                        .then()
+                        .statusCode(JwtErrorCode.EXPIRED_TOKEN.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+
+        assertThat(errorResponse.message()).isEqualTo(JwtErrorCode.EXPIRED_TOKEN.getMessage());
+    }
+
+    public static ValidatableResponse loginUser(int port, LoginRequest request) {
+        return given().port(port)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(request)
+                .when()
+                .post(AUTH_URL + "/login")
+                .then()
+                .log()
+                .all();
+    }
+
+    public static ValidatableResponse reissueToken(int port, String refreshToken) {
+        return given().port(port)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .queryParam("refreshToken", refreshToken)
+                .when()
+                .post(AUTH_URL + "/reissue")
+                .then()
+                .log()
+                .all();
     }
 
     Department setDepartment() {
