@@ -55,9 +55,9 @@ public class SecurityConfig {
                                 .permitAll()
                                 .requestMatchers(
                                         HttpMethod.GET, "/v1/events", "/v1/events/*/lockers")
-                                .hasAuthority("MANAGER")
+                                .hasAuthority("guest")
                                 .requestMatchers(HttpMethod.POST, "/v1/events")
-                                .hasAuthority("MANAGER")
+                                .hasAuthority("manager")
                                 .anyRequest()
                                 .authenticated());
 

@@ -3,6 +3,7 @@ package com.jnulocker.events.adapter.in;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.jnulocker.auth.jwt.TokenProvider;
 import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.events.adapter.out.EventRepository;
 import com.jnulocker.events.adapter.out.FloorRepository;
@@ -12,8 +13,13 @@ import com.jnulocker.events.application.port.in.response.FloorWithLockersRespons
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.exception.EventErrorCode;
 import com.jnulocker.events.utils.EventTestUtil;
+import com.jnulocker.member.adapter.out.MemberRepository;
+import com.jnulocker.member.domain.Member;
+import com.jnulocker.member.domain.Role;
 import com.jnulocker.organization.adapter.out.DepartmentRepository;
 import com.jnulocker.organization.adapter.out.OrganizationRepository;
+import com.jnulocker.organization.domain.Department;
+import com.jnulocker.organization.domain.Organization;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
 import java.util.List;
@@ -30,10 +36,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import organization.builder.DepartmentTestDataBuilder;
+import organization.builder.OrganizationTestDataBuilder;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -55,12 +65,26 @@ class EventControllerIntegrationTest {
 
     @Autowired private LockerRepository lockerRepository;
 
+    @Autowired private MemberRepository memberRepository;
+
     @Autowired private EventTestUtil eventTestUtil;
 
+    @Autowired private TokenProvider tokenProvider;
+
+    public static String accessToken;
+    public static Long memberId;
+
     @BeforeEach
-    void setUp() {
+    void setUp(WebApplicationContext webApplicationContext) {
         RestAssured.port = port;
         clearData();
+
+        // 테스트 사용자 생성
+        Member member = createTestMember();
+        memberId = member.getId();
+
+        // 토큰 생성
+        accessToken = tokenProvider.generateAccessToken(memberId, Role.GUEST);
     }
 
     @AfterEach
@@ -69,6 +93,7 @@ class EventControllerIntegrationTest {
     }
 
     private void clearData() {
+        memberRepository.deleteAll();
         lockerRepository.deleteAll();
         floorRepository.deleteAll();
         eventRepository.deleteAll();
@@ -117,6 +142,7 @@ class EventControllerIntegrationTest {
     public static ValidatableResponse getEvents(int port, int page, int size) {
         return given().port(port)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                 .queryParam("page", page)
                 .queryParam("size", size)
                 .queryParam("direction", "DESC")
@@ -181,10 +207,24 @@ class EventControllerIntegrationTest {
     public static ValidatableResponse getEventLockers(int port, Long eventId) {
         return given().port(port)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                 .when()
                 .get(EVENT_URL + "/{event-id}/lockers", eventId)
                 .then()
                 .log()
                 .all();
+    }
+
+    private Member createTestMember() {
+        Organization organization = OrganizationTestDataBuilder.builder().build();
+        Organization savedOrganization = organizationRepository.save(organization);
+        Department department =
+                DepartmentTestDataBuilder.builder().withOrganization(savedOrganization).build();
+        departmentRepository.save(department);
+
+        Member member =
+                Member.createManager(
+                        "test", "test@example.com", "test12345!", "010-1234-1234", department);
+        return memberRepository.save(member);
     }
 }
