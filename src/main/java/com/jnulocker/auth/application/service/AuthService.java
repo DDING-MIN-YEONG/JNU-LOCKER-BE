@@ -98,14 +98,12 @@ public class AuthService
     @Override
     @Transactional
     public AuthToken reissue(String refreshToken) {
-        // validRefreshToken
-
-        Long memberId = tokenProvider.getUserIdFromRefreshToken(refreshToken);
-        Member member = memberQuery.findByIdOrThrow(memberId);
-
         if (!tokenProvider.existsByUserIdAndRefreshToken(refreshToken)) {
             throw InvalidRefreshTokenException.EXCEPTION;
         }
+
+        Long memberId = tokenProvider.getUserIdFromRefreshToken(refreshToken);
+        Member member = memberQuery.findByIdOrThrow(memberId);
 
         String newAccessToken = tokenProvider.generateAccessToken(memberId, member.getRole());
         String newRefreshToken = tokenProvider.generateRefreshToken(memberId);
