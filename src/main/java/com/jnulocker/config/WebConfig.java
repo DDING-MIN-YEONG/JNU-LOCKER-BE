@@ -16,6 +16,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "https://localhost:3000",
                         "http://localhost:8080",
                         "https://localhost:8080",
+                        "https://jnu-locker.vercel.app",
                         "https://api.dev.jnu-locker.site")
                 .allowedMethods(
                         HttpMethod.GET.name(),
