@@ -12,11 +12,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
+    private static final String REISSUE_URI = "/api/auth/reissue";
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "Bearer ";
 
     private final TokenProvider tokenProvider;
 
+    // TODO: 검토
     @Override
     protected void doFilterInternal(
             HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -24,7 +26,13 @@ public class JwtFilter extends OncePerRequestFilter {
         String authorizationHeader = request.getHeader(AUTHORIZATION_HEADER);
         String token = getAccessToken(authorizationHeader);
 
-        if (tokenProvider.validateAccessToken(token)) {
+        // refreshToken 처리
+        if (request.getRequestURI().equals(REISSUE_URI)) {
+            tokenProvider.validateRefreshToken(token);
+        }
+
+        // accessToken 처리
+        if (token != null && tokenProvider.validateAccessToken(token)) {
             Authentication authentication =
                     tokenProvider.getAuthentication(token, TokenType.ACCESS);
             SecurityContextHolder.getContext().setAuthentication(authentication);
