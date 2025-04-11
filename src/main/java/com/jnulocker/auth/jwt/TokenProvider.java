@@ -5,7 +5,6 @@ import com.jnulocker.auth.application.port.in.response.AuthToken;
 import com.jnulocker.auth.jwt.exception.ExpiredTokenException;
 import com.jnulocker.auth.jwt.exception.InvalidAccessTokenException;
 import com.jnulocker.auth.jwt.exception.InvalidRefreshTokenException;
-import com.jnulocker.auth.jwt.exception.MissingTokenException;
 import com.jnulocker.member.domain.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -129,13 +128,6 @@ public class TokenProvider {
     public Long getUserIdFromRefreshToken(String refreshToken) {
         Claims claims = parseClaims(refreshToken, TokenType.REFRESH);
         return claims.get("id", Long.class);
-    }
-
-    public String extractToken(String header) {
-        if (header == null || !header.startsWith(BEARER_PREFIX)) {
-            throw MissingTokenException.EXCEPTION;
-        }
-        return header.substring(BEARER_PREFIX.length());
     }
 
     public boolean existsByUserIdAndRefreshToken(String refreshToken) {

@@ -12,7 +12,6 @@ public enum JwtErrorCode implements ErrorCode {
     INVALID_REFRESH_TOKEN("JW002", HttpStatus.UNAUTHORIZED, "올바른 REFRESH 토큰이 아닙니다."),
     EXPIRED_TOKEN("JW003", HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
     AUTHENTICATION_FAIL("JW004", HttpStatus.UNAUTHORIZED, "Security Context 에 인증 정보가 없습니다."),
-    MISSING_TOKEN("JW005", HttpStatus.UNAUTHORIZED, "요청에 토큰이 포함되어있지 않습니다."),
     ;
 
     private final String code;
