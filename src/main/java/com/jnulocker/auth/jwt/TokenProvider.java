@@ -130,7 +130,7 @@ public class TokenProvider {
         return claims.get("id", Long.class);
     }
 
-    public boolean existsByUserIdAndRefreshToken(String refreshToken) {
+    public boolean existsByRefreshToken(String refreshToken) {
         return tokenRepository.existsByToken(refreshToken);
     }
 

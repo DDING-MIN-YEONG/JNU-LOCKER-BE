@@ -93,7 +93,7 @@ public class AuthService
     @Override
     @Transactional
     public AuthToken reissue(String refreshToken) {
-        if (!tokenProvider.existsByUserIdAndRefreshToken(refreshToken)) {
+        if (!tokenProvider.existsByRefreshToken(refreshToken)) {
             throw InvalidRefreshTokenException.EXCEPTION;
         }
 
