@@ -53,9 +53,9 @@ public class SecurityConfig {
                                 .permitAll() // 인증 API 모든 접근 허용
                                 .requestMatchers(
                                         HttpMethod.GET, "/v1/events", "/v1/events/*/lockers")
-                                .hasAuthority("manager")
+                                .hasAuthority("guest")
                                 .requestMatchers(HttpMethod.POST, "/v1/events")
-                                .hasAuthority("manager") // 권한이 MANAGER인 유저만 사용 가능
+                                .hasAuthority("guest") // 권한이 MANAGER인 유저만 사용 가능 // TODO: 추후 manager로 변경, 토큰의 role과 db의 role과 다른 문제 고려
                                 .anyRequest()
                                 .authenticated());
 

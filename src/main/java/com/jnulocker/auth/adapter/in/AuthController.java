@@ -1,5 +1,8 @@
 package com.jnulocker.auth.adapter.in;
 
+import static com.jnulocker.auth.util.CookieUtil.addCookieFromAuthToken;
+import static com.jnulocker.auth.util.CookieUtil.getCookieValue;
+
 import com.jnulocker.auth.adapter.in.docs.AuthApi;
 import com.jnulocker.auth.application.port.in.LoginCommand;
 import com.jnulocker.auth.application.port.in.ManagerSignupCommand;
@@ -9,7 +12,6 @@ import com.jnulocker.auth.application.port.in.request.LoginRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.response.AuthToken;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -49,17 +51,7 @@ public class AuthController implements AuthApi {
     public ResponseEntity<Void> login(
             @Valid @RequestBody LoginRequest request, HttpServletResponse response) {
         AuthToken authToken = loginCommand.login(request);
-        addCookie(
-                response,
-                "access_token",
-                authToken.accessToken(),
-                Math.toIntExact(authToken.accessTokenExpiresIn()));
-        addCookie(
-                response,
-                "refresh_token",
-                authToken.refreshToken(),
-                Math.toIntExact(authToken.refreshTokenExpiresIn()));
-
+        addCookieFromAuthToken(response, authToken);
         return ResponseEntity.ok().build();
     }
 
@@ -68,40 +60,7 @@ public class AuthController implements AuthApi {
     public ResponseEntity<Void> reissue(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = getCookieValue(request, "refresh_token");
         AuthToken authToken = reissueCommand.reissue(refreshToken);
-        addCookie(
-                response,
-                "access_token",
-                authToken.accessToken(),
-                Math.toIntExact(authToken.accessTokenExpiresIn()));
-        addCookie(
-                response,
-                "refresh_token",
-                authToken.refreshToken(),
-                Math.toIntExact(authToken.refreshTokenExpiresIn()));
+        addCookieFromAuthToken(response, authToken);
         return ResponseEntity.ok().build();
-    }
-
-    private void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(maxAge);
-
-        response.addCookie(cookie);
-    }
-
-    private String getCookieValue(HttpServletRequest request, String name) {
-        Cookie[] cookies = request.getCookies();
-
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (name.equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
-
-        return null;
     }
 }

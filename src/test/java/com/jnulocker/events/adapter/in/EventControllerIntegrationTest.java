@@ -70,8 +70,8 @@ class EventControllerIntegrationTest {
 
     @Autowired private TokenProvider tokenProvider;
 
-    public static String accessToken;
-    public static Long memberId;
+    private static String accessToken;
+    private static Long memberId;
 
     @BeforeEach
     void setUp() {
@@ -117,7 +117,7 @@ class EventControllerIntegrationTest {
 
         // when
         EventCustomPage eventCustomPage =
-                getEvents(port, page, pageSize)
+                getEvents(port, page, pageSize, accessToken)
                         .statusCode(HttpStatus.OK.value())
                         .extract()
                         .as(EventCustomPage.class);
@@ -138,7 +138,7 @@ class EventControllerIntegrationTest {
         return Math.min(remainingItems, pageSize);
     }
 
-    public static ValidatableResponse getEvents(int port, int page, int size) {
+    public static ValidatableResponse getEvents(int port, int page, int size, String accessToken) {
         return given().port(port)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(new Cookie.Builder("access_token", accessToken).build())
@@ -162,7 +162,7 @@ class EventControllerIntegrationTest {
 
         // when
         List<FloorWithLockersResponse> floors =
-                getEventLockers(port, event.getId())
+                getEventLockers(port, event.getId(), accessToken)
                         .statusCode(HttpStatus.OK.value())
                         .extract()
                         .jsonPath()
@@ -194,7 +194,7 @@ class EventControllerIntegrationTest {
 
         // when
         ErrorResponse errorResponse =
-                getEventLockers(port, nonExistentEventId)
+                getEventLockers(port, nonExistentEventId, accessToken)
                         .statusCode(EventErrorCode.EVENT_NOT_FOUND.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -203,7 +203,7 @@ class EventControllerIntegrationTest {
         assertThat(errorResponse.message()).isEqualTo(EventErrorCode.EVENT_NOT_FOUND.getMessage());
     }
 
-    public static ValidatableResponse getEventLockers(int port, Long eventId) {
+    public static ValidatableResponse getEventLockers(int port, Long eventId, String accessToken) {
         return given().port(port)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(new Cookie.Builder("access_token", accessToken).build())
