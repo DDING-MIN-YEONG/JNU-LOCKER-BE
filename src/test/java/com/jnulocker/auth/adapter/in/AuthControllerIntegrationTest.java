@@ -5,27 +5,33 @@ import static auth.application.port.in.request.UserSignupRequestTestDataBuilder.
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import com.jnulocker.auth.adapter.out.TokenRepository;
 import com.jnulocker.auth.application.port.in.request.LoginRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.response.AuthToken;
 import com.jnulocker.auth.exception.AuthErrorCode;
-import com.jnulocker.auth.jwt.TokenProvider;
+import com.jnulocker.auth.jwt.RefreshToken;
 import com.jnulocker.auth.jwt.exception.JwtErrorCode;
 import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.member.adapter.out.MemberRepository;
+import com.jnulocker.member.domain.Member;
 import com.jnulocker.organization.adapter.out.DepartmentRepository;
 import com.jnulocker.organization.adapter.out.OrganizationRepository;
 import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.domain.Organization;
 import com.jnulocker.organization.exception.DepartmentErrorCode;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import io.restassured.RestAssured;
 import io.restassured.response.ValidatableResponse;
+import java.util.Date;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -52,7 +58,10 @@ class AuthControllerIntegrationTest {
 
     @Autowired private DepartmentRepository departmentRepository;
 
-    @Autowired private TokenProvider tokenProvider;
+    @Autowired private TokenRepository tokenRepository;
+
+    @Value("${jwt.secret}")
+    private String secretKey;
 
     @BeforeEach
     void setUp() {
@@ -250,8 +259,10 @@ class AuthControllerIntegrationTest {
 
     @Test
     void 만료된_토큰으로_재발급하면_Token_Expired_에러가_발생한다() {
-        String expiredRefreshToken =
-                "eyJhbGciOiJIUzUxMiJ9.eyJpZCI6MSwiaWF0IjoxNzQ0MzU5MjA2LCJleHAiOjE3NDQzNTkyMDd9.4NG8_xBmEuk2HUGAOsek8_31qzxfL5g4DeanNxJPTm25iVfz1sSDUCe_zPNFthiadg7whhHzLaCm_e-hIsgx-Q";
+        Member member = createTestMember();
+        String expiredRefreshToken = createExpiredRefreshToken(member.getId(), secretKey);
+        RefreshToken refreshToken = new RefreshToken(member.getId(), expiredRefreshToken, -1000L);
+        tokenRepository.save(refreshToken);
 
         // when
         ErrorResponse errorResponse =
@@ -321,5 +332,31 @@ class AuthControllerIntegrationTest {
                 .then()
                 .log()
                 .all();
+    }
+
+    public static String createExpiredRefreshToken(Long userId, String secretKey) {
+        long now = System.currentTimeMillis();
+        Date issuedAt = new Date(now - 2000);
+        Date expiredAt = new Date(now - 1000);
+
+        return Jwts.builder()
+                .claim("id", userId)
+                .setIssuedAt(issuedAt)
+                .setExpiration(expiredAt)
+                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
+                .compact();
+    }
+
+    private Member createTestMember() {
+        Organization organization = OrganizationTestDataBuilder.builder().build();
+        Organization savedOrganization = organizationRepository.save(organization);
+        Department department =
+                DepartmentTestDataBuilder.builder().withOrganization(savedOrganization).build();
+        departmentRepository.save(department);
+
+        Member member =
+                Member.createManager(
+                        "test", "test@example.com", "test12345!", "010-1234-1234", department);
+        return memberRepository.save(member);
     }
 }
