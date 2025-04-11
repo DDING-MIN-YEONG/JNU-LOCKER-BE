@@ -68,6 +68,11 @@ custom:
     access-token-expire-time: ${JWT_ACCESS_TOKEN_EXPIRE_TIME:3600}
     refresh-token-expire-time: ${JWT_REFRESH_TOKEN_EXPIRE_TIME:86400}
 
+  data:
+    redis:
+      host: redis
+      port: 6379
+
 ---
 spring:
   config:
