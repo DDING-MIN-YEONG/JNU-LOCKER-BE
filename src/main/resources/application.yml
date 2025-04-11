@@ -113,9 +113,6 @@ spring:
     init:
       mode: never
 
-jwt:
-  secret: ${JWT_REFRESH_SECRET_KEY:dGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNo}
-
 logging:
   level:
     p6spy: info

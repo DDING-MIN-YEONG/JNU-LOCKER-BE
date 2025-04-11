@@ -17,7 +17,6 @@ import com.jnulocker.member.domain.Member;
 import com.jnulocker.organization.application.port.in.DepartmentQuery;
 import com.jnulocker.organization.domain.Department;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -37,9 +36,6 @@ public class AuthService
     private final TokenProvider tokenProvider;
 
     private static final String GRANT_TYPE = "Bearer";
-
-    @Value("${custom.jwt.access-token-expire-time}")
-    private Long accessTokenExpireTime;
 
     @Override
     @Transactional
@@ -91,8 +87,7 @@ public class AuthService
         Authentication authentication =
                 authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
-        AuthToken authToken = tokenProvider.createAuthToken(authentication, member.getRole());
-        return authToken;
+        return tokenProvider.createAuthTokenByAuthentication(authentication, member.getRole());
     }
 
     @Override
@@ -105,9 +100,7 @@ public class AuthService
         Long memberId = tokenProvider.getUserIdFromRefreshToken(refreshToken);
         Member member = memberQuery.findByIdOrThrow(memberId);
 
-        String newAccessToken = tokenProvider.generateAccessToken(memberId, member.getRole());
-        String newRefreshToken = tokenProvider.generateRefreshToken(memberId);
-        return AuthToken.of(newAccessToken, newRefreshToken, GRANT_TYPE, accessTokenExpireTime);
+        return tokenProvider.createAuthToken(memberId, member.getRole());
     }
 
     private void validateDuplicateEmail(String email) {

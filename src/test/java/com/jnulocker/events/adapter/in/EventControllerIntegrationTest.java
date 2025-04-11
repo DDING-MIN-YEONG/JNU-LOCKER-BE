@@ -21,6 +21,7 @@ import com.jnulocker.organization.adapter.out.OrganizationRepository;
 import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.domain.Organization;
 import io.restassured.RestAssured;
+import io.restassured.http.Cookie;
 import io.restassured.response.ValidatableResponse;
 import java.util.List;
 import java.util.stream.Stream;
@@ -36,11 +37,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import organization.builder.DepartmentTestDataBuilder;
 import organization.builder.OrganizationTestDataBuilder;
@@ -75,7 +74,7 @@ class EventControllerIntegrationTest {
     public static Long memberId;
 
     @BeforeEach
-    void setUp(WebApplicationContext webApplicationContext) {
+    void setUp() {
         RestAssured.port = port;
         clearData();
 
@@ -142,7 +141,7 @@ class EventControllerIntegrationTest {
     public static ValidatableResponse getEvents(int port, int page, int size) {
         return given().port(port)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .cookie(new Cookie.Builder("access_token", accessToken).build())
                 .queryParam("page", page)
                 .queryParam("size", size)
                 .queryParam("direction", "DESC")
@@ -207,7 +206,7 @@ class EventControllerIntegrationTest {
     public static ValidatableResponse getEventLockers(int port, Long eventId) {
         return given().port(port)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .cookie(new Cookie.Builder("access_token", accessToken).build())
                 .when()
                 .get(EVENT_URL + "/{event-id}/lockers", eventId)
                 .then()

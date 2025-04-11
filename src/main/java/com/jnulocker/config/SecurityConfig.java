@@ -42,22 +42,20 @@ public class SecurityConfig {
                                 .requestMatchers( // actuator TODO: 접근 권한 설정 (ADMIN)
                                         actuatorBasePath,
                                         actuatorBasePath + "/health",
-                                        actuatorBasePath + "/prometheus",
-                                        "/v1/organizations",
-                                        "/v1/organizations/*/departments")
+                                        actuatorBasePath + "/prometheus")
                                 .permitAll()
                                 .requestMatchers(
                                         HttpMethod.GET,
                                         "/v1/organizations",
                                         "/v1/organizations/*/departments")
-                                .permitAll()
+                                .permitAll() // 소속대학/학과 조회 API 모든 접근 허용
                                 .requestMatchers("/v1/auth/**")
-                                .permitAll()
+                                .permitAll() // 인증 API 모든 접근 허용
                                 .requestMatchers(
                                         HttpMethod.GET, "/v1/events", "/v1/events/*/lockers")
-                                .hasAuthority("guest")
-                                .requestMatchers(HttpMethod.POST, "/v1/events")
                                 .hasAuthority("manager")
+                                .requestMatchers(HttpMethod.POST, "/v1/events")
+                                .hasAuthority("manager") // 권한이 MANAGER인 유저만 사용 가능
                                 .anyRequest()
                                 .authenticated());
 

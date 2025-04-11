@@ -9,7 +9,6 @@ import com.jnulocker.auth.adapter.out.TokenRepository;
 import com.jnulocker.auth.application.port.in.request.LoginRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
-import com.jnulocker.auth.application.port.in.response.AuthToken;
 import com.jnulocker.auth.exception.AuthErrorCode;
 import com.jnulocker.auth.jwt.RefreshToken;
 import com.jnulocker.auth.jwt.exception.JwtErrorCode;
@@ -24,6 +23,10 @@ import com.jnulocker.organization.exception.DepartmentErrorCode;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import io.restassured.RestAssured;
+import io.restassured.http.Cookie;
+import io.restassured.http.Cookies;
+import io.restassured.response.ExtractableResponse;
+import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import java.util.Date;
 import org.junit.jupiter.api.AfterEach;
@@ -60,7 +63,7 @@ class AuthControllerIntegrationTest {
 
     @Autowired private TokenRepository tokenRepository;
 
-    @Value("${jwt.secret}")
+    @Value("${custom.jwt.refresh-secret-key}")
     private String secretKey;
 
     @BeforeEach
@@ -80,112 +83,81 @@ class AuthControllerIntegrationTest {
         organizationRepository.deleteAll();
     }
 
-    // USER 회원가입 테스트
+    // USER 회원가입 테스트 (변경 없음)
     @Test
     void USER_회원가입을_할_수_있다() {
-        // given
         Department department = setDepartment();
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
-
-        // when
         ValidatableResponse response = signupUser(port, request);
-
-        // then
         response.statusCode(HttpStatus.CREATED.value());
     }
 
     @Test
     void USER_존재하지_않는_학과로_회원가입하면_Department_Not_Found_에러_응답을_받는다() {
-        // given
         Long nonexistentDepartmentId = -1L;
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(nonexistentDepartmentId).build();
-
-        // when
         ErrorResponse errorResponse =
                 signupUser(port, request)
                         .statusCode(
                                 DepartmentErrorCode.DEPARTMENT_NOT_FOUND.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
-
-        // then
         assertThat(errorResponse.message())
                 .isEqualTo(DepartmentErrorCode.DEPARTMENT_NOT_FOUND.getMessage());
     }
 
     @Test
     void USER_동일메일로_회원가입하면_User_Already_Exist_에러_응답을_받는다() {
-        // given
         Department department = setDepartment();
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
-
-        // when
         signupUser(port, request).statusCode(HttpStatus.CREATED.value());
         ErrorResponse errorResponse =
                 signupUser(port, request)
                         .statusCode(AuthErrorCode.USER_ALREADY_EXIST.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
-
-        // then
         assertThat(errorResponse.message())
                 .isEqualTo(AuthErrorCode.USER_ALREADY_EXIST.getMessage());
     }
 
-    // MANAGER 회원가입 테스트
     @Test
     void MANAGER_회원가입을_할_수_있다() {
-        // given
         Department department = setDepartment();
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
-
-        // when
         ValidatableResponse response = signupManager(port, request);
-
-        // then
         response.statusCode(HttpStatus.CREATED.value());
     }
 
     @Test
     void MANAGER_존재하지_않는_학과로_회원가입하면_Department_Not_Found_에러_응답을_받는다() {
-        // given
         Long nonexistentDepartmentId = -1L;
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(nonexistentDepartmentId).build();
-
-        // when
         ErrorResponse errorResponse =
                 signupManager(port, request)
                         .statusCode(
                                 DepartmentErrorCode.DEPARTMENT_NOT_FOUND.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
-
-        // then
         assertThat(errorResponse.message())
                 .isEqualTo(DepartmentErrorCode.DEPARTMENT_NOT_FOUND.getMessage());
     }
 
     @Test
     void MANAGER_동일메일로_회원가입하면_User_Already_Exist_에러_응답을_받는다() {
-        // given
         Department department = setDepartment();
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
-
-        // when
         signupManager(port, request).statusCode(HttpStatus.CREATED.value());
         ErrorResponse errorResponse =
                 signupManager(port, request)
                         .statusCode(AuthErrorCode.USER_ALREADY_EXIST.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
-
-        // then
         assertThat(errorResponse.message())
                 .isEqualTo(AuthErrorCode.USER_ALREADY_EXIST.getMessage());
     }
@@ -202,15 +174,16 @@ class AuthControllerIntegrationTest {
                 new LoginRequest(signupRequest.email(), signupRequest.password());
 
         // when
-        AuthToken authToken =
-                loginUser(port, loginRequest)
-                        .statusCode(HttpStatus.OK.value())
-                        .extract()
-                        .as(AuthToken.class);
+        ExtractableResponse<Response> response =
+                loginUser(port, loginRequest).statusCode(HttpStatus.OK.value()).extract();
 
         // then
-        assertThat(authToken.accessToken()).isNotBlank();
-        assertThat(authToken.refreshToken()).isNotBlank();
+        Cookies cookies = response.detailedCookies();
+        String accessToken = getCookieValue(cookies, "access_token");
+        String refreshToken = getCookieValue(cookies, "refresh_token");
+
+        assertThat(accessToken).isNotBlank();
+        assertThat(refreshToken).isNotBlank();
     }
 
     @Test
@@ -223,21 +196,17 @@ class AuthControllerIntegrationTest {
 
         LoginRequest loginRequest =
                 new LoginRequest(signupRequest.email(), signupRequest.password());
-        AuthToken authToken =
-                loginUser(port, loginRequest)
-                        .statusCode(HttpStatus.OK.value())
-                        .extract()
-                        .as(AuthToken.class);
+        ExtractableResponse<Response> loginResponse =
+                loginUser(port, loginRequest).statusCode(HttpStatus.OK.value()).extract();
+        String refreshToken = getCookieValue(loginResponse.detailedCookies(), "refresh_token");
 
         // when
-        AuthToken reissuedToken =
-                reissueToken(port, authToken.refreshToken())
-                        .statusCode(HttpStatus.OK.value())
-                        .extract()
-                        .as(AuthToken.class);
+        ExtractableResponse<Response> response =
+                reissueToken(port, refreshToken).statusCode(HttpStatus.OK.value()).extract();
 
         // then
-        assertThat(reissuedToken.accessToken()).isNotBlank();
+        String newAccessToken = getCookieValue(response.detailedCookies(), "access_token");
+        assertThat(newAccessToken).isNotBlank();
     }
 
     @Test
@@ -259,6 +228,7 @@ class AuthControllerIntegrationTest {
 
     @Test
     void 만료된_토큰으로_재발급하면_Token_Expired_에러가_발생한다() {
+        // given
         Member member = createTestMember();
         String expiredRefreshToken = createExpiredRefreshToken(member.getId(), secretKey);
         RefreshToken refreshToken = new RefreshToken(member.getId(), expiredRefreshToken, -1000L);
@@ -266,18 +236,12 @@ class AuthControllerIntegrationTest {
 
         // when
         ErrorResponse errorResponse =
-                given().port(port)
-                        .queryParam("refreshToken", expiredRefreshToken)
-                        .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .when()
-                        .post(AUTH_URL + "/reissue")
-                        .then()
+                reissueToken(port, expiredRefreshToken)
                         .statusCode(JwtErrorCode.EXPIRED_TOKEN.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
 
         // then
-
         assertThat(errorResponse.message()).isEqualTo(JwtErrorCode.EXPIRED_TOKEN.getMessage());
     }
 
@@ -295,7 +259,7 @@ class AuthControllerIntegrationTest {
     public static ValidatableResponse reissueToken(int port, String refreshToken) {
         return given().port(port)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .queryParam("refreshToken", refreshToken)
+                .cookie(new Cookie.Builder("refresh_token", refreshToken).build()) // 쿠키로 전송
                 .when()
                 .post(AUTH_URL + "/reissue")
                 .then()
@@ -303,6 +267,11 @@ class AuthControllerIntegrationTest {
                 .all();
     }
 
+    private String getCookieValue(Cookies cookies, String name) {
+        return cookies.getValue(name);
+    }
+
+    // 기존 메서드 (변경 없음)
     Department setDepartment() {
         Organization organization = OrganizationTestDataBuilder.builder().build();
         Organization savedOrganization = organizationRepository.save(organization);

@@ -5,6 +5,7 @@ import com.jnulocker.auth.application.port.in.response.AuthToken;
 import com.jnulocker.auth.jwt.exception.ExpiredTokenException;
 import com.jnulocker.auth.jwt.exception.InvalidAccessTokenException;
 import com.jnulocker.auth.jwt.exception.InvalidRefreshTokenException;
+import com.jnulocker.auth.jwt.exception.MissingTokenException;
 import com.jnulocker.member.domain.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -46,12 +47,28 @@ public class TokenProvider {
         this.tokenRepository = tokenRepository;
     }
 
-    public AuthToken createAuthToken(Authentication authentication, Role role) {
+    public AuthToken createAuthTokenByAuthentication(Authentication authentication, Role role) {
         Long userId = Long.valueOf(authentication.getName());
         String accessToken = generateAccessToken(userId, role);
         String refreshToken = generateRefreshToken(userId);
 
-        return AuthToken.of(accessToken, refreshToken, BEARER_PREFIX, accessTokenExpireTime);
+        return AuthToken.of(
+                accessToken,
+                refreshToken,
+                BEARER_PREFIX,
+                accessTokenExpireTime,
+                refreshTokenExpireTime);
+    }
+
+    public AuthToken createAuthToken(Long memberId, Role role) {
+        String newAccessToken = generateAccessToken(memberId, role);
+        String newRefreshToken = generateRefreshToken(memberId);
+        return AuthToken.of(
+                newAccessToken,
+                newRefreshToken,
+                BEARER_PREFIX,
+                accessTokenExpireTime,
+                refreshTokenExpireTime);
     }
 
     public String generateAccessToken(Long userId, Role role) {
@@ -112,6 +129,13 @@ public class TokenProvider {
     public Long getUserIdFromRefreshToken(String refreshToken) {
         Claims claims = parseClaims(refreshToken, TokenType.REFRESH);
         return claims.get("id", Long.class);
+    }
+
+    public String extractToken(String header) {
+        if (header == null || !header.startsWith(BEARER_PREFIX)) {
+            throw MissingTokenException.EXCEPTION;
+        }
+        return header.substring(BEARER_PREFIX.length());
     }
 
     public boolean existsByUserIdAndRefreshToken(String refreshToken) {
