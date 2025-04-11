@@ -1,24 +1,35 @@
 package com.jnulocker.config;
 
+import com.jnulocker.auth.jwt.JwtFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsUtils;
 
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtFilter jwtFilter;
 
     @Value(("${management.endpoints.web.base-path}"))
     private String actuatorBasePath;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.cors(Customizer.withDefaults()).csrf(AbstractHttpConfigurer::disable);
+        http.cors(Customizer.withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(
+                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.authorizeHttpRequests(
                 requestMatcherRegistry ->
@@ -31,11 +42,27 @@ public class SecurityConfig {
                                 .requestMatchers( // actuator TODO: 접근 권한 설정 (ADMIN)
                                         actuatorBasePath,
                                         actuatorBasePath + "/health",
-                                        actuatorBasePath + "/prometheus")
+                                        actuatorBasePath + "/prometheus",
+                                        "/v1/organizations",
+                                        "/v1/organizations/*/departments")
                                 .permitAll()
+                                .requestMatchers(
+                                        HttpMethod.GET,
+                                        "/v1/organizations",
+                                        "/v1/organizations/*/departments")
+                                .permitAll()
+                                .requestMatchers("/v1/auth/**")
+                                .permitAll()
+                                .requestMatchers(
+                                        HttpMethod.GET, "/v1/events", "/v1/events/*/lockers")
+                                .hasAuthority("MANAGER")
+                                .requestMatchers(HttpMethod.POST, "/v1/events")
+                                .hasAuthority("MANAGER")
                                 .anyRequest()
-                                // TODO: 인증 구현 후 이 부분을 .authenticated()로 되돌릴 것
-                                .permitAll());
+                                .authenticated());
+
+        // JWT 필터 추가
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

@@ -89,11 +89,13 @@ public class TokenProvider {
     }
 
     // 토큰 복호화
-    public Authentication getAuthentication(String accessToken, TokenType tokenType) {
-        Claims claims = parseClaims(accessToken, tokenType);
+    public Authentication getAuthentication(String accessToken) {
+        Claims claims = parseClaims(accessToken, TokenType.ACCESS);
+        String userId = claims.get("id").toString();
+        String role = claims.get("role").toString();
         Set<SimpleGrantedAuthority> authorities =
-                Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
-        UserDetails principal = new User(claims.getSubject(), "", authorities);
+                Collections.singleton(new SimpleGrantedAuthority(role));
+        UserDetails principal = new User(userId, "", authorities);
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 
