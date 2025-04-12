@@ -11,6 +11,7 @@ import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.exception.AuthErrorCode;
 import com.jnulocker.auth.jwt.RefreshToken;
+import com.jnulocker.auth.jwt.TokenProvider;
 import com.jnulocker.auth.jwt.exception.JwtErrorCode;
 import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.member.adapter.out.MemberRepository;
@@ -63,8 +64,13 @@ class AuthControllerIntegrationTest {
 
     @Autowired private TokenRepository tokenRepository;
 
+    @Autowired private TokenProvider tokenProvider;
+
+    @Value("${custom.jwt.access-secret-key}")
+    String accessSecretKey;
+
     @Value("${custom.jwt.refresh-secret-key}")
-    private String secretKey;
+    private String refreshSecretKey;
 
     @BeforeEach
     void setUp() {
@@ -227,10 +233,10 @@ class AuthControllerIntegrationTest {
     }
 
     @Test
-    void 만료된_토큰으로_재발급하면_Token_Expired_에러가_발생한다() {
+    void 만료된_리프레시토큰으로_재발급하면_Token_Expired_에러가_발생한다() {
         // given
         Member member = createTestMember();
-        String expiredRefreshToken = createExpiredRefreshToken(member.getId(), secretKey);
+        String expiredRefreshToken = createExpiredRefreshToken(member.getId(), refreshSecretKey);
         RefreshToken refreshToken = new RefreshToken(member.getId(), expiredRefreshToken, -1000L);
         tokenRepository.save(refreshToken);
 
@@ -243,6 +249,52 @@ class AuthControllerIntegrationTest {
 
         // then
         assertThat(errorResponse.message()).isEqualTo(JwtErrorCode.EXPIRED_TOKEN.getMessage());
+    }
+
+    @Test
+    void 만료된_액세스토큰으로_요청하면_Token_Expired_에러가_발생한다() {
+        // given
+        Member member = createTestMember();
+        String expiredAccessToken = createExpiredAccessToken(member.getId(), accessSecretKey);
+
+        // when
+        ErrorResponse errorResponse =
+                given().port(port)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .cookie(new Cookie.Builder("access_token", expiredAccessToken).build())
+                        .when()
+                        .get("/v1/events")
+                        .then()
+                        .statusCode(JwtErrorCode.EXPIRED_TOKEN.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message()).isEqualTo(JwtErrorCode.EXPIRED_TOKEN.getMessage());
+        assertThat(errorResponse.code()).isEqualTo(JwtErrorCode.EXPIRED_TOKEN.getCode());
+    }
+
+    @Test
+    void 액세스토큰이_null이면_InvalidAccessTokenException이_발생한다() {
+        // given
+        String nullAccessToken = null;
+
+        // when
+        ErrorResponse errorResponse =
+                given().port(port)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .cookie(new Cookie.Builder("access_token", nullAccessToken).build())
+                        .when()
+                        .get("/v1/events")
+                        .then()
+                        .statusCode(JwtErrorCode.INVALID_ACCESS_TOKEN.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(JwtErrorCode.INVALID_ACCESS_TOKEN.getMessage());
+        assertThat(errorResponse.code()).isEqualTo(JwtErrorCode.INVALID_ACCESS_TOKEN.getCode());
     }
 
     public static ValidatableResponse loginUser(int port, LoginRequest request) {
@@ -301,6 +353,19 @@ class AuthControllerIntegrationTest {
                 .then()
                 .log()
                 .all();
+    }
+
+    public static String createExpiredAccessToken(Long userId, String secretKey) {
+        long now = System.currentTimeMillis();
+        Date issuedAt = new Date(now - 2000);
+        Date expiredAt = new Date(now - 1000);
+
+        return Jwts.builder()
+                .claim("id", userId)
+                .setIssuedAt(issuedAt)
+                .setExpiration(expiredAt)
+                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
+                .compact();
     }
 
     public static String createExpiredRefreshToken(Long userId, String secretKey) {
