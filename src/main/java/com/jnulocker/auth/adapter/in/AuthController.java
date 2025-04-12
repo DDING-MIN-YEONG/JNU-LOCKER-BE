@@ -1,7 +1,7 @@
 package com.jnulocker.auth.adapter.in;
 
 import static com.jnulocker.auth.util.CookieUtil.addCookieFromAuthToken;
-import static com.jnulocker.auth.util.CookieUtil.getCookieValue;
+import static com.jnulocker.auth.util.CookieUtil.getCookieValueFromRefreshToken;
 
 import com.jnulocker.auth.adapter.in.docs.AuthApi;
 import com.jnulocker.auth.application.port.in.LoginCommand;
@@ -58,7 +58,7 @@ public class AuthController implements AuthApi {
     @Override
     @PostMapping("/reissue")
     public ResponseEntity<Void> reissue(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = getCookieValue(request, "refresh_token");
+        String refreshToken = getCookieValueFromRefreshToken(request);
         AuthToken authToken = reissueCommand.reissue(refreshToken);
         addCookieFromAuthToken(response, authToken);
         return ResponseEntity.ok().build();

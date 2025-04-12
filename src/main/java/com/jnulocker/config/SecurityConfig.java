@@ -1,6 +1,7 @@
 package com.jnulocker.config;
 
 import com.jnulocker.auth.jwt.JwtFilter;
+import com.jnulocker.auth.security.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,12 +25,17 @@ public class SecurityConfig {
     @Value(("${management.endpoints.web.base-path}"))
     private String actuatorBasePath;
 
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(
-                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(
+                        exception ->
+                                exception.authenticationEntryPoint(customAuthenticationEntryPoint));
 
         http.authorizeHttpRequests(
                 requestMatcherRegistry ->
@@ -55,7 +61,9 @@ public class SecurityConfig {
                                         HttpMethod.GET, "/v1/events", "/v1/events/*/lockers")
                                 .hasAuthority("guest")
                                 .requestMatchers(HttpMethod.POST, "/v1/events")
-                                .hasAuthority("guest") // 권한이 MANAGER인 유저만 사용 가능 // TODO: 추후 manager로 변경, 토큰의 role과 db의 role과 다른 문제 고려
+                                .hasAuthority(
+                                        "guest") // 권한이 MANAGER인 유저만 사용 가능 // TODO: 추후 manager로 변경,
+                                // 토큰의 role과 db의 role과 다른 문제 고려
                                 .anyRequest()
                                 .authenticated());
 
