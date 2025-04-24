@@ -65,7 +65,7 @@ custom:
   jwt:
     access-secret-key: ${JWT_ACCESS_SECRET_KEY:dGVzdC1zZWNyZXQta2V5LXRlc3Qtc2VjcmV0LWtleS10ZXN0LXNlY3JldC1rZXktdGVzdC1zZWNyZXQta2V5}
     refresh-secret-key: ${JWT_REFRESH_SECRET_KEY:dGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNo}
-    access-token-expire-time: ${JWT_ACCESS_TOKEN_EXPIRE_TIME:1}
+    access-token-expire-time: ${JWT_ACCESS_TOKEN_EXPIRE_TIME:3600}
     refresh-token-expire-time: ${JWT_REFRESH_TOKEN_EXPIRE_TIME:86400}
 
   data:
