@@ -297,6 +297,50 @@ class AuthControllerIntegrationTest {
         assertThat(errorResponse.code()).isEqualTo(JwtErrorCode.INVALID_ACCESS_TOKEN.getCode());
     }
 
+    @Test
+    void 올바르지_않은_이메일로_로그인하면_인증에_실패한다() {
+        // given
+        Department department = setDepartment();
+        UserSignupRequest signupRequest =
+                userSignupRequestBuilder().withDepartmentId(department.getId()).build();
+        signupUser(port, signupRequest);
+
+        LoginRequest loginRequest = new LoginRequest("12345@jnu.ac.kr", signupRequest.password());
+
+        // when
+        ErrorResponse errorResponse =
+                loginUser(port, loginRequest)
+                        .statusCode(AuthErrorCode.FAIL_AUTHENTICATION.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(AuthErrorCode.FAIL_AUTHENTICATION.getMessage());
+    }
+
+    @Test
+    void 올바르지_않은_비밀번호로_로그인하면_인증에_실패한다() {
+        // given
+        Department department = setDepartment();
+        UserSignupRequest signupRequest =
+                userSignupRequestBuilder().withDepartmentId(department.getId()).build();
+        signupUser(port, signupRequest);
+
+        LoginRequest loginRequest = new LoginRequest(signupRequest.email(), "wrong12345!");
+
+        // when
+        ErrorResponse errorResponse =
+                loginUser(port, loginRequest)
+                        .statusCode(AuthErrorCode.FAIL_AUTHENTICATION.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(AuthErrorCode.FAIL_AUTHENTICATION.getMessage());
+    }
+
     public static ValidatableResponse loginUser(int port, LoginRequest request) {
         return given().port(port)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
