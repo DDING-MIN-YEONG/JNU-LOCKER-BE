@@ -56,8 +56,9 @@ public class JwtFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         } catch (BusinessException e) {
+            log.error("JWT 처리 중 예외 발생: {}", e.getMessage());
             request.setAttribute("exception", e);
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+            response.sendError(e.getErrorCode().getHttpStatus().value(), e.getMessage());
         }
     }
 }
