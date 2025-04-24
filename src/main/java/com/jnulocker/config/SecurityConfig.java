@@ -1,6 +1,7 @@
 package com.jnulocker.config;
 
 import com.jnulocker.auth.jwt.JwtFilter;
+import com.jnulocker.auth.security.CustomAccessDeniedHandler;
 import com.jnulocker.auth.security.CustomAuthenticationEntryPoint;
 import com.jnulocker.auth.security.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,8 @@ public class SecurityConfig {
     private String actuatorBasePath;
 
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-    private final CustomUserDetailsService userDetailsService;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -39,7 +41,9 @@ public class SecurityConfig {
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(
                         exception ->
-                                exception.authenticationEntryPoint(customAuthenticationEntryPoint));
+                                exception
+                                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                                        .accessDeniedHandler(customAccessDeniedHandler));
 
         http.authorizeHttpRequests(
                 requestMatcherRegistry ->
@@ -82,7 +86,7 @@ public class SecurityConfig {
         AuthenticationManagerBuilder authManagerBuilder =
                 http.getSharedObject(AuthenticationManagerBuilder.class);
         authManagerBuilder
-                .userDetailsService(userDetailsService)
+                .userDetailsService(customUserDetailsService)
                 .passwordEncoder(bCryptPasswordEncoder());
         return authManagerBuilder.build();
     }
