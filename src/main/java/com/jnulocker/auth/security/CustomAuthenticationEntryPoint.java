@@ -11,8 +11,13 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
+/*
+인증을 처리함 - 로그인, 회원가입
+ */
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
+    private static final String MEDIA_TYPE = "application/json; charset=UTF-8";
 
     @Override
     public void commence(
@@ -27,7 +32,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             ErrorResponse errorResponse = new ErrorResponse(errorCode);
 
             response.setStatus(errorCode.getHttpStatus().value());
-            response.setContentType("application/json; charset=UTF-8");
+            response.setContentType(MEDIA_TYPE);
 
             String jsonResponse = new ObjectMapper().writeValueAsString(errorResponse);
             response.getWriter().write(jsonResponse);
