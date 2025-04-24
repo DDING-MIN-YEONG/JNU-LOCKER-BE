@@ -2,12 +2,15 @@ package com.jnulocker.config;
 
 import com.jnulocker.auth.jwt.JwtFilter;
 import com.jnulocker.auth.security.CustomAuthenticationEntryPoint;
+import com.jnulocker.auth.security.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -26,6 +29,7 @@ public class SecurityConfig {
     private String actuatorBasePath;
 
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomUserDetailsService userDetailsService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -71,6 +75,16 @@ public class SecurityConfig {
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authManagerBuilder =
+                http.getSharedObject(AuthenticationManagerBuilder.class);
+        authManagerBuilder
+                .userDetailsService(userDetailsService)
+                .passwordEncoder(bCryptPasswordEncoder());
+        return authManagerBuilder.build();
     }
 
     @Bean
