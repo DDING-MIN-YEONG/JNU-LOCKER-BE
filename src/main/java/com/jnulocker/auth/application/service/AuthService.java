@@ -8,6 +8,7 @@ import com.jnulocker.auth.application.port.in.request.LoginRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.response.AuthToken;
+import com.jnulocker.auth.exception.FailAuthenticationException;
 import com.jnulocker.auth.exception.UserAlreadyExistException;
 import com.jnulocker.auth.jwt.TokenProvider;
 import com.jnulocker.auth.jwt.exception.InvalidRefreshTokenException;
@@ -17,9 +18,10 @@ import com.jnulocker.member.domain.Member;
 import com.jnulocker.organization.application.port.in.DepartmentQuery;
 import com.jnulocker.organization.domain.Department;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,14 +30,12 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthService
         implements UserSignupCommand, ManagerSignupCommand, LoginCommand, ReissueCommand {
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final MemberQuery memberQuery;
     private final MemberCommand memberCommand;
     private final DepartmentQuery departmentQuery;
     private final TokenProvider tokenProvider;
-
-    private static final String GRANT_TYPE = "Bearer";
 
     @Override
     @Transactional
@@ -80,12 +80,19 @@ public class AuthService
     @Override
     @Transactional
     public AuthToken login(LoginRequest request) {
-        Member member = memberQuery.findByEmailOrThrow(request.email());
+        // AuthenticationManager를 통해 인증 수행
+        Authentication authentication;
+        try {
+            authentication =
+                    authenticationManager.authenticate(
+                            new UsernamePasswordAuthenticationToken(
+                                    request.email(), request.password()));
+        } catch (AuthenticationException e) {
+            throw FailAuthenticationException.EXCEPTION;
+        }
 
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(request.email(), request.password());
-        Authentication authentication =
-                authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        // 인증 성공 시 사용자 정보 가져오기
+        Member member = memberQuery.findByEmailOrThrow(request.email());
 
         return tokenProvider.createAuthTokenByAuthentication(authentication, member.getRole());
     }
