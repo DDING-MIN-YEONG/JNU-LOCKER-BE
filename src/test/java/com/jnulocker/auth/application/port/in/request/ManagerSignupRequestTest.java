@@ -11,6 +11,8 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @DisplayName("MANAGER 회원가입 요청 본문 검증 테스트")
 class ManagerSignupRequestTest {
@@ -88,12 +90,24 @@ class ManagerSignupRequestTest {
         assertThat(violations).anyMatch(v -> v.getMessage().equals("비밀번호는 필수입니다."));
     }
 
-    @Test
-    void 비밀번호가_형식에_맞지_않으면_검증에_실패한다() {
+    @ParameterizedTest
+    @ValueSource(
+            strings = {
+                "password1", // 특수문자 없음
+                "123456789", // 영문 및 특수문자 없음
+                "abcdefghi", // 숫자 및 특수문자 없음
+                "abc12345", // 특수문자 없음, 9자 미만
+                "abc!@#", // 숫자 없음, 9자 미만
+            })
+    void 비밀번호가_형식에_맞지_않으면_검증에_실패한다(String invalidPassword) {
+        // given
         ManagerSignupRequest request =
-                managerSignupRequestBuilder().withPassword("password1").build();
+                managerSignupRequestBuilder().withPassword(invalidPassword).build();
 
+        // when
         Set<ConstraintViolation<ManagerSignupRequest>> violations = validator.validate(request);
+
+        // then
         assertThat(violations)
                 .anyMatch(
                         v ->
