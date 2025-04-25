@@ -53,12 +53,18 @@ public class JwtFilter extends OncePerRequestFilter {
             if (tokenProvider.validateAccessToken(accessToken)) {
                 Authentication authentication = tokenProvider.getAuthentication(accessToken);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                throw InvalidAccessTokenException.EXCEPTION;
             }
             filterChain.doFilter(request, response);
         } catch (BusinessException e) {
             log.error("JWT 처리 중 예외 발생: {}", e.getMessage());
             request.setAttribute("exception", e);
             response.sendError(e.getErrorCode().getHttpStatus().value(), e.getMessage());
+        } catch (Exception e) {
+            log.error("JWT 처리 중 예기치 않은 예외 발생: {}", e.getMessage());
+            request.setAttribute("exception", e);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "인증 처리 중 오류가 발생했습니다.");
         }
     }
 }
