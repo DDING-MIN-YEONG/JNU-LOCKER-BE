@@ -29,7 +29,6 @@ services:
     ports:
       - "6379:6379"
     environment: # Redis 계정 추가
-      REDIS_HOST: ${REDIS_HOST}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
