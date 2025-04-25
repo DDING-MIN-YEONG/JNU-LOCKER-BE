@@ -4,6 +4,7 @@ import com.jnulocker.auth.application.port.out.MemberRecordPort;
 import com.jnulocker.common.annotation.PersistenceAdapter;
 import com.jnulocker.member.application.port.out.MemberLoadPort;
 import com.jnulocker.member.domain.Member;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
 @PersistenceAdapter
@@ -19,5 +20,15 @@ public class MemberPersistenceAdapter implements MemberLoadPort, MemberRecordPor
     @Override
     public void save(Member member) {
         memberRepository.save(member);
+    }
+
+    @Override
+    public Optional<Member> findByEmail(String email) {
+        return memberRepository.findByEmail(email);
+    }
+
+    @Override
+    public Optional<Member> findById(Long id) {
+        return memberRepository.findById(id);
     }
 }

@@ -1,23 +1,49 @@
 package com.jnulocker.config;
 
+import com.jnulocker.auth.jwt.JwtFilter;
+import com.jnulocker.auth.security.CustomAccessDeniedHandler;
+import com.jnulocker.auth.security.CustomAuthenticationEntryPoint;
+import com.jnulocker.auth.security.CustomUserDetailsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsUtils;
 
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtFilter jwtFilter;
 
     @Value(("${management.endpoints.web.base-path}"))
     private String actuatorBasePath;
 
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomUserDetailsService customUserDetailsService;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable);
+        http.cors(Customizer.withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(
+                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(
+                        exception ->
+                                exception
+                                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                                        .accessDeniedHandler(customAccessDeniedHandler));
 
         http.authorizeHttpRequests(
                 requestMatcherRegistry ->
@@ -32,11 +58,37 @@ public class SecurityConfig {
                                         actuatorBasePath + "/health",
                                         actuatorBasePath + "/prometheus")
                                 .permitAll()
+                                .requestMatchers(
+                                        HttpMethod.GET,
+                                        "/v1/organizations",
+                                        "/v1/organizations/*/departments")
+                                .permitAll() // 소속대학/학과 조회 API 모든 접근 허용
+                                .requestMatchers("/v1/auth/**")
+                                .permitAll() // 인증 API 모든 접근 허용
+                                .requestMatchers(
+                                        HttpMethod.GET, "/v1/events", "/v1/events/*/lockers")
+                                .hasAuthority("guest")
+                                .requestMatchers(HttpMethod.POST, "/v1/events")
+                                .hasAuthority(
+                                        "guest") // 권한이 MANAGER인 유저만 사용 가능 // TODO: 추후 manager로 변경,
+                                // 토큰의 role과 db의 role과 다른 문제 고려
                                 .anyRequest()
-                                // TODO: 인증 구현 후 이 부분을 .authenticated()로 되돌릴 것
-                                .permitAll());
+                                .authenticated());
+
+        // JWT 필터 추가
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authManagerBuilder =
+                http.getSharedObject(AuthenticationManagerBuilder.class);
+        authManagerBuilder
+                .userDetailsService(customUserDetailsService)
+                .passwordEncoder(bCryptPasswordEncoder());
+        return authManagerBuilder.build();
     }
 
     @Bean

@@ -12,7 +12,8 @@ public record ManagerSignupRequest(
                 @NotBlank(message = "이메일은 필수입니다.")
                 @Email(message = "올바른 이메일 형식이 아닙니다.")
                 String email,
-        @NotBlank(message = "비밀번호는 필수입니다.")
+        @Schema(description = "비밀번호", example = "abcde12345!")
+                @NotBlank(message = "비밀번호는 필수입니다.")
                 @Pattern(
                         regexp =
                                 "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{9,}$",
@@ -20,6 +21,7 @@ public record ManagerSignupRequest(
                 String password,
         @Schema(description = "소속학과", example = "128") @NotNull(message = "소속은 필수입니다.")
                 Long departmentId,
-        @NotBlank(message = "전화번호는 필수입니다.")
+        @Schema(description = "전화번호", example = "010-1234-1234")
+                @NotBlank(message = "전화번호는 필수입니다.")
                 @Pattern(regexp = "^010-\\d{4}-\\d{4}$", message = "전화번호 형식이 올바르지 않습니다.")
                 String phoneNumber) {}
