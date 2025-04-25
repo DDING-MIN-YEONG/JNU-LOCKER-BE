@@ -1,6 +1,7 @@
 package com.jnulocker.auth.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jnulocker.auth.exception.AuthErrorCode;
 import com.jnulocker.common.exception.BusinessException;
 import com.jnulocker.common.exception.ErrorCode;
 import com.jnulocker.common.exception.ErrorResponse;
@@ -29,6 +30,15 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
         if (cause instanceof BusinessException ex) {
             ErrorCode errorCode = ex.getErrorCode();
+            ErrorResponse errorResponse = new ErrorResponse(errorCode);
+
+            response.setStatus(errorCode.getHttpStatus().value());
+            response.setContentType(MEDIA_TYPE);
+
+            String jsonResponse = new ObjectMapper().writeValueAsString(errorResponse);
+            response.getWriter().write(jsonResponse);
+        } else {
+            ErrorCode errorCode = AuthErrorCode.FAIL_AUTHENTICATION;
             ErrorResponse errorResponse = new ErrorResponse(errorCode);
 
             response.setStatus(errorCode.getHttpStatus().value());

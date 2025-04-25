@@ -8,7 +8,6 @@ import com.jnulocker.auth.application.port.in.request.LoginRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.response.AuthToken;
-import com.jnulocker.auth.exception.FailAuthenticationException;
 import com.jnulocker.auth.exception.UserAlreadyExistException;
 import com.jnulocker.auth.jwt.TokenProvider;
 import com.jnulocker.auth.jwt.exception.InvalidRefreshTokenException;
@@ -21,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,18 +78,11 @@ public class AuthService
     @Override
     @Transactional
     public AuthToken login(LoginRequest request) {
-        // AuthenticationManager를 통해 인증 수행
-        Authentication authentication;
-        try {
-            authentication =
-                    authenticationManager.authenticate(
-                            new UsernamePasswordAuthenticationToken(
-                                    request.email(), request.password()));
-        } catch (AuthenticationException e) {
-            throw FailAuthenticationException.EXCEPTION;
-        }
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                request.email(), request.password()));
 
-        // 인증 성공 시 사용자 정보 가져오기
         Member member = memberQuery.findByEmailOrThrow(request.email());
 
         return tokenProvider.createAuthTokenByAuthentication(authentication, member.getRole());
@@ -100,7 +91,12 @@ public class AuthService
     @Override
     @Transactional
     public AuthToken reissue(String refreshToken) {
-        if (!tokenProvider.existsByRefreshToken(refreshToken)) {
+        if (refreshToken == null) {
+            throw InvalidRefreshTokenException.EXCEPTION;
+        }
+
+        if (!tokenProvider.existsByRefreshToken(refreshToken)
+                || !tokenProvider.validateRefreshToken(refreshToken)) {
             throw InvalidRefreshTokenException.EXCEPTION;
         }
 
