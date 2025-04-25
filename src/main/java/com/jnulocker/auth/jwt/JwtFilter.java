@@ -29,6 +29,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private final TokenProvider tokenProvider;
 
     private final List<String> excludeUrls = Arrays.asList("/v1/auth/**");
+    private static final String MEDIA_TYPE = "application/json; charset=UTF-8";
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
@@ -75,7 +76,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private void setErrorResponse(HttpServletResponse response, ErrorCode errorCode)
             throws IOException {
         response.setStatus(errorCode.getHttpStatus().value());
-        response.setContentType("application/json;charset=UTF-8");
+        response.setContentType(MEDIA_TYPE);
 
         ErrorResponse errorResponse = new ErrorResponse(errorCode);
         String jsonResponse = new ObjectMapper().writeValueAsString(errorResponse);
