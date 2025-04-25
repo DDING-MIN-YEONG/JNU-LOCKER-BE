@@ -169,7 +169,7 @@ class AuthControllerIntegrationTest {
     }
 
     @Test
-    void USER_로그인_성공시_토큰을_반환한다() {
+    void 로그인_성공시_토큰을_반환한다() {
         // given
         Department department = setDepartment();
         UserSignupRequest signupRequest =
