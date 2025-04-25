@@ -20,30 +20,26 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
+
     private final TokenProvider tokenProvider;
 
-    private final List<String> excludeUrls = Arrays.asList("/v1/auth/**");
+    private static final List<String> EXCLUDE_URLS = Arrays.asList("/v1/auth/**");
     private static final String MEDIA_TYPE = "application/json; charset=UTF-8";
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
 
-        return excludeUrls.stream()
-                .anyMatch(
-                        pattern -> {
-                            if (pattern.endsWith("/**")) {
-                                String basePath = pattern.substring(0, pattern.length() - 3);
-                                return path.startsWith(basePath);
-                            }
-                            return path.equals(pattern);
-                        });
+        return EXCLUDE_URLS.stream()
+                .anyMatch(pattern -> pathMatcher.match(pattern, path)); // AntPathMatcher를 이용한 매칭
     }
 
     @Override
