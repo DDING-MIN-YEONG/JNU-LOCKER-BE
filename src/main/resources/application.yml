@@ -21,6 +21,11 @@ spring:
     init:
       mode: always
 
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+
 management:
   endpoints:
     web:
@@ -68,10 +73,7 @@ custom:
     access-token-expire-time: ${JWT_ACCESS_TOKEN_EXPIRE_TIME:3600}
     refresh-token-expire-time: ${JWT_REFRESH_TOKEN_EXPIRE_TIME:86400}
 
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
+
 
 ---
 spring:
