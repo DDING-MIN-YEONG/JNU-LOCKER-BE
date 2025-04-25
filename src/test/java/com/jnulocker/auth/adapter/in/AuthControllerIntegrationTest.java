@@ -16,6 +16,7 @@ import com.jnulocker.auth.jwt.exception.JwtErrorCode;
 import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.member.adapter.out.MemberRepository;
 import com.jnulocker.member.domain.Member;
+import com.jnulocker.member.exception.MemberErrorCode;
 import com.jnulocker.organization.adapter.out.DepartmentRepository;
 import com.jnulocker.organization.adapter.out.OrganizationRepository;
 import com.jnulocker.organization.domain.Department;
@@ -305,18 +306,18 @@ class AuthControllerIntegrationTest {
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
         signupUser(port, signupRequest);
 
-        LoginRequest loginRequest = new LoginRequest("12345@jnu.ac.kr", signupRequest.password());
+        LoginRequest loginRequest = new LoginRequest("123456@jnu.ac.kr", signupRequest.password());
 
         // when
         ErrorResponse errorResponse =
                 loginUser(port, loginRequest)
-                        .statusCode(AuthErrorCode.FAIL_AUTHENTICATION.getHttpStatus().value())
+                        .statusCode(MemberErrorCode.MEMBER_NOT_FOUND.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
 
         // then
         assertThat(errorResponse.message())
-                .isEqualTo(AuthErrorCode.FAIL_AUTHENTICATION.getMessage());
+                .isEqualTo(MemberErrorCode.MEMBER_NOT_FOUND.getMessage());
     }
 
     @Test
