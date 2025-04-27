@@ -1,5 +1,6 @@
 package com.jnulocker.events.application.service;
 
+import com.jnulocker.auth.security.SecurityUtils;
 import com.jnulocker.events.application.port.in.EventCommand;
 import com.jnulocker.events.application.port.in.request.CreateEventRequest;
 import com.jnulocker.events.application.port.in.request.FloorInfo;
@@ -11,6 +12,7 @@ import com.jnulocker.events.domain.EventParticipation;
 import com.jnulocker.events.domain.Floor;
 import com.jnulocker.events.domain.Locker;
 import com.jnulocker.events.event.LockerEventCreatedEvent;
+import com.jnulocker.member.application.port.in.MemberQuery;
 import com.jnulocker.organization.application.port.in.DepartmentQuery;
 import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.exception.DepartmentNotFoundException;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Service;
 public class EventCommandService implements EventCommand {
 
     private final ApplicationEventPublisher eventPublisher;
+    private final MemberQuery memberQuery;
     private final DepartmentQuery departmentQuery;
     private final EventRecordPort eventRecordPort;
 
@@ -53,9 +56,8 @@ public class EventCommandService implements EventCommand {
 
     private Event createAndSaveEvent(CreateEventRequest request) {
         // 이벤트를 주최하는 department 조회
-        // TODO: 회원 정보를 통해 MANAGER 소속의 departmentId를 가져오는 로직으로 변경
-        Department organizerDepartment =
-                departmentQuery.getDepartmentByIdOrThrow(request.departmentId());
+        Long memberId = SecurityUtils.getCurrentMemberId();
+        Department organizerDepartment = memberQuery.findByIdOrThrow(memberId).getDepartment();
 
         // 이벤트 생성 및 저장
         return eventRecordPort.saveEvent(
