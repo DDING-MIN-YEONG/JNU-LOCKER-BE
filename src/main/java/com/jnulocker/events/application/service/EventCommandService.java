@@ -3,6 +3,8 @@ package com.jnulocker.events.application.service;
 import com.jnulocker.events.application.port.in.EventCommand;
 import com.jnulocker.events.application.port.in.request.CreateEventRequest;
 import com.jnulocker.events.application.port.in.request.FloorInfo;
+import com.jnulocker.events.application.port.in.request.LockerRange;
+import com.jnulocker.events.application.port.in.request.PrefixInfo;
 import com.jnulocker.events.application.port.out.EventRecordPort;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.EventParticipation;
@@ -90,9 +92,13 @@ public class EventCommandService implements EventCommand {
 
     private List<Locker> createLockersForFloor(FloorInfo floorInfo, Floor floor) {
         List<Locker> lockers = new ArrayList<>();
-        for (int i = floorInfo.lockerStartNumber(); i <= floorInfo.lockerEndNumber(); i++) {
-            String code = generateLockerCode(floorInfo.lockerPrefix(), i);
-            lockers.add(Locker.create(floor, code, true));
+        for (PrefixInfo prefixInfo : floorInfo.prefixes()) {
+            for (LockerRange range : prefixInfo.ranges()) {
+                for (int i = range.lockerStartNumber(); i <= range.lockerEndNumber(); i++) {
+                    String code = generateLockerCode(prefixInfo.lockerPrefix(), i);
+                    lockers.add(Locker.create(floor, code, true));
+                }
+            }
         }
         return lockers;
     }
