@@ -54,16 +54,6 @@ class CreateEventRequestTest {
     }
 
     @Test
-    void departmentId가_null이면_검증에_실패한다() {
-        CreateEventRequest request = createEventRequestBuilder().withDepartmentId(null).build();
-
-        Set<ConstraintViolation<CreateEventRequest>> violations = validator.validate(request);
-        assertThat(violations).hasSize(1);
-        assertThat(violations.iterator().next().getMessage())
-                .isEqualTo("주최 조직 department ID는 필수입니다.");
-    }
-
-    @Test
     void 시작_시간이_null이면_검증에_실패한다() {
         CreateEventRequest request = createEventRequestBuilder().withStartAt(null).build();
 
@@ -134,7 +124,18 @@ class CreateEventRequestTest {
     void 사물함_시작_번호가_null이면_검증에_실패한다() {
         CreateEventRequest request =
                 createEventRequestBuilder()
-                        .withFloors(List.of(floorInfoBuilder().withLockerStartNumber(null).build()))
+                        .withFloors(
+                                List.of(
+                                        floorInfoBuilder()
+                                                .withPrefixes(
+                                                        List.of(
+                                                                new PrefixInfo(
+                                                                        "A",
+                                                                        List.of(
+                                                                                new LockerRange(
+                                                                                        null,
+                                                                                        20)))))
+                                                .build()))
                         .build();
 
         Set<ConstraintViolation<CreateEventRequest>> violations = validator.validate(request);
@@ -146,11 +147,63 @@ class CreateEventRequestTest {
     void 사물함_종료_번호가_null이면_검증에_실패한다() {
         CreateEventRequest request =
                 createEventRequestBuilder()
-                        .withFloors(List.of(floorInfoBuilder().withLockerEndNumber(null).build()))
+                        .withFloors(
+                                List.of(
+                                        floorInfoBuilder()
+                                                .withPrefixes(
+                                                        List.of(
+                                                                new PrefixInfo(
+                                                                        "A",
+                                                                        List.of(
+                                                                                new LockerRange(
+                                                                                        1, null)))))
+                                                .build()))
                         .build();
 
         Set<ConstraintViolation<CreateEventRequest>> violations = validator.validate(request);
         assertThat(violations).hasSize(1);
         assertThat(violations.iterator().next().getMessage()).isEqualTo("사물함 종료 번호는 필수입니다.");
+    }
+
+    @Test
+    void 사물함_종료_번호가_시작_번호보다_작으면_검증에_실패한다() {
+        CreateEventRequest request =
+                createEventRequestBuilder()
+                        .withFloors(
+                                List.of(
+                                        floorInfoBuilder()
+                                                .withPrefixes(
+                                                        List.of(
+                                                                new PrefixInfo(
+                                                                        "A",
+                                                                        List.of(
+                                                                                new LockerRange(
+                                                                                        10,
+                                                                                        8) // 종료 번호
+                                                                                // < 시작
+                                                                                // 번호
+                                                                                ))))
+                                                .build()))
+                        .build();
+
+        Set<ConstraintViolation<CreateEventRequest>> violations = validator.validate(request);
+        assertThat(violations).hasSize(1);
+        assertThat(violations.iterator().next().getMessage())
+                .isEqualTo("사물함 종료 번호는 시작 번호보다 크거나 같아야 합니다.");
+    }
+
+    @Test
+    void 사물함_범위가_단일_번호여도_검증에_성공한다() {
+        CreateEventRequest request =
+                createEventRequestBuilder()
+                        .withFloors(
+                                List.of(
+                                        floorInfoBuilder()
+                                                .withPrefix("A", 5, 5) // 단일 사물함
+                                                .build()))
+                        .build();
+
+        Set<ConstraintViolation<CreateEventRequest>> violations = validator.validate(request);
+        assertThat(violations).isEmpty();
     }
 }

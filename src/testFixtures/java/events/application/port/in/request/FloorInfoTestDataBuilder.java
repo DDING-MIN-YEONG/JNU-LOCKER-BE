@@ -1,14 +1,19 @@
 package events.application.port.in.request;
 
 import com.jnulocker.events.application.port.in.request.FloorInfo;
+import com.jnulocker.events.application.port.in.request.LockerRange;
+import com.jnulocker.events.application.port.in.request.PrefixInfo;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FloorInfoTestDataBuilder {
     private Integer floorNumber = 1;
-    private String lockerPrefix = "A";
-    private Integer lockerStartNumber = 1;
-    private Integer lockerEndNumber = 20;
+    private List<PrefixInfo> prefixes = new ArrayList<>();
 
-    private FloorInfoTestDataBuilder() {}
+    private FloorInfoTestDataBuilder() {
+        // 기본적으로 하나의 PrefixInfo와 LockerRange 추가
+        prefixes.add(new PrefixInfo("A", List.of(new LockerRange(1, 20))));
+    }
 
     public static FloorInfoTestDataBuilder floorInfoBuilder() {
         return new FloorInfoTestDataBuilder();
@@ -19,22 +24,35 @@ public class FloorInfoTestDataBuilder {
         return this;
     }
 
-    public FloorInfoTestDataBuilder withLockerPrefix(String lockerPrefix) {
-        this.lockerPrefix = lockerPrefix;
+    public FloorInfoTestDataBuilder withPrefix(String lockerPrefix, List<LockerRange> ranges) {
+        this.prefixes.add(new PrefixInfo(lockerPrefix, ranges));
         return this;
     }
 
-    public FloorInfoTestDataBuilder withLockerStartNumber(Integer lockerStartNumber) {
-        this.lockerStartNumber = lockerStartNumber;
+    public FloorInfoTestDataBuilder withPrefix(
+            String lockerPrefix, Integer startNumber, Integer endNumber) {
+        this.prefixes.add(
+                new PrefixInfo(lockerPrefix, List.of(new LockerRange(startNumber, endNumber))));
         return this;
     }
 
-    public FloorInfoTestDataBuilder withLockerEndNumber(Integer lockerEndNumber) {
-        this.lockerEndNumber = lockerEndNumber;
+    public FloorInfoTestDataBuilder withPrefixes(List<PrefixInfo> prefixes) {
+        this.prefixes = new ArrayList<>(prefixes);
+        return this;
+    }
+
+    public FloorInfoTestDataBuilder addRangeToLastPrefix(Integer startNumber, Integer endNumber) {
+        if (prefixes.isEmpty()) {
+            prefixes.add(new PrefixInfo("A", new ArrayList<>()));
+        }
+        PrefixInfo lastPrefix = prefixes.get(prefixes.size() - 1);
+        List<LockerRange> updatedRanges = new ArrayList<>(lastPrefix.ranges());
+        updatedRanges.add(new LockerRange(startNumber, endNumber));
+        prefixes.set(prefixes.size() - 1, new PrefixInfo(lastPrefix.lockerPrefix(), updatedRanges));
         return this;
     }
 
     public FloorInfo build() {
-        return new FloorInfo(floorNumber, lockerPrefix, lockerStartNumber, lockerEndNumber);
+        return new FloorInfo(floorNumber, prefixes);
     }
 }
