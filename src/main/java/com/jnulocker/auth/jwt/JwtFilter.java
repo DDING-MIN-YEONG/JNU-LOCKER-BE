@@ -30,7 +30,14 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final TokenProvider tokenProvider;
 
-    private static final List<String> EXCLUDE_URLS = Arrays.asList("/v1/auth/**");
+    private static final List<String> EXCLUDE_URLS =
+            Arrays.asList(
+                    "/v1/auth/**",
+                    "/swagger-ui/**",
+                    "/swagger-resources/**",
+                    "/v3/api-docs/**",
+                    "/api-docs/**");
+
     private static final String MEDIA_TYPE = "application/json; charset=UTF-8";
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
