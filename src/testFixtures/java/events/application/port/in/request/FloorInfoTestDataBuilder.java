@@ -41,17 +41,6 @@ public class FloorInfoTestDataBuilder {
         return this;
     }
 
-    public FloorInfoTestDataBuilder addRangeToLastPrefix(Integer startNumber, Integer endNumber) {
-        if (prefixes.isEmpty()) {
-            prefixes.add(new PrefixInfo("A", new ArrayList<>()));
-        }
-        PrefixInfo lastPrefix = prefixes.get(prefixes.size() - 1);
-        List<LockerRange> updatedRanges = new ArrayList<>(lastPrefix.ranges());
-        updatedRanges.add(new LockerRange(startNumber, endNumber));
-        prefixes.set(prefixes.size() - 1, new PrefixInfo(lastPrefix.lockerPrefix(), updatedRanges));
-        return this;
-    }
-
     public FloorInfo build() {
         return new FloorInfo(floorNumber, prefixes);
     }
