@@ -8,15 +8,18 @@ import com.jnulocker.auth.jwt.exception.InvalidAccessTokenException;
 import com.jnulocker.common.exception.BusinessException;
 import com.jnulocker.common.exception.ErrorCode;
 import com.jnulocker.common.exception.ErrorResponse;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -28,15 +31,26 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
+    @Value(("${management.endpoints.web.base-path}"))
+    private String actuatorBasePath;
+
     private final TokenProvider tokenProvider;
 
-    private static final List<String> EXCLUDE_URLS =
-            Arrays.asList(
-                    "/v1/auth/**",
-                    "/swagger-ui/**",
-                    "/swagger-resources/**",
-                    "/v3/api-docs/**",
-                    "/api-docs/**");
+    private static List<String> EXCLUDE_URLS = new ArrayList<>();
+
+    @PostConstruct
+    public void init() {
+        EXCLUDE_URLS =
+                Arrays.asList(
+                        "/v1/auth/**",
+                        "/swagger-ui/**",
+                        "/swagger-resources/**",
+                        "/v3/api-docs/**",
+                        "/api-docs/**",
+                        actuatorBasePath,
+                        actuatorBasePath + "/health",
+                        actuatorBasePath + "/prometheus");
+    }
 
     private static final String MEDIA_TYPE = "application/json; charset=UTF-8";
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
