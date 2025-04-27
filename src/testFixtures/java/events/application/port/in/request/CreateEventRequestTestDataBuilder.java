@@ -7,7 +7,6 @@ import java.util.List;
 
 public class CreateEventRequestTestDataBuilder {
     private String title = "전자컴퓨터공학부 2025-2 사물함 신청";
-    private Long departmentId = 1L;
     private LocalDateTime startAt = LocalDateTime.of(2025, 8, 1, 15, 0);
     private LocalDateTime endAt = LocalDateTime.of(2025, 8, 1, 16, 0);
     private List<Long> participationDepartmentIds = List.of(1L, 2L, 3L);
@@ -21,11 +20,6 @@ public class CreateEventRequestTestDataBuilder {
 
     public CreateEventRequestTestDataBuilder withTitle(String title) {
         this.title = title;
-        return this;
-    }
-
-    public CreateEventRequestTestDataBuilder withDepartmentId(Long departmentId) {
-        this.departmentId = departmentId;
         return this;
     }
 
@@ -51,7 +45,6 @@ public class CreateEventRequestTestDataBuilder {
     }
 
     public CreateEventRequest build() {
-        return new CreateEventRequest(
-                title, departmentId, startAt, endAt, participationDepartmentIds, floors);
+        return new CreateEventRequest(title, startAt, endAt, participationDepartmentIds, floors);
     }
 }

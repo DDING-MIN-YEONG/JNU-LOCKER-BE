@@ -50,12 +50,12 @@ public class CookieUtil {
     public static void addCookieFromAuthToken(HttpServletResponse response, AuthToken authToken) {
         addCookie(
                 response,
-                "access_token",
+                ACCESS_TOKEN,
                 authToken.accessToken(),
                 Math.toIntExact(authToken.accessTokenExpiresIn()));
         addCookie(
                 response,
-                "refresh_token",
+                REFRESH_TOKEN,
                 authToken.refreshToken(),
                 Math.toIntExact(authToken.refreshTokenExpiresIn()));
     }

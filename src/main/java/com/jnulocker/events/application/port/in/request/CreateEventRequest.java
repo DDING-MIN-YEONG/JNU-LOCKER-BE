@@ -14,9 +14,6 @@ public record CreateEventRequest(
         @Schema(description = "이벤트 제목", example = "전자컴퓨터공학부 2025-2 사물함 신청")
                 @NotBlank(message = "이벤트 제목은 필수입니다.")
                 String title,
-        @Schema(description = "주최 조직의 department ID", example = "1")
-                @NotNull(message = "주최 조직 department ID는 필수입니다.")
-                Long departmentId,
         @Schema(description = "이벤트 시작 시간", example = "2025-08-01T15:00:00")
                 @NotNull(message = "이벤트 시작 시간은 필수입니다.")
                 @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
