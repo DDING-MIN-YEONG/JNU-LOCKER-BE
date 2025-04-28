@@ -1,6 +1,8 @@
 package com.jnulocker.events.domain;
 
 import com.jnulocker.common.persistence.BaseEntity;
+import com.jnulocker.events.exception.EventNotOpenException;
+import com.jnulocker.member.domain.Role;
 import com.jnulocker.organization.domain.Department;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -54,6 +56,39 @@ public class Event extends BaseEntity {
                 .eventStatus(EventStatus.READY)
                 .publish(false)
                 .build();
+    }
+
+    public static Event create(
+            String title,
+            Department department,
+            LocalDateTime startAt,
+            LocalDateTime endAt,
+            EventStatus eventStatus,
+            Boolean publish) {
+        return Event.builder()
+                .title(title)
+                .department(department)
+                .eventSchedule(EventSchedule.of(startAt, endAt))
+                .eventStatus(eventStatus)
+                .publish(publish)
+                .build();
+    }
+
+    public void validateRegistration(Role role) {
+        validatePublishStatus(role);
+        validateEventStatus();
+    }
+
+    private void validatePublishStatus(Role role) {
+        if (Boolean.FALSE.equals(publish) && role != Role.MANAGER) {
+            throw EventNotOpenException.EXCEPTION;
+        }
+    }
+
+    private void validateEventStatus() {
+        if (eventStatus != EventStatus.OPEN) {
+            throw EventNotOpenException.EXCEPTION;
+        }
     }
 
     public void openEvent() {

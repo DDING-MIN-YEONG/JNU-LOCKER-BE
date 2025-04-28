@@ -1,11 +1,13 @@
-package organization.builder;
+package organization.domain;
+
+import static organization.domain.OrganizationTestDataBuilder.*;
 
 import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.domain.Organization;
 
 public class DepartmentTestDataBuilder {
 
-    private Organization organization = OrganizationTestDataBuilder.builder().build();
+    private Organization organization = organizationBuilder().build();
     private String name = "테스트 학과명";
     private String nickname = "테스트 학과 학생회 별칭";
     private String email = "test@test.com";
@@ -13,7 +15,7 @@ public class DepartmentTestDataBuilder {
 
     private DepartmentTestDataBuilder() {}
 
-    public static DepartmentTestDataBuilder builder() {
+    public static DepartmentTestDataBuilder departmentBuilder() {
         return new DepartmentTestDataBuilder();
     }
 

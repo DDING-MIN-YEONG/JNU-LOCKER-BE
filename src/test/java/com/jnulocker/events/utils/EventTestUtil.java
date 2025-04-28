@@ -1,22 +1,24 @@
 package com.jnulocker.events.utils;
 
+import static events.domain.EventTestDataBuilder.*;
+import static organization.domain.DepartmentTestDataBuilder.*;
+import static organization.domain.OrganizationTestDataBuilder.*;
+
 import com.jnulocker.events.adapter.out.EventRepository;
 import com.jnulocker.events.adapter.out.FloorRepository;
 import com.jnulocker.events.adapter.out.LockerRepository;
 import com.jnulocker.events.domain.Event;
+import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.domain.Floor;
 import com.jnulocker.events.domain.Locker;
 import com.jnulocker.organization.adapter.out.DepartmentRepository;
 import com.jnulocker.organization.adapter.out.OrganizationRepository;
 import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.domain.Organization;
-import events.builder.EventTestDataBuilder;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import organization.builder.DepartmentTestDataBuilder;
-import organization.builder.OrganizationTestDataBuilder;
 
 @Component
 public class EventTestUtil {
@@ -31,18 +33,23 @@ public class EventTestUtil {
 
     @Autowired private LockerRepository lockerRepository;
 
-    public Event createEventWithFloorAndLockers(List<Integer> lockersPerFloor) {
+    public Event createEventWithFloorAndLockers(
+            List<Integer> lockersPerFloor, EventStatus eventStatus, boolean publish) {
         // 조직 생성 및 저장
-        Organization organization = OrganizationTestDataBuilder.builder().build();
+        Organization organization = organizationBuilder().build();
         Organization savedOrganization = organizationRepository.save(organization);
 
         // 학과 생성 및 저장
-        Department department =
-                DepartmentTestDataBuilder.builder().withOrganization(savedOrganization).build();
+        Department department = departmentBuilder().withOrganization(savedOrganization).build();
         Department savedDepartment = departmentRepository.save(department);
 
         // 이벤트 생성 및 저장
-        Event event = EventTestDataBuilder.builder().withDepartment(savedDepartment).build();
+        Event event =
+                eventBuilder()
+                        .withDepartment(savedDepartment)
+                        .withEventStatus(eventStatus)
+                        .withPublish(publish)
+                        .build();
         Event savedEvent = eventRepository.save(event);
 
         // 층 생성 및 저장

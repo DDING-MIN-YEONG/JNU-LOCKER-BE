@@ -1,4 +1,4 @@
-package organization.builder;
+package organization.domain;
 
 import com.jnulocker.organization.domain.Organization;
 import com.jnulocker.organization.domain.OrganizationType;
@@ -10,7 +10,7 @@ public class OrganizationTestDataBuilder {
 
     private OrganizationTestDataBuilder() {}
 
-    public static OrganizationTestDataBuilder builder() {
+    public static OrganizationTestDataBuilder organizationBuilder() {
         return new OrganizationTestDataBuilder();
     }
 

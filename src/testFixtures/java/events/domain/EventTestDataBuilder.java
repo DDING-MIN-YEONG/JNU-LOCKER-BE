@@ -1,20 +1,24 @@
-package events.builder;
+package events.domain;
+
+import static organization.domain.DepartmentTestDataBuilder.*;
 
 import com.jnulocker.events.domain.Event;
+import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.organization.domain.Department;
 import java.time.LocalDateTime;
-import organization.builder.DepartmentTestDataBuilder;
 
 public class EventTestDataBuilder {
 
     private String title = "테스트 이벤트";
-    private Department department = DepartmentTestDataBuilder.builder().build();
+    private Department department = departmentBuilder().build();
     private LocalDateTime startAt = LocalDateTime.now();
     private LocalDateTime endAt = LocalDateTime.now().plusHours(1);
+    private EventStatus eventStatus = EventStatus.READY;
+    private Boolean publish = false;
 
     private EventTestDataBuilder() {}
 
-    public static EventTestDataBuilder builder() {
+    public static EventTestDataBuilder eventBuilder() {
         return new EventTestDataBuilder();
     }
 
@@ -38,7 +42,17 @@ public class EventTestDataBuilder {
         return this;
     }
 
+    public EventTestDataBuilder withEventStatus(EventStatus eventStatus) {
+        this.eventStatus = eventStatus;
+        return this;
+    }
+
+    public EventTestDataBuilder withPublish(Boolean publish) {
+        this.publish = publish;
+        return this;
+    }
+
     public Event build() {
-        return Event.create(title, department, startAt, endAt);
+        return Event.create(title, department, startAt, endAt, eventStatus, publish);
     }
 }

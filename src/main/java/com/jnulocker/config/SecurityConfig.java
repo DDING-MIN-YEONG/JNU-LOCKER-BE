@@ -67,7 +67,7 @@ public class SecurityConfig {
                                 .permitAll() // 인증 API 모든 접근 허용
                                 .requestMatchers(
                                         HttpMethod.GET, "/v1/events", "/v1/events/*/lockers")
-                                .hasAuthority("guest")
+                                .authenticated()
                                 .requestMatchers(HttpMethod.POST, "/v1/events")
                                 .hasAuthority(
                                         "guest") // 권한이 MANAGER인 유저만 사용 가능 // TODO: 추후 manager로 변경,

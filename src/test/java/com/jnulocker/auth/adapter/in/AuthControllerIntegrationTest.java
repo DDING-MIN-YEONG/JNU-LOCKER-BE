@@ -4,6 +4,8 @@ import static auth.application.port.in.request.ManagerSignupRequestTestDataBuild
 import static auth.application.port.in.request.UserSignupRequestTestDataBuilder.userSignupRequestBuilder;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static organization.domain.DepartmentTestDataBuilder.*;
+import static organization.domain.OrganizationTestDataBuilder.*;
 
 import com.jnulocker.auth.adapter.out.TokenRepository;
 import com.jnulocker.auth.application.port.in.request.LoginRequest;
@@ -11,12 +13,12 @@ import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.exception.AuthErrorCode;
 import com.jnulocker.auth.jwt.RefreshToken;
-import com.jnulocker.auth.jwt.TokenProvider;
 import com.jnulocker.auth.jwt.exception.JwtErrorCode;
 import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.member.adapter.out.MemberRepository;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.exception.MemberErrorCode;
+import com.jnulocker.member.utils.MemberTestUtil;
 import com.jnulocker.organization.adapter.out.DepartmentRepository;
 import com.jnulocker.organization.adapter.out.OrganizationRepository;
 import com.jnulocker.organization.domain.Department;
@@ -44,16 +46,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import organization.builder.DepartmentTestDataBuilder;
-import organization.builder.OrganizationTestDataBuilder;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ActiveProfiles("test")
-@DisplayName("인증인가 통합 테스트")
+@DisplayName("인증 통합 테스트")
 class AuthControllerIntegrationTest {
 
     private static final String AUTH_URL = "/v1/auth";
+    private static final String ACCESS_TOKEN = "access_token";
+    private static final String REFRESH_TOKEN = "refresh_token";
 
     @LocalServerPort private int port;
 
@@ -65,7 +67,7 @@ class AuthControllerIntegrationTest {
 
     @Autowired private TokenRepository tokenRepository;
 
-    @Autowired private TokenProvider tokenProvider;
+    @Autowired private MemberTestUtil memberTestUtil;
 
     @Value("${custom.jwt.access-secret-key}")
     String accessSecretKey;
@@ -96,7 +98,7 @@ class AuthControllerIntegrationTest {
         Department department = setDepartment();
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
-        ValidatableResponse response = signupUser(port, request);
+        ValidatableResponse response = signupUser(request);
         response.statusCode(HttpStatus.CREATED.value());
     }
 
@@ -106,7 +108,7 @@ class AuthControllerIntegrationTest {
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(nonexistentDepartmentId).build();
         ErrorResponse errorResponse =
-                signupUser(port, request)
+                signupUser(request)
                         .statusCode(
                                 DepartmentErrorCode.DEPARTMENT_NOT_FOUND.getHttpStatus().value())
                         .extract()
@@ -120,9 +122,9 @@ class AuthControllerIntegrationTest {
         Department department = setDepartment();
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
-        signupUser(port, request).statusCode(HttpStatus.CREATED.value());
+        signupUser(request).statusCode(HttpStatus.CREATED.value());
         ErrorResponse errorResponse =
-                signupUser(port, request)
+                signupUser(request)
                         .statusCode(AuthErrorCode.USER_ALREADY_EXIST.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -135,7 +137,7 @@ class AuthControllerIntegrationTest {
         Department department = setDepartment();
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
-        ValidatableResponse response = signupManager(port, request);
+        ValidatableResponse response = signupManager(request);
         response.statusCode(HttpStatus.CREATED.value());
     }
 
@@ -145,7 +147,7 @@ class AuthControllerIntegrationTest {
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(nonexistentDepartmentId).build();
         ErrorResponse errorResponse =
-                signupManager(port, request)
+                signupManager(request)
                         .statusCode(
                                 DepartmentErrorCode.DEPARTMENT_NOT_FOUND.getHttpStatus().value())
                         .extract()
@@ -159,9 +161,9 @@ class AuthControllerIntegrationTest {
         Department department = setDepartment();
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
-        signupManager(port, request).statusCode(HttpStatus.CREATED.value());
+        signupManager(request).statusCode(HttpStatus.CREATED.value());
         ErrorResponse errorResponse =
-                signupManager(port, request)
+                signupManager(request)
                         .statusCode(AuthErrorCode.USER_ALREADY_EXIST.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -175,19 +177,19 @@ class AuthControllerIntegrationTest {
         Department department = setDepartment();
         UserSignupRequest signupRequest =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
-        signupUser(port, signupRequest);
+        signupUser(signupRequest);
 
         LoginRequest loginRequest =
                 new LoginRequest(signupRequest.email(), signupRequest.password());
 
         // when
         ExtractableResponse<Response> response =
-                loginUser(port, loginRequest).statusCode(HttpStatus.OK.value()).extract();
+                loginUser(loginRequest).statusCode(HttpStatus.OK.value()).extract();
 
         // then
         Cookies cookies = response.detailedCookies();
-        String accessToken = getCookieValue(cookies, "access_token");
-        String refreshToken = getCookieValue(cookies, "refresh_token");
+        String accessToken = getCookieValue(cookies, ACCESS_TOKEN);
+        String refreshToken = getCookieValue(cookies, REFRESH_TOKEN);
 
         assertThat(accessToken).isNotBlank();
         assertThat(refreshToken).isNotBlank();
@@ -199,20 +201,20 @@ class AuthControllerIntegrationTest {
         Department department = setDepartment();
         UserSignupRequest signupRequest =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
-        signupUser(port, signupRequest);
+        signupUser(signupRequest);
 
         LoginRequest loginRequest =
                 new LoginRequest(signupRequest.email(), signupRequest.password());
         ExtractableResponse<Response> loginResponse =
-                loginUser(port, loginRequest).statusCode(HttpStatus.OK.value()).extract();
-        String refreshToken = getCookieValue(loginResponse.detailedCookies(), "refresh_token");
+                loginUser(loginRequest).statusCode(HttpStatus.OK.value()).extract();
+        String refreshToken = getCookieValue(loginResponse.detailedCookies(), REFRESH_TOKEN);
 
         // when
         ExtractableResponse<Response> response =
-                reissueToken(port, refreshToken).statusCode(HttpStatus.OK.value()).extract();
+                reissueToken(refreshToken).statusCode(HttpStatus.OK.value()).extract();
 
         // then
-        String newAccessToken = getCookieValue(response.detailedCookies(), "access_token");
+        String newAccessToken = getCookieValue(response.detailedCookies(), ACCESS_TOKEN);
         assertThat(newAccessToken).isNotBlank();
     }
 
@@ -223,7 +225,7 @@ class AuthControllerIntegrationTest {
 
         // when
         ErrorResponse errorResponse =
-                reissueToken(port, invalidRefreshToken)
+                reissueToken(invalidRefreshToken)
                         .statusCode(JwtErrorCode.INVALID_REFRESH_TOKEN.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -236,14 +238,14 @@ class AuthControllerIntegrationTest {
     @Test
     void 만료된_리프레시토큰으로_재발급하면_Token_Expired_에러가_발생한다() {
         // given
-        Member member = createTestMember();
-        String expiredRefreshToken = createExpiredRefreshToken(member.getId(), refreshSecretKey);
+        Member member = memberTestUtil.createManager();
+        String expiredRefreshToken = createExpiredToken(member.getId(), refreshSecretKey);
         RefreshToken refreshToken = new RefreshToken(member.getId(), expiredRefreshToken, -1000L);
         tokenRepository.save(refreshToken);
 
         // when
         ErrorResponse errorResponse =
-                reissueToken(port, expiredRefreshToken)
+                reissueToken(expiredRefreshToken)
                         .statusCode(JwtErrorCode.EXPIRED_TOKEN.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -255,14 +257,13 @@ class AuthControllerIntegrationTest {
     @Test
     void 만료된_액세스토큰으로_요청하면_Token_Expired_에러가_발생한다() {
         // given
-        Member member = createTestMember();
-        String expiredAccessToken = createExpiredAccessToken(member.getId(), accessSecretKey);
+        Member member = memberTestUtil.createManager();
+        String expiredAccessToken = createExpiredToken(member.getId(), accessSecretKey);
 
         // when
         ErrorResponse errorResponse =
-                given().port(port)
-                        .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .cookie(new Cookie.Builder("access_token", expiredAccessToken).build())
+                given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .cookie(new Cookie.Builder(ACCESS_TOKEN, expiredAccessToken).build())
                         .when()
                         .get("/v1/events")
                         .then()
@@ -282,9 +283,8 @@ class AuthControllerIntegrationTest {
 
         // when
         ErrorResponse errorResponse =
-                given().port(port)
-                        .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .cookie(new Cookie.Builder("access_token", nullAccessToken).build())
+                given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .cookie(new Cookie.Builder(ACCESS_TOKEN, nullAccessToken).build())
                         .when()
                         .get("/v1/events")
                         .then()
@@ -304,13 +304,13 @@ class AuthControllerIntegrationTest {
         Department department = setDepartment();
         UserSignupRequest signupRequest =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
-        signupUser(port, signupRequest);
+        signupUser(signupRequest);
 
         LoginRequest loginRequest = new LoginRequest("123456@jnu.ac.kr", signupRequest.password());
 
         // when
         ErrorResponse errorResponse =
-                loginUser(port, loginRequest)
+                loginUser(loginRequest)
                         .statusCode(MemberErrorCode.MEMBER_NOT_FOUND.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -326,13 +326,13 @@ class AuthControllerIntegrationTest {
         Department department = setDepartment();
         UserSignupRequest signupRequest =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
-        signupUser(port, signupRequest);
+        signupUser(signupRequest);
 
         LoginRequest loginRequest = new LoginRequest(signupRequest.email(), "wrong12345!");
 
         // when
         ErrorResponse errorResponse =
-                loginUser(port, loginRequest)
+                loginUser(loginRequest)
                         .statusCode(AuthErrorCode.FAIL_AUTHENTICATION.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -342,9 +342,8 @@ class AuthControllerIntegrationTest {
                 .isEqualTo(AuthErrorCode.FAIL_AUTHENTICATION.getMessage());
     }
 
-    public static ValidatableResponse loginUser(int port, LoginRequest request) {
-        return given().port(port)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
+    public static ValidatableResponse loginUser(LoginRequest request) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
                 .post(AUTH_URL + "/login")
@@ -353,10 +352,9 @@ class AuthControllerIntegrationTest {
                 .all();
     }
 
-    public static ValidatableResponse reissueToken(int port, String refreshToken) {
-        return given().port(port)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .cookie(new Cookie.Builder("refresh_token", refreshToken).build()) // 쿠키로 전송
+    public static ValidatableResponse reissueToken(String refreshToken) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(REFRESH_TOKEN, refreshToken).build()) // 쿠키로 전송
                 .when()
                 .post(AUTH_URL + "/reissue")
                 .then()
@@ -370,17 +368,15 @@ class AuthControllerIntegrationTest {
 
     // 기존 메서드 (변경 없음)
     Department setDepartment() {
-        Organization organization = OrganizationTestDataBuilder.builder().build();
+        Organization organization = organizationBuilder().build();
         Organization savedOrganization = organizationRepository.save(organization);
-        Department department =
-                DepartmentTestDataBuilder.builder().withOrganization(savedOrganization).build();
+        Department department = departmentBuilder().withOrganization(savedOrganization).build();
         departmentRepository.save(department);
         return department;
     }
 
-    public static ValidatableResponse signupUser(int port, UserSignupRequest request) {
-        return given().port(port)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
+    public static ValidatableResponse signupUser(UserSignupRequest request) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
                 .post(AUTH_URL + "/users/signup")
@@ -389,9 +385,8 @@ class AuthControllerIntegrationTest {
                 .all();
     }
 
-    public static ValidatableResponse signupManager(int port, ManagerSignupRequest request) {
-        return given().port(port)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
+    public static ValidatableResponse signupManager(ManagerSignupRequest request) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
                 .post(AUTH_URL + "/managers/signup")
@@ -400,42 +395,16 @@ class AuthControllerIntegrationTest {
                 .all();
     }
 
-    public static String createExpiredAccessToken(Long userId, String secretKey) {
+    public static String createExpiredToken(Long userId, String secretKey) {
         long now = System.currentTimeMillis();
         Date issuedAt = new Date(now - 2000);
         Date expiredAt = new Date(now - 1000);
 
         return Jwts.builder()
                 .claim("id", userId)
-                .setIssuedAt(issuedAt)
-                .setExpiration(expiredAt)
+                .issuedAt(issuedAt)
+                .expiration(expiredAt)
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
-    }
-
-    public static String createExpiredRefreshToken(Long userId, String secretKey) {
-        long now = System.currentTimeMillis();
-        Date issuedAt = new Date(now - 2000);
-        Date expiredAt = new Date(now - 1000);
-
-        return Jwts.builder()
-                .claim("id", userId)
-                .setIssuedAt(issuedAt)
-                .setExpiration(expiredAt)
-                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
-                .compact();
-    }
-
-    private Member createTestMember() {
-        Organization organization = OrganizationTestDataBuilder.builder().build();
-        Organization savedOrganization = organizationRepository.save(organization);
-        Department department =
-                DepartmentTestDataBuilder.builder().withOrganization(savedOrganization).build();
-        departmentRepository.save(department);
-
-        Member member =
-                Member.createManager(
-                        "test", "test@example.com", "test12345!", "010-1234-1234", department);
-        return memberRepository.save(member);
     }
 }

@@ -11,15 +11,15 @@ import com.jnulocker.events.adapter.out.LockerRepository;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import com.jnulocker.events.domain.Event;
+import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.exception.EventErrorCode;
 import com.jnulocker.events.utils.EventTestUtil;
 import com.jnulocker.member.adapter.out.MemberRepository;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
+import com.jnulocker.member.utils.MemberTestUtil;
 import com.jnulocker.organization.adapter.out.DepartmentRepository;
 import com.jnulocker.organization.adapter.out.OrganizationRepository;
-import com.jnulocker.organization.domain.Department;
-import com.jnulocker.organization.domain.Organization;
 import io.restassured.RestAssured;
 import io.restassured.http.Cookie;
 import io.restassured.response.ValidatableResponse;
@@ -41,16 +41,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import organization.builder.DepartmentTestDataBuilder;
-import organization.builder.OrganizationTestDataBuilder;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ActiveProfiles("test")
 @DisplayName("이벤트 컨트롤러 통합 테스트")
-class EventControllerIntegrationTest {
+public class EventControllerIntegrationTest {
 
     private static final String EVENT_URL = "/v1/events";
+    private static final String ACCESS_TOKEN = "access_token";
 
     @LocalServerPort private int port;
 
@@ -70,8 +69,9 @@ class EventControllerIntegrationTest {
 
     @Autowired private TokenProvider tokenProvider;
 
+    @Autowired private MemberTestUtil memberTestUtil;
+
     private static String accessToken;
-    private static Long memberId;
 
     @BeforeEach
     void setUp() {
@@ -79,11 +79,10 @@ class EventControllerIntegrationTest {
         clearData();
 
         // 테스트 사용자 생성
-        Member member = createTestMember();
-        memberId = member.getId();
+        Member member = memberTestUtil.createManager();
 
         // 토큰 생성
-        accessToken = tokenProvider.generateAccessToken(memberId, Role.GUEST);
+        accessToken = tokenProvider.generateAccessToken(member.getId(), Role.GUEST);
     }
 
     @AfterEach
@@ -112,12 +111,12 @@ class EventControllerIntegrationTest {
     void 이벤트_목록을_조회할_수_있다(int createCount, int pageSize, int page, boolean expectedLast) {
         // given
         for (int i = 0; i < createCount; i++) {
-            eventTestUtil.createEventWithFloorAndLockers(List.of(1));
+            eventTestUtil.createEventWithFloorAndLockers(List.of(1), EventStatus.OPEN, true);
         }
 
         // when
         EventCustomPage eventCustomPage =
-                getEvents(port, page, pageSize, accessToken)
+                getEvents(page, pageSize, accessToken)
                         .statusCode(HttpStatus.OK.value())
                         .extract()
                         .as(EventCustomPage.class);
@@ -138,10 +137,9 @@ class EventControllerIntegrationTest {
         return Math.min(remainingItems, pageSize);
     }
 
-    public static ValidatableResponse getEvents(int port, int page, int size, String accessToken) {
-        return given().port(port)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .cookie(new Cookie.Builder("access_token", accessToken).build())
+    public static ValidatableResponse getEvents(int page, int size, String accessToken) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .queryParam("page", page)
                 .queryParam("size", size)
                 .queryParam("direction", "DESC")
@@ -158,11 +156,13 @@ class EventControllerIntegrationTest {
     void 이벤트에_해당하는_층과_사물함_목록을_조회할_수_있다(List<Integer> lockersPerFloor) {
         // given
         // 이벤트 데이터 생성: 층별 사물함 수를 파라미터로 받아 생성
-        Event event = eventTestUtil.createEventWithFloorAndLockers(lockersPerFloor);
+        Event event =
+                eventTestUtil.createEventWithFloorAndLockers(
+                        lockersPerFloor, EventStatus.OPEN, true);
 
         // when
         List<FloorWithLockersResponse> floors =
-                getEventLockers(port, event.getId(), accessToken)
+                getEventLockers(event.getId(), accessToken)
                         .statusCode(HttpStatus.OK.value())
                         .extract()
                         .jsonPath()
@@ -194,7 +194,7 @@ class EventControllerIntegrationTest {
 
         // when
         ErrorResponse errorResponse =
-                getEventLockers(port, nonExistentEventId, accessToken)
+                getEventLockers(nonExistentEventId, accessToken)
                         .statusCode(EventErrorCode.EVENT_NOT_FOUND.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -203,27 +203,13 @@ class EventControllerIntegrationTest {
         assertThat(errorResponse.message()).isEqualTo(EventErrorCode.EVENT_NOT_FOUND.getMessage());
     }
 
-    public static ValidatableResponse getEventLockers(int port, Long eventId, String accessToken) {
-        return given().port(port)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .cookie(new Cookie.Builder("access_token", accessToken).build())
+    public static ValidatableResponse getEventLockers(Long eventId, String accessToken) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .when()
                 .get(EVENT_URL + "/{event-id}/lockers", eventId)
                 .then()
                 .log()
                 .all();
-    }
-
-    private Member createTestMember() {
-        Organization organization = OrganizationTestDataBuilder.builder().build();
-        Organization savedOrganization = organizationRepository.save(organization);
-        Department department =
-                DepartmentTestDataBuilder.builder().withOrganization(savedOrganization).build();
-        departmentRepository.save(department);
-
-        Member member =
-                Member.createManager(
-                        "test", "test@example.com", "test12345!", "010-1234-1234", department);
-        return memberRepository.save(member);
     }
 }

@@ -19,10 +19,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@Tag(name = "사물함 신청 이벤트", description = "사물함 신청 이벤트 관련 API")
+@Tag(name = "이벤트", description = "이벤트 관련 API")
 public interface EventApi {
 
-    @Operation(summary = "사물함 신청 이벤트 목록 조회", description = "사물함 신청 이벤트 목록을 조회합니다. 페이지네이션이 지원됩니다.")
+    @Operation(summary = "이벤트 목록 조회", description = "이벤트 목록을 조회합니다. 페이지네이션이 지원됩니다.")
     @ApiResponse(
             responseCode = "200",
             description = "이벤트 목록 조회 성공",
@@ -35,12 +35,12 @@ public interface EventApi {
     @ApiExceptionExamples(CreateEventExceptionDocs.class)
     @Operation(
             summary = "이벤트 생성",
-            description = "새로운 사물함 신청 이벤트를 생성합니다. 이벤트 상태는 기본적으로 READY, 게시 상태는 false로 설정됩니다.")
+            description = "새로운 이벤트를 생성합니다. 이벤트 상태는 기본적으로 READY, 게시 상태는 false로 설정됩니다.")
     @ApiResponse(responseCode = "201", description = "이벤트 생성 성공")
     ResponseEntity<Void> createEvent(@Valid @RequestBody CreateEventRequest request);
 
     @ApiExceptionExamples(GetLockerExceptionDocs.class)
-    @Operation(summary = "사물함 목록 조회", description = "사물함 신청 이벤트에 대한 사물함 목록을 조회합니다.")
+    @Operation(summary = "사물함 목록 조회", description = "이벤트에 대한 사물함 목록을 조회합니다.")
     @ApiResponse(
             responseCode = "200",
             description = "사물함 목록 조회 성공",
