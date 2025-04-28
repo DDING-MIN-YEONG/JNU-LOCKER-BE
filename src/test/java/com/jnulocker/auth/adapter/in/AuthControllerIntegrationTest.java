@@ -4,6 +4,8 @@ import static auth.application.port.in.request.ManagerSignupRequestTestDataBuild
 import static auth.application.port.in.request.UserSignupRequestTestDataBuilder.userSignupRequestBuilder;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static organization.domain.DepartmentTestDataBuilder.*;
+import static organization.domain.OrganizationTestDataBuilder.*;
 
 import com.jnulocker.auth.adapter.out.TokenRepository;
 import com.jnulocker.auth.application.port.in.request.LoginRequest;
@@ -11,7 +13,6 @@ import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.exception.AuthErrorCode;
 import com.jnulocker.auth.jwt.RefreshToken;
-import com.jnulocker.auth.jwt.TokenProvider;
 import com.jnulocker.auth.jwt.exception.JwtErrorCode;
 import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.member.adapter.out.MemberRepository;
@@ -44,8 +45,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import organization.builder.DepartmentTestDataBuilder;
-import organization.builder.OrganizationTestDataBuilder;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -64,8 +63,6 @@ class AuthControllerIntegrationTest {
     @Autowired private DepartmentRepository departmentRepository;
 
     @Autowired private TokenRepository tokenRepository;
-
-    @Autowired private TokenProvider tokenProvider;
 
     @Value("${custom.jwt.access-secret-key}")
     String accessSecretKey;
@@ -237,7 +234,7 @@ class AuthControllerIntegrationTest {
     void 만료된_리프레시토큰으로_재발급하면_Token_Expired_에러가_발생한다() {
         // given
         Member member = createTestMember();
-        String expiredRefreshToken = createExpiredRefreshToken(member.getId(), refreshSecretKey);
+        String expiredRefreshToken = createExpiredToken(member.getId(), refreshSecretKey);
         RefreshToken refreshToken = new RefreshToken(member.getId(), expiredRefreshToken, -1000L);
         tokenRepository.save(refreshToken);
 
@@ -256,7 +253,7 @@ class AuthControllerIntegrationTest {
     void 만료된_액세스토큰으로_요청하면_Token_Expired_에러가_발생한다() {
         // given
         Member member = createTestMember();
-        String expiredAccessToken = createExpiredAccessToken(member.getId(), accessSecretKey);
+        String expiredAccessToken = createExpiredToken(member.getId(), accessSecretKey);
 
         // when
         ErrorResponse errorResponse =
@@ -370,10 +367,9 @@ class AuthControllerIntegrationTest {
 
     // 기존 메서드 (변경 없음)
     Department setDepartment() {
-        Organization organization = OrganizationTestDataBuilder.builder().build();
+        Organization organization = organizationBuilder().build();
         Organization savedOrganization = organizationRepository.save(organization);
-        Department department =
-                DepartmentTestDataBuilder.builder().withOrganization(savedOrganization).build();
+        Department department = departmentBuilder().withOrganization(savedOrganization).build();
         departmentRepository.save(department);
         return department;
     }
@@ -400,37 +396,23 @@ class AuthControllerIntegrationTest {
                 .all();
     }
 
-    public static String createExpiredAccessToken(Long userId, String secretKey) {
+    public static String createExpiredToken(Long userId, String secretKey) {
         long now = System.currentTimeMillis();
         Date issuedAt = new Date(now - 2000);
         Date expiredAt = new Date(now - 1000);
 
         return Jwts.builder()
                 .claim("id", userId)
-                .setIssuedAt(issuedAt)
-                .setExpiration(expiredAt)
-                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
-                .compact();
-    }
-
-    public static String createExpiredRefreshToken(Long userId, String secretKey) {
-        long now = System.currentTimeMillis();
-        Date issuedAt = new Date(now - 2000);
-        Date expiredAt = new Date(now - 1000);
-
-        return Jwts.builder()
-                .claim("id", userId)
-                .setIssuedAt(issuedAt)
-                .setExpiration(expiredAt)
+                .issuedAt(issuedAt)
+                .expiration(expiredAt)
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
     }
 
     private Member createTestMember() {
-        Organization organization = OrganizationTestDataBuilder.builder().build();
+        Organization organization = organizationBuilder().build();
         Organization savedOrganization = organizationRepository.save(organization);
-        Department department =
-                DepartmentTestDataBuilder.builder().withOrganization(savedOrganization).build();
+        Department department = departmentBuilder().withOrganization(savedOrganization).build();
         departmentRepository.save(department);
 
         Member member =

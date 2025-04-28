@@ -2,6 +2,8 @@ package com.jnulocker.events.adapter.in;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static organization.domain.DepartmentTestDataBuilder.*;
+import static organization.domain.OrganizationTestDataBuilder.*;
 
 import com.jnulocker.auth.jwt.TokenProvider;
 import com.jnulocker.common.exception.ErrorResponse;
@@ -41,8 +43,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import organization.builder.DepartmentTestDataBuilder;
-import organization.builder.OrganizationTestDataBuilder;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Testcontainers
@@ -51,6 +51,7 @@ import organization.builder.OrganizationTestDataBuilder;
 class EventControllerIntegrationTest {
 
     private static final String EVENT_URL = "/v1/events";
+    private static final String ACCESS_TOKEN = "access_token";
 
     @LocalServerPort private int port;
 
@@ -71,7 +72,6 @@ class EventControllerIntegrationTest {
     @Autowired private TokenProvider tokenProvider;
 
     private static String accessToken;
-    private static Long memberId;
 
     @BeforeEach
     void setUp() {
@@ -80,7 +80,7 @@ class EventControllerIntegrationTest {
 
         // 테스트 사용자 생성
         Member member = createTestMember();
-        memberId = member.getId();
+        Long memberId = member.getId();
 
         // 토큰 생성
         accessToken = tokenProvider.generateAccessToken(memberId, Role.GUEST);
@@ -141,7 +141,7 @@ class EventControllerIntegrationTest {
     public static ValidatableResponse getEvents(int port, int page, int size, String accessToken) {
         return given().port(port)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .cookie(new Cookie.Builder("access_token", accessToken).build())
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .queryParam("page", page)
                 .queryParam("size", size)
                 .queryParam("direction", "DESC")
@@ -162,7 +162,7 @@ class EventControllerIntegrationTest {
 
         // when
         List<FloorWithLockersResponse> floors =
-                getEventLockers(port, event.getId(), accessToken)
+                getEventLockers(event.getId())
                         .statusCode(HttpStatus.OK.value())
                         .extract()
                         .jsonPath()
@@ -194,7 +194,7 @@ class EventControllerIntegrationTest {
 
         // when
         ErrorResponse errorResponse =
-                getEventLockers(port, nonExistentEventId, accessToken)
+                getEventLockers(nonExistentEventId)
                         .statusCode(EventErrorCode.EVENT_NOT_FOUND.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -203,10 +203,9 @@ class EventControllerIntegrationTest {
         assertThat(errorResponse.message()).isEqualTo(EventErrorCode.EVENT_NOT_FOUND.getMessage());
     }
 
-    public static ValidatableResponse getEventLockers(int port, Long eventId, String accessToken) {
-        return given().port(port)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .cookie(new Cookie.Builder("access_token", accessToken).build())
+    public static ValidatableResponse getEventLockers(Long eventId) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .when()
                 .get(EVENT_URL + "/{event-id}/lockers", eventId)
                 .then()
@@ -215,10 +214,9 @@ class EventControllerIntegrationTest {
     }
 
     private Member createTestMember() {
-        Organization organization = OrganizationTestDataBuilder.builder().build();
+        Organization organization = organizationBuilder().build();
         Organization savedOrganization = organizationRepository.save(organization);
-        Department department =
-                DepartmentTestDataBuilder.builder().withOrganization(savedOrganization).build();
+        Department department = departmentBuilder().withOrganization(savedOrganization).build();
         departmentRepository.save(department);
 
         Member member =

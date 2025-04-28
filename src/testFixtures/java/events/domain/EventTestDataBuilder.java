@@ -1,20 +1,21 @@
-package events.builder;
+package events.domain;
+
+import static organization.domain.DepartmentTestDataBuilder.*;
 
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.organization.domain.Department;
 import java.time.LocalDateTime;
-import organization.builder.DepartmentTestDataBuilder;
 
 public class EventTestDataBuilder {
 
     private String title = "테스트 이벤트";
-    private Department department = DepartmentTestDataBuilder.builder().build();
+    private Department department = departmentBuilder().build();
     private LocalDateTime startAt = LocalDateTime.now();
     private LocalDateTime endAt = LocalDateTime.now().plusHours(1);
 
     private EventTestDataBuilder() {}
 
-    public static EventTestDataBuilder builder() {
+    public static EventTestDataBuilder eventBuilder() {
         return new EventTestDataBuilder();
     }
 
