@@ -8,6 +8,7 @@ import com.jnulocker.events.adapter.out.EventRepository;
 import com.jnulocker.events.adapter.out.FloorRepository;
 import com.jnulocker.events.adapter.out.LockerRepository;
 import com.jnulocker.events.domain.Event;
+import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.domain.Floor;
 import com.jnulocker.events.domain.Locker;
 import com.jnulocker.organization.adapter.out.DepartmentRepository;
@@ -32,7 +33,8 @@ public class EventTestUtil {
 
     @Autowired private LockerRepository lockerRepository;
 
-    public Event createEventWithFloorAndLockers(List<Integer> lockersPerFloor) {
+    public Event createEventWithFloorAndLockers(
+            List<Integer> lockersPerFloor, EventStatus eventStatus, boolean publish) {
         // 조직 생성 및 저장
         Organization organization = organizationBuilder().build();
         Organization savedOrganization = organizationRepository.save(organization);
@@ -42,7 +44,12 @@ public class EventTestUtil {
         Department savedDepartment = departmentRepository.save(department);
 
         // 이벤트 생성 및 저장
-        Event event = eventBuilder().withDepartment(savedDepartment).build();
+        Event event =
+                eventBuilder()
+                        .withDepartment(savedDepartment)
+                        .withEventStatus(eventStatus)
+                        .withPublish(publish)
+                        .build();
         Event savedEvent = eventRepository.save(event);
 
         // 층 생성 및 저장
