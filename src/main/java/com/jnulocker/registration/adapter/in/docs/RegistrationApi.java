@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@Tag(name = "사물함 신청 API", description = "사물함 신청 관련 API")
+@Tag(name = "사물함 신청", description = "사물함 신청 관련 API")
 public interface RegistrationApi {
 
     @ApiExceptionExamples(RegistrationForEventExceptionDocs.class)
