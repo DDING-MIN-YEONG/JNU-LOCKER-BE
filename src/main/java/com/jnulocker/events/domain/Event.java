@@ -58,10 +58,35 @@ public class Event extends BaseEntity {
                 .build();
     }
 
+    public static Event create(
+            String title,
+            Department department,
+            LocalDateTime startAt,
+            LocalDateTime endAt,
+            EventStatus eventStatus,
+            Boolean publish) {
+        return Event.builder()
+                .title(title)
+                .department(department)
+                .eventSchedule(EventSchedule.of(startAt, endAt))
+                .eventStatus(eventStatus)
+                .publish(publish)
+                .build();
+    }
+
     public void validateRegistration(Role role) {
-        // 이벤트 상태가 OPEN인 경우만 신청 가능
-        // publish가 false인 경우 MANAGER만 신청 가능
-        if ((eventStatus != EventStatus.OPEN) || (!publish && role != Role.MANAGER)) {
+        validatePublishStatus(role);
+        validateEventStatus();
+    }
+
+    private void validatePublishStatus(Role role) {
+        if (Boolean.FALSE.equals(publish) && role != Role.MANAGER) {
+            throw EventNotOpenException.EXCEPTION;
+        }
+    }
+
+    private void validateEventStatus() {
+        if (eventStatus != EventStatus.OPEN) {
             throw EventNotOpenException.EXCEPTION;
         }
     }
