@@ -2,8 +2,6 @@ package com.jnulocker.events.adapter.in;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static organization.domain.DepartmentTestDataBuilder.*;
-import static organization.domain.OrganizationTestDataBuilder.*;
 
 import com.jnulocker.auth.jwt.TokenProvider;
 import com.jnulocker.common.exception.ErrorResponse;
@@ -13,15 +11,15 @@ import com.jnulocker.events.adapter.out.LockerRepository;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import com.jnulocker.events.domain.Event;
+import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.exception.EventErrorCode;
 import com.jnulocker.events.utils.EventTestUtil;
 import com.jnulocker.member.adapter.out.MemberRepository;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
+import com.jnulocker.member.utils.MemberTestUtil;
 import com.jnulocker.organization.adapter.out.DepartmentRepository;
 import com.jnulocker.organization.adapter.out.OrganizationRepository;
-import com.jnulocker.organization.domain.Department;
-import com.jnulocker.organization.domain.Organization;
 import io.restassured.RestAssured;
 import io.restassured.http.Cookie;
 import io.restassured.response.ValidatableResponse;
@@ -48,7 +46,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 @ActiveProfiles("test")
 @DisplayName("이벤트 컨트롤러 통합 테스트")
-class EventControllerIntegrationTest {
+public class EventControllerIntegrationTest {
 
     private static final String EVENT_URL = "/v1/events";
     private static final String ACCESS_TOKEN = "access_token";
@@ -71,6 +69,8 @@ class EventControllerIntegrationTest {
 
     @Autowired private TokenProvider tokenProvider;
 
+    @Autowired private MemberTestUtil memberTestUtil;
+
     private static String accessToken;
 
     @BeforeEach
@@ -79,11 +79,10 @@ class EventControllerIntegrationTest {
         clearData();
 
         // 테스트 사용자 생성
-        Member member = createTestMember();
-        Long memberId = member.getId();
+        Member member = memberTestUtil.createManager();
 
         // 토큰 생성
-        accessToken = tokenProvider.generateAccessToken(memberId, Role.GUEST);
+        accessToken = tokenProvider.generateAccessToken(member.getId(), Role.GUEST);
     }
 
     @AfterEach
@@ -112,7 +111,7 @@ class EventControllerIntegrationTest {
     void 이벤트_목록을_조회할_수_있다(int createCount, int pageSize, int page, boolean expectedLast) {
         // given
         for (int i = 0; i < createCount; i++) {
-            eventTestUtil.createEventWithFloorAndLockers(List.of(1));
+            eventTestUtil.createEventWithFloorAndLockers(List.of(1), EventStatus.OPEN, true);
         }
 
         // when
@@ -158,11 +157,13 @@ class EventControllerIntegrationTest {
     void 이벤트에_해당하는_층과_사물함_목록을_조회할_수_있다(List<Integer> lockersPerFloor) {
         // given
         // 이벤트 데이터 생성: 층별 사물함 수를 파라미터로 받아 생성
-        Event event = eventTestUtil.createEventWithFloorAndLockers(lockersPerFloor);
+        Event event =
+                eventTestUtil.createEventWithFloorAndLockers(
+                        lockersPerFloor, EventStatus.OPEN, true);
 
         // when
         List<FloorWithLockersResponse> floors =
-                getEventLockers(event.getId())
+                getEventLockers(event.getId(), accessToken)
                         .statusCode(HttpStatus.OK.value())
                         .extract()
                         .jsonPath()
@@ -194,7 +195,7 @@ class EventControllerIntegrationTest {
 
         // when
         ErrorResponse errorResponse =
-                getEventLockers(nonExistentEventId)
+                getEventLockers(nonExistentEventId, accessToken)
                         .statusCode(EventErrorCode.EVENT_NOT_FOUND.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -203,7 +204,7 @@ class EventControllerIntegrationTest {
         assertThat(errorResponse.message()).isEqualTo(EventErrorCode.EVENT_NOT_FOUND.getMessage());
     }
 
-    public static ValidatableResponse getEventLockers(Long eventId) {
+    public static ValidatableResponse getEventLockers(Long eventId, String accessToken) {
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .when()
@@ -211,17 +212,5 @@ class EventControllerIntegrationTest {
                 .then()
                 .log()
                 .all();
-    }
-
-    private Member createTestMember() {
-        Organization organization = organizationBuilder().build();
-        Organization savedOrganization = organizationRepository.save(organization);
-        Department department = departmentBuilder().withOrganization(savedOrganization).build();
-        departmentRepository.save(department);
-
-        Member member =
-                Member.createManager(
-                        "test", "test@example.com", "test12345!", "010-1234-1234", department);
-        return memberRepository.save(member);
     }
 }
