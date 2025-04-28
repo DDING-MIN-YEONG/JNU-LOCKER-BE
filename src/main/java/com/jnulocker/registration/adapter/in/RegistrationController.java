@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/{event-id}/registrations")
+@RequestMapping("/v1/events/{event-id}/registrations")
 public class RegistrationController implements RegistrationApi {
 
     private final RegistrationCommand registrationCommand;

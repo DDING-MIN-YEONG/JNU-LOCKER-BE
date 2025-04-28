@@ -39,7 +39,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @DisplayName("이벤트 신청 컨트롤러 통합 테스트")
 class RegistrationControllerIntegrationTest {
 
-    private static final String REGISTRATION_URL = "/v1/{event-id}/registrations";
+    private static final String REGISTRATION_URL = "/v1/events/{event-id}/registrations";
     private static final String ACCESS_TOKEN = "access_token";
 
     @LocalServerPort private int port;
