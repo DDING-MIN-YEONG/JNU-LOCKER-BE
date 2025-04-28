@@ -9,7 +9,9 @@ import com.jnulocker.events.application.port.out.FloorLoadPort;
 import com.jnulocker.events.application.port.out.LockerLoadPort;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.Floor;
+import com.jnulocker.events.domain.Locker;
 import com.jnulocker.events.exception.EventNotFoundException;
+import com.jnulocker.events.exception.LockerNotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -34,6 +36,13 @@ public class EventQueryService implements EventQuery {
         // TODO: MANAGER가 조회하는 경우 자신이 소속된 조직의 이벤트만 조회할 수 있도록 수정
         Page<Event> events = eventLoadPort.getAllEvents(pageable);
         return EventCustomPage.from(events);
+    }
+
+    @Override
+    public Locker getLockerByIdOrThrow(Long lockerId) {
+        return lockerLoadPort
+                .getById(lockerId)
+                .orElseThrow(() -> LockerNotFoundException.EXCEPTION);
     }
 
     @Override
