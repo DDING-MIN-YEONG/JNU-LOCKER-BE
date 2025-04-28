@@ -116,7 +116,7 @@ public class EventControllerIntegrationTest {
 
         // when
         EventCustomPage eventCustomPage =
-                getEvents(port, page, pageSize, accessToken)
+                getEvents(page, pageSize, accessToken)
                         .statusCode(HttpStatus.OK.value())
                         .extract()
                         .as(EventCustomPage.class);
@@ -137,9 +137,8 @@ public class EventControllerIntegrationTest {
         return Math.min(remainingItems, pageSize);
     }
 
-    public static ValidatableResponse getEvents(int port, int page, int size, String accessToken) {
-        return given().port(port)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
+    public static ValidatableResponse getEvents(int page, int size, String accessToken) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .queryParam("page", page)
                 .queryParam("size", size)

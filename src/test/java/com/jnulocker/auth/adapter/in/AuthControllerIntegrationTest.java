@@ -98,7 +98,7 @@ class AuthControllerIntegrationTest {
         Department department = setDepartment();
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
-        ValidatableResponse response = signupUser(port, request);
+        ValidatableResponse response = signupUser(request);
         response.statusCode(HttpStatus.CREATED.value());
     }
 
@@ -108,7 +108,7 @@ class AuthControllerIntegrationTest {
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(nonexistentDepartmentId).build();
         ErrorResponse errorResponse =
-                signupUser(port, request)
+                signupUser(request)
                         .statusCode(
                                 DepartmentErrorCode.DEPARTMENT_NOT_FOUND.getHttpStatus().value())
                         .extract()
@@ -122,9 +122,9 @@ class AuthControllerIntegrationTest {
         Department department = setDepartment();
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
-        signupUser(port, request).statusCode(HttpStatus.CREATED.value());
+        signupUser(request).statusCode(HttpStatus.CREATED.value());
         ErrorResponse errorResponse =
-                signupUser(port, request)
+                signupUser(request)
                         .statusCode(AuthErrorCode.USER_ALREADY_EXIST.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -137,7 +137,7 @@ class AuthControllerIntegrationTest {
         Department department = setDepartment();
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
-        ValidatableResponse response = signupManager(port, request);
+        ValidatableResponse response = signupManager(request);
         response.statusCode(HttpStatus.CREATED.value());
     }
 
@@ -147,7 +147,7 @@ class AuthControllerIntegrationTest {
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(nonexistentDepartmentId).build();
         ErrorResponse errorResponse =
-                signupManager(port, request)
+                signupManager(request)
                         .statusCode(
                                 DepartmentErrorCode.DEPARTMENT_NOT_FOUND.getHttpStatus().value())
                         .extract()
@@ -161,9 +161,9 @@ class AuthControllerIntegrationTest {
         Department department = setDepartment();
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
-        signupManager(port, request).statusCode(HttpStatus.CREATED.value());
+        signupManager(request).statusCode(HttpStatus.CREATED.value());
         ErrorResponse errorResponse =
-                signupManager(port, request)
+                signupManager(request)
                         .statusCode(AuthErrorCode.USER_ALREADY_EXIST.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -177,14 +177,14 @@ class AuthControllerIntegrationTest {
         Department department = setDepartment();
         UserSignupRequest signupRequest =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
-        signupUser(port, signupRequest);
+        signupUser(signupRequest);
 
         LoginRequest loginRequest =
                 new LoginRequest(signupRequest.email(), signupRequest.password());
 
         // when
         ExtractableResponse<Response> response =
-                loginUser(port, loginRequest).statusCode(HttpStatus.OK.value()).extract();
+                loginUser(loginRequest).statusCode(HttpStatus.OK.value()).extract();
 
         // then
         Cookies cookies = response.detailedCookies();
@@ -201,17 +201,17 @@ class AuthControllerIntegrationTest {
         Department department = setDepartment();
         UserSignupRequest signupRequest =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
-        signupUser(port, signupRequest);
+        signupUser(signupRequest);
 
         LoginRequest loginRequest =
                 new LoginRequest(signupRequest.email(), signupRequest.password());
         ExtractableResponse<Response> loginResponse =
-                loginUser(port, loginRequest).statusCode(HttpStatus.OK.value()).extract();
+                loginUser(loginRequest).statusCode(HttpStatus.OK.value()).extract();
         String refreshToken = getCookieValue(loginResponse.detailedCookies(), REFRESH_TOKEN);
 
         // when
         ExtractableResponse<Response> response =
-                reissueToken(port, refreshToken).statusCode(HttpStatus.OK.value()).extract();
+                reissueToken(refreshToken).statusCode(HttpStatus.OK.value()).extract();
 
         // then
         String newAccessToken = getCookieValue(response.detailedCookies(), ACCESS_TOKEN);
@@ -225,7 +225,7 @@ class AuthControllerIntegrationTest {
 
         // when
         ErrorResponse errorResponse =
-                reissueToken(port, invalidRefreshToken)
+                reissueToken(invalidRefreshToken)
                         .statusCode(JwtErrorCode.INVALID_REFRESH_TOKEN.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -245,7 +245,7 @@ class AuthControllerIntegrationTest {
 
         // when
         ErrorResponse errorResponse =
-                reissueToken(port, expiredRefreshToken)
+                reissueToken(expiredRefreshToken)
                         .statusCode(JwtErrorCode.EXPIRED_TOKEN.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -262,8 +262,7 @@ class AuthControllerIntegrationTest {
 
         // when
         ErrorResponse errorResponse =
-                given().port(port)
-                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                given().contentType(MediaType.APPLICATION_JSON_VALUE)
                         .cookie(new Cookie.Builder(ACCESS_TOKEN, expiredAccessToken).build())
                         .when()
                         .get("/v1/events")
@@ -284,8 +283,7 @@ class AuthControllerIntegrationTest {
 
         // when
         ErrorResponse errorResponse =
-                given().port(port)
-                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                given().contentType(MediaType.APPLICATION_JSON_VALUE)
                         .cookie(new Cookie.Builder(ACCESS_TOKEN, nullAccessToken).build())
                         .when()
                         .get("/v1/events")
@@ -306,13 +304,13 @@ class AuthControllerIntegrationTest {
         Department department = setDepartment();
         UserSignupRequest signupRequest =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
-        signupUser(port, signupRequest);
+        signupUser(signupRequest);
 
         LoginRequest loginRequest = new LoginRequest("123456@jnu.ac.kr", signupRequest.password());
 
         // when
         ErrorResponse errorResponse =
-                loginUser(port, loginRequest)
+                loginUser(loginRequest)
                         .statusCode(MemberErrorCode.MEMBER_NOT_FOUND.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -328,13 +326,13 @@ class AuthControllerIntegrationTest {
         Department department = setDepartment();
         UserSignupRequest signupRequest =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
-        signupUser(port, signupRequest);
+        signupUser(signupRequest);
 
         LoginRequest loginRequest = new LoginRequest(signupRequest.email(), "wrong12345!");
 
         // when
         ErrorResponse errorResponse =
-                loginUser(port, loginRequest)
+                loginUser(loginRequest)
                         .statusCode(AuthErrorCode.FAIL_AUTHENTICATION.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -344,9 +342,8 @@ class AuthControllerIntegrationTest {
                 .isEqualTo(AuthErrorCode.FAIL_AUTHENTICATION.getMessage());
     }
 
-    public static ValidatableResponse loginUser(int port, LoginRequest request) {
-        return given().port(port)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
+    public static ValidatableResponse loginUser(LoginRequest request) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
                 .post(AUTH_URL + "/login")
@@ -355,9 +352,8 @@ class AuthControllerIntegrationTest {
                 .all();
     }
 
-    public static ValidatableResponse reissueToken(int port, String refreshToken) {
-        return given().port(port)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
+    public static ValidatableResponse reissueToken(String refreshToken) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(new Cookie.Builder(REFRESH_TOKEN, refreshToken).build()) // 쿠키로 전송
                 .when()
                 .post(AUTH_URL + "/reissue")
@@ -379,9 +375,8 @@ class AuthControllerIntegrationTest {
         return department;
     }
 
-    public static ValidatableResponse signupUser(int port, UserSignupRequest request) {
-        return given().port(port)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
+    public static ValidatableResponse signupUser(UserSignupRequest request) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
                 .post(AUTH_URL + "/users/signup")
@@ -390,9 +385,8 @@ class AuthControllerIntegrationTest {
                 .all();
     }
 
-    public static ValidatableResponse signupManager(int port, ManagerSignupRequest request) {
-        return given().port(port)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
+    public static ValidatableResponse signupManager(ManagerSignupRequest request) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
                 .post(AUTH_URL + "/managers/signup")
