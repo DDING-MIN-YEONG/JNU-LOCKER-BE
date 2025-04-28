@@ -1,6 +1,8 @@
 package com.jnulocker.events.domain;
 
 import com.jnulocker.common.persistence.BaseEntity;
+import com.jnulocker.events.exception.LockerUnavailableException;
+import com.jnulocker.member.domain.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -37,5 +39,14 @@ public class Locker extends BaseEntity {
 
     public static Locker create(Floor floor, String code, Boolean available) {
         return Locker.builder().floor(floor).code(code).available(available).build();
+    }
+
+    public void validateRegistration(Role role) {
+        Event event = floor.getEvent();
+        event.validateRegistration(role);
+
+        if (Boolean.FALSE.equals(available)) {
+            throw LockerUnavailableException.EXCEPTION;
+        }
     }
 }

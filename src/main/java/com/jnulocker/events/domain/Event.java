@@ -1,6 +1,8 @@
 package com.jnulocker.events.domain;
 
 import com.jnulocker.common.persistence.BaseEntity;
+import com.jnulocker.events.exception.EventNotOpenException;
+import com.jnulocker.member.domain.Role;
 import com.jnulocker.organization.domain.Department;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -54,6 +56,14 @@ public class Event extends BaseEntity {
                 .eventStatus(EventStatus.READY)
                 .publish(false)
                 .build();
+    }
+
+    public void validateRegistration(Role role) {
+        // 이벤트 상태가 OPEN인 경우만 신청 가능
+        // publish가 false인 경우 MANAGER만 신청 가능
+        if ((eventStatus != EventStatus.OPEN) || (!publish && role != Role.MANAGER)) {
+            throw EventNotOpenException.EXCEPTION;
+        }
     }
 
     public void openEvent() {
