@@ -44,7 +44,16 @@ public class Locker extends BaseEntity {
     public void validateRegistration(Role role) {
         Event event = floor.getEvent();
         event.validateRegistration(role);
+        checkAvailability();
+    }
 
+    // 새로 추가: 사물함을 사용 불가 상태로 변경
+    public void markAsUnavailable() {
+        checkAvailability();
+        this.available = false;
+    }
+
+    private void checkAvailability() {
         if (Boolean.FALSE.equals(available)) {
             throw LockerUnavailableException.EXCEPTION;
         }

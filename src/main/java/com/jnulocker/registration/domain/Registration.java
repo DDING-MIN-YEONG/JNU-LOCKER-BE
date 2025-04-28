@@ -38,6 +38,7 @@ public class Registration {
 
     public static Registration create(Member member, Locker locker) {
         locker.validateRegistration(member.getRole());
+        locker.markAsUnavailable();
         return Registration.builder().member(member).locker(locker).build();
     }
 }
