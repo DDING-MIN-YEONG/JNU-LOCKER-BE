@@ -18,6 +18,7 @@ import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.member.adapter.out.MemberRepository;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.exception.MemberErrorCode;
+import com.jnulocker.member.utils.MemberTestUtil;
 import com.jnulocker.organization.adapter.out.DepartmentRepository;
 import com.jnulocker.organization.adapter.out.OrganizationRepository;
 import com.jnulocker.organization.domain.Department;
@@ -49,10 +50,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @ActiveProfiles("test")
-@DisplayName("인증인가 통합 테스트")
+@DisplayName("인증 통합 테스트")
 class AuthControllerIntegrationTest {
 
     private static final String AUTH_URL = "/v1/auth";
+    private static final String ACCESS_TOKEN = "access_token";
+    private static final String REFRESH_TOKEN = "refresh_token";
 
     @LocalServerPort private int port;
 
@@ -63,6 +66,8 @@ class AuthControllerIntegrationTest {
     @Autowired private DepartmentRepository departmentRepository;
 
     @Autowired private TokenRepository tokenRepository;
+
+    @Autowired private MemberTestUtil memberTestUtil;
 
     @Value("${custom.jwt.access-secret-key}")
     String accessSecretKey;
@@ -183,8 +188,8 @@ class AuthControllerIntegrationTest {
 
         // then
         Cookies cookies = response.detailedCookies();
-        String accessToken = getCookieValue(cookies, "access_token");
-        String refreshToken = getCookieValue(cookies, "refresh_token");
+        String accessToken = getCookieValue(cookies, ACCESS_TOKEN);
+        String refreshToken = getCookieValue(cookies, REFRESH_TOKEN);
 
         assertThat(accessToken).isNotBlank();
         assertThat(refreshToken).isNotBlank();
@@ -202,14 +207,14 @@ class AuthControllerIntegrationTest {
                 new LoginRequest(signupRequest.email(), signupRequest.password());
         ExtractableResponse<Response> loginResponse =
                 loginUser(port, loginRequest).statusCode(HttpStatus.OK.value()).extract();
-        String refreshToken = getCookieValue(loginResponse.detailedCookies(), "refresh_token");
+        String refreshToken = getCookieValue(loginResponse.detailedCookies(), REFRESH_TOKEN);
 
         // when
         ExtractableResponse<Response> response =
                 reissueToken(port, refreshToken).statusCode(HttpStatus.OK.value()).extract();
 
         // then
-        String newAccessToken = getCookieValue(response.detailedCookies(), "access_token");
+        String newAccessToken = getCookieValue(response.detailedCookies(), ACCESS_TOKEN);
         assertThat(newAccessToken).isNotBlank();
     }
 
@@ -233,7 +238,7 @@ class AuthControllerIntegrationTest {
     @Test
     void 만료된_리프레시토큰으로_재발급하면_Token_Expired_에러가_발생한다() {
         // given
-        Member member = createTestMember();
+        Member member = memberTestUtil.createManager();
         String expiredRefreshToken = createExpiredToken(member.getId(), refreshSecretKey);
         RefreshToken refreshToken = new RefreshToken(member.getId(), expiredRefreshToken, -1000L);
         tokenRepository.save(refreshToken);
@@ -252,14 +257,14 @@ class AuthControllerIntegrationTest {
     @Test
     void 만료된_액세스토큰으로_요청하면_Token_Expired_에러가_발생한다() {
         // given
-        Member member = createTestMember();
+        Member member = memberTestUtil.createManager();
         String expiredAccessToken = createExpiredToken(member.getId(), accessSecretKey);
 
         // when
         ErrorResponse errorResponse =
                 given().port(port)
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .cookie(new Cookie.Builder("access_token", expiredAccessToken).build())
+                        .cookie(new Cookie.Builder(ACCESS_TOKEN, expiredAccessToken).build())
                         .when()
                         .get("/v1/events")
                         .then()
@@ -281,7 +286,7 @@ class AuthControllerIntegrationTest {
         ErrorResponse errorResponse =
                 given().port(port)
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .cookie(new Cookie.Builder("access_token", nullAccessToken).build())
+                        .cookie(new Cookie.Builder(ACCESS_TOKEN, nullAccessToken).build())
                         .when()
                         .get("/v1/events")
                         .then()
@@ -353,7 +358,7 @@ class AuthControllerIntegrationTest {
     public static ValidatableResponse reissueToken(int port, String refreshToken) {
         return given().port(port)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .cookie(new Cookie.Builder("refresh_token", refreshToken).build()) // 쿠키로 전송
+                .cookie(new Cookie.Builder(REFRESH_TOKEN, refreshToken).build()) // 쿠키로 전송
                 .when()
                 .post(AUTH_URL + "/reissue")
                 .then()
@@ -407,17 +412,5 @@ class AuthControllerIntegrationTest {
                 .expiration(expiredAt)
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
-    }
-
-    private Member createTestMember() {
-        Organization organization = organizationBuilder().build();
-        Organization savedOrganization = organizationRepository.save(organization);
-        Department department = departmentBuilder().withOrganization(savedOrganization).build();
-        departmentRepository.save(department);
-
-        Member member =
-                Member.createManager(
-                        "test", "test@example.com", "test12345!", "010-1234-1234", department);
-        return memberRepository.save(member);
     }
 }
