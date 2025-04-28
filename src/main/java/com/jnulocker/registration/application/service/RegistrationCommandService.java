@@ -2,7 +2,9 @@ package com.jnulocker.registration.application.service;
 
 import com.jnulocker.auth.security.SecurityUtils;
 import com.jnulocker.events.application.port.in.EventQuery;
+import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.Locker;
+import com.jnulocker.events.exception.InvalidLockerForEventException;
 import com.jnulocker.member.application.port.in.MemberQuery;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.registration.application.port.in.RegistrationCommand;
@@ -30,12 +32,17 @@ public class RegistrationCommandService implements RegistrationCommand {
         Long memberId = SecurityUtils.getCurrentMemberId();
         Member member = memberQuery.findByIdOrThrow(memberId);
 
+        Event event = eventQuery.getByIdOrThrow(eventId);
+        Locker locker = eventQuery.getLockerByIdOrThrow(request.lockerId());
+
+        if (!event.equals(locker.getFloor().getEvent())) {
+            throw InvalidLockerForEventException.EXCEPTION;
+        }
+
         // 이미 해당 이벤트에서 사물함 신청을 완료한 경우 예외 발생
         if (registrationLoadPort.existsByMemberIdAndEventId(memberId, eventId)) {
             throw RegistrationAlreadyExistsException.EXCEPTION;
         }
-
-        Locker locker = eventQuery.getLockerByIdOrThrow(request.lockerId());
 
         Registration registration = Registration.create(member, locker);
         registrationRecordPort.save(registration);
