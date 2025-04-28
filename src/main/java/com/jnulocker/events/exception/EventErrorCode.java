@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum EventErrorCode implements ErrorCode {
     EVENT_NOT_FOUND("E001", HttpStatus.NOT_FOUND, "이벤트가 존재하지 않습니다"),
+    EVENT_NOT_OPEN("E002", HttpStatus.BAD_REQUEST, "이벤트가 열려있지 않습니다"),
+    LOCKER_NOT_FOUND("E003", HttpStatus.NOT_FOUND, "사물함이 존재하지 않습니다"),
+    LOCKER_UNAVAILABLE("E004", HttpStatus.BAD_REQUEST, "사용중인 사물함입니다"),
     ;
 
     private final String code;
