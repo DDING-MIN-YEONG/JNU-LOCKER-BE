@@ -1,5 +1,6 @@
 package com.jnulocker.registration.domain;
 
+import com.jnulocker.common.persistence.BaseEntity;
 import com.jnulocker.events.domain.Locker;
 import com.jnulocker.member.domain.Member;
 import jakarta.persistence.Column;
@@ -21,7 +22,7 @@ import lombok.NoArgsConstructor;
 @Builder(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Registration {
+public class Registration extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
