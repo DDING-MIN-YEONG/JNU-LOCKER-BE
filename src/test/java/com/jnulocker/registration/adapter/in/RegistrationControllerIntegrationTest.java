@@ -258,12 +258,14 @@ class RegistrationControllerIntegrationTest {
 
     private RegisterForEventRequest createRequestForAvailableLocker(Event event) {
         List<FloorWithLockersResponse> floors = getFloors(event);
+        // 짝수 번째 인덱스의 사물함은 테스트에서 사용 가능한 상태 (eventTestUtil 참고)
         Long lockerId = floors.getFirst().lockers().get(1).lockerId(); // 짝수 번째 사용 가능
         return new RegisterForEventRequest(lockerId);
     }
 
     private RegisterForEventRequest createRequestForUnavailableLocker(Event event) {
         List<FloorWithLockersResponse> floors = getFloors(event);
+        // 홀수 번째 인덱스의 사물함은 테스트에서 사용 불가능한 상태 (eventTestUtil 참고)
         Long lockerId = floors.getLast().lockers().getFirst().lockerId(); // 홀수 번째 사용 불가
         return new RegisterForEventRequest(lockerId);
     }
