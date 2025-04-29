@@ -4,6 +4,7 @@ import com.jnulocker.auth.jwt.JwtFilter;
 import com.jnulocker.auth.security.CustomAccessDeniedHandler;
 import com.jnulocker.auth.security.CustomAuthenticationEntryPoint;
 import com.jnulocker.auth.security.CustomUserDetailsService;
+import com.jnulocker.member.domain.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -68,9 +69,12 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         HttpMethod.GET, "/v1/events", "/v1/events/*/lockers")
                                 .authenticated()
+                                .requestMatchers(HttpMethod.GET, "/v1/events/*/registrations/me")
+                                .hasAuthority(Role.USER.getRole())
+                                .requestMatchers(HttpMethod.GET, "/v1/events/*/registrations")
+                                .hasAuthority(Role.GUEST.getRole()) // TODO: 추후 manager로 변경
                                 .requestMatchers(HttpMethod.POST, "/v1/events")
-                                .hasAuthority(
-                                        "guest") // 권한이 MANAGER인 유저만 사용 가능 // TODO: 추후 manager로 변경,
+                                .hasAuthority(Role.GUEST.getRole()) // TODO: 추후 manager로 변경
                                 // 토큰의 role과 db의 role과 다른 문제 고려
                                 .anyRequest()
                                 .authenticated());

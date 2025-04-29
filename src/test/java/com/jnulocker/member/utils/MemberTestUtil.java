@@ -44,4 +44,8 @@ public class MemberTestUtil {
         Department department = departmentBuilder().withOrganization(savedOrganization).build();
         return departmentRepository.save(department);
     }
+
+    public void deleteAll() {
+        memberRepository.deleteAll();
+    }
 }

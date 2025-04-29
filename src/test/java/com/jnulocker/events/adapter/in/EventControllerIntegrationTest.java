@@ -5,21 +5,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.jnulocker.auth.jwt.TokenProvider;
 import com.jnulocker.common.exception.ErrorResponse;
-import com.jnulocker.events.adapter.out.EventRepository;
-import com.jnulocker.events.adapter.out.FloorRepository;
-import com.jnulocker.events.adapter.out.LockerRepository;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.exception.EventErrorCode;
 import com.jnulocker.events.utils.EventTestUtil;
-import com.jnulocker.member.adapter.out.MemberRepository;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.utils.MemberTestUtil;
-import com.jnulocker.organization.adapter.out.DepartmentRepository;
-import com.jnulocker.organization.adapter.out.OrganizationRepository;
 import io.restassured.RestAssured;
 import io.restassured.http.Cookie;
 import io.restassured.response.ValidatableResponse;
@@ -53,18 +47,6 @@ public class EventControllerIntegrationTest {
 
     @LocalServerPort private int port;
 
-    @Autowired private OrganizationRepository organizationRepository;
-
-    @Autowired private DepartmentRepository departmentRepository;
-
-    @Autowired private EventRepository eventRepository;
-
-    @Autowired private FloorRepository floorRepository;
-
-    @Autowired private LockerRepository lockerRepository;
-
-    @Autowired private MemberRepository memberRepository;
-
     @Autowired private EventTestUtil eventTestUtil;
 
     @Autowired private TokenProvider tokenProvider;
@@ -91,12 +73,8 @@ public class EventControllerIntegrationTest {
     }
 
     private void clearData() {
-        memberRepository.deleteAll();
-        lockerRepository.deleteAll();
-        floorRepository.deleteAll();
-        eventRepository.deleteAll();
-        departmentRepository.deleteAll();
-        organizationRepository.deleteAll();
+        memberTestUtil.deleteAll();
+        eventTestUtil.deleteAll();
     }
 
     // 이벤트 목록 조회 테스트

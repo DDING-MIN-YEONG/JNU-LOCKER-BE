@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum RegistrationErrorCode implements ErrorCode {
     REGISTRATION_ALREADY_EXISTS("R001", HttpStatus.BAD_REQUEST, "이미 해당 회원이 신청한 사물함이 존재합니다."),
+    REGISTRATION_NOT_FOUND("R002", HttpStatus.NOT_FOUND, "신청 정보가 존재하지 않습니다."),
     ;
 
     private final String code;
