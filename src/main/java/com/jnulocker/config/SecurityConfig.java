@@ -70,9 +70,11 @@ public class SecurityConfig {
                                         HttpMethod.GET,
                                         "/v1/events",
                                         "/v1/events/*/lockers",
-                                        "/v1/{event-id}/registrations",
                                         "/v1/events/*/registrations/me")
                                 .authenticated()
+                                .requestMatchers(
+                                        HttpMethod.GET, "/v1/events/*/registrations")
+                                .hasAuthority(Role.GUEST.getRole()) // TODO: 추후 manager로 변경
                                 .requestMatchers(HttpMethod.POST, "/v1/events")
                                 .hasAuthority(Role.GUEST.getRole()) // TODO: 추후 manager로 변경
                                 // 토큰의 role과 db의 role과 다른 문제 고려
