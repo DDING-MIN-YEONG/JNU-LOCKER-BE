@@ -142,7 +142,45 @@ class AuthControllerIntegrationTest {
     }
 
     @Test
-    void MANAGER_학생회_회원가입_시_학번이_null이면_Student_NUmber_Required_에러_응답을_받는다() {}
+    void MANAGER_학생회_회원가입_시_학번이_null이면_Student_NUmber_Required_에러_응답을_받는다() {
+        Department department = organizationUtil.createDepartment();
+        ManagerSignupRequest request =
+                managerSignupRequestBuilder()
+                        .withDepartmentId(department.getId())
+                        .withStudentNumber(null)
+                        .build();
+        ErrorResponse errorResponse =
+                signupManager(request)
+                        .statusCode(AuthErrorCode.STUDENT_NUMBER_REQUIRED.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+        assertThat(errorResponse.message())
+                .isEqualTo(AuthErrorCode.STUDENT_NUMBER_REQUIRED.getMessage());
+    }
+
+    @Test
+    void MANAGER_학생회_회원가입_시_학번이_입력되면_정상적으로_회원가입된다() {
+        Department department = organizationUtil.createDepartment();
+        ManagerSignupRequest request =
+                managerSignupRequestBuilder()
+                        .withDepartmentId(department.getId())
+                        .withStudentNumber("221965")
+                        .build();
+        ValidatableResponse response = signupManager(request);
+        response.statusCode(HttpStatus.CREATED.value());
+    }
+
+    @Test
+    void MANAGER_자치회_회원가입_시_학번이_입력되지_않으면_정상적으로_회원가입된다() {
+        Department department = organizationUtil.createCommitteeDepartment();
+        ManagerSignupRequest request =
+                managerSignupRequestBuilder()
+                        .withDepartmentId(department.getId())
+                        .withStudentNumber(null)
+                        .build();
+        ValidatableResponse response = signupManager(request);
+        response.statusCode(HttpStatus.CREATED.value());
+    }
 
     @Test
     void MANAGER_존재하지_않는_학과로_회원가입하면_Department_Not_Found_에러_응답을_받는다() {
