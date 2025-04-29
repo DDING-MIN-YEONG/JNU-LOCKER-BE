@@ -11,6 +11,7 @@ public enum AuthErrorCode implements ErrorCode {
     USER_ALREADY_EXIST("A001", HttpStatus.CONFLICT, "이미 동일한 메일을 사용하는 계정이 존재합니다."),
     FAIL_AUTHENTICATION("A002", HttpStatus.UNAUTHORIZED, "인증에 실패했습니다."),
     FAIL_AUTHORIZATION("A003", HttpStatus.FORBIDDEN, "권한이 없습니다."),
+    STUDENT_NUMBER_REQUIRED("A004", HttpStatus.BAD_REQUEST, "학생회 회원가입 시 학번은 필수입력사항입니다."),
     ;
 
     private final String code;

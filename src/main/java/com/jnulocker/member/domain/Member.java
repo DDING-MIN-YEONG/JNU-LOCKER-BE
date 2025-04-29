@@ -1,8 +1,10 @@
 package com.jnulocker.member.domain;
 
+import com.jnulocker.auth.exception.StudentNumberRequiredException;
 import com.jnulocker.common.persistence.BaseEntity;
 import com.jnulocker.member.exception.OnlyGuestCanBeManagerException;
 import com.jnulocker.organization.domain.Department;
+import com.jnulocker.organization.domain.OrganizationType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -53,7 +55,17 @@ public class Member extends BaseEntity {
 
     // 관리자 회원가입시 사용
     public static Member createManager(
-            String name, String email, String password, String phoneNumber, Department department) {
+            String name,
+            String email,
+            String password,
+            String phoneNumber,
+            String studentNumber,
+            Department department) {
+        if (department.getOrganization().getType() == OrganizationType.COUNCIL
+                && studentNumber == null) {
+            throw StudentNumberRequiredException.EXCEPTION;
+        }
+
         return Member.builder()
                 .name(name)
                 .email(email)

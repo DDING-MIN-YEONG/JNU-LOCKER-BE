@@ -50,6 +50,6 @@ public class MemberTestDataBuilder {
     }
 
     public Member buildManager() {
-        return Member.createManager(name, email, phoneNumber, password, department);
+        return Member.createManager(name, email, phoneNumber, password, studentNumber, department);
     }
 }
