@@ -8,6 +8,7 @@ public class UserSignupRequestTestDataBuilder {
     private String password = "abcde12345!";
     private Long departmentId = 1L;
     private String phoneNumber = "010-1234-1234";
+    private String studentNumber = "221965";
 
     private UserSignupRequestTestDataBuilder() {}
 
@@ -40,7 +41,13 @@ public class UserSignupRequestTestDataBuilder {
         return this;
     }
 
+    public UserSignupRequestTestDataBuilder withStudentNumber(String studentNumber) {
+        this.studentNumber = studentNumber;
+        return this;
+    }
+
     public UserSignupRequest build() {
-        return new UserSignupRequest(name, email, password, departmentId, phoneNumber);
+        return new UserSignupRequest(
+                name, email, password, departmentId, phoneNumber, studentNumber);
     }
 }

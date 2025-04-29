@@ -11,6 +11,7 @@ public class MemberTestDataBuilder {
     private String email = "test@email.com";
     private String phoneNumber = "010-1234-5678";
     private String password = "password123";
+    private String studentNumber = "221965";
     private Department department = departmentBuilder().build();
 
     private MemberTestDataBuilder() {}
@@ -45,10 +46,10 @@ public class MemberTestDataBuilder {
     }
 
     public Member buildUser() {
-        return Member.createUser(name, email, phoneNumber, password, department);
+        return Member.createUser(name, email, phoneNumber, password, studentNumber, department);
     }
 
     public Member buildManager() {
-        return Member.createManager(name, email, phoneNumber, password, department);
+        return Member.createManager(name, email, phoneNumber, password, studentNumber, department);
     }
 }

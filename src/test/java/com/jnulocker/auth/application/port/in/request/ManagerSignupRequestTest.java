@@ -148,4 +148,13 @@ class ManagerSignupRequestTest {
         Set<ConstraintViolation<ManagerSignupRequest>> violations = validator.validate(request);
         assertThat(violations).anyMatch(v -> v.getMessage().equals("전화번호 형식이 올바르지 않습니다."));
     }
+
+    @Test
+    void 학번_형식이_잘못되면_검증에_실패한다() {
+        ManagerSignupRequest request =
+                managerSignupRequestBuilder().withStudentNumber("1234567").build();
+
+        Set<ConstraintViolation<ManagerSignupRequest>> violations = validator.validate(request);
+        assertThat(violations).anyMatch(v -> v.getMessage().equals("학번 형식이 올바르지 않습니다."));
+    }
 }
