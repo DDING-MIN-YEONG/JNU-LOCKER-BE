@@ -5,13 +5,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public record RegistrationResponse(
         @Schema(description = "신청 ID", example = "1") Long id,
-        @Schema(description = "사물함 번호", example = "A-021") String lockerCode,
-        @Schema(description = "신청자 자신의 소속학과", example = "컴퓨터정보통신공학과") String department) {
+        @Schema(description = "층 번호", example = "2") Integer floorNumber,
+        @Schema(description = "사물함 번호", example = "A-021") String lockerCode) {
 
     public static RegistrationResponse from(Registration registration) {
         return new RegistrationResponse(
                 registration.getId(),
-                registration.getLocker().getCode(),
-                registration.getMember().getDepartment().getName());
+                registration.getLocker().getFloor().getFloorNumber(),
+                registration.getLocker().getCode());
     }
 }

@@ -129,8 +129,8 @@ class RegistrationControllerIntegrationTest {
                         .extract()
                         .as(RegistrationResponse.class);
 
+        assertThat(registrationResponse.floorNumber()).isEqualTo(1);
         assertThat(registrationResponse.lockerCode()).isEqualTo("A-002");
-        assertThat(registrationResponse.department()).isEqualTo("테스트 학과명");
     }
 
     @Test
