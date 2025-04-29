@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface RegistrationApi {
 
     @ApiExceptionExamples(GetRegistrationsExceptionDocs.class)
-    @Operation(summary = "사물함 신청 목록 조회", description = "사물함 이벤트에 대한 신청 목록을 조회합니다.")
+    @Operation(summary = "사물함 신청 목록 조회", description = "이벤트에 대한 신청 목록을 조회합니다.")
     @ApiResponse(
             responseCode = "200",
             description = "사물함 신청 목록 조회 성공",
@@ -34,7 +34,7 @@ public interface RegistrationApi {
             @Valid @ParameterObject RegistrationPageable registrationPageable);
 
     @ApiExceptionExamples(GetMyRegistrationExceptionDocs.class)
-    @Operation(summary = "자신의 사물함 신청 현황 조회", description = "사물함 이벤트에 대한 자신의 신청 현황을 조회합니다")
+    @Operation(summary = "자신의 사물함 신청 현황 조회", description = "이벤트에 대한 자신의 신청 현황을 조회합니다")
     @ApiResponse(
             responseCode = "200",
             description = "자신의 사물함 신청 현황 조회 성공",
@@ -45,7 +45,7 @@ public interface RegistrationApi {
     ResponseEntity<RegistrationResponse> getMyRegistration(@PathVariable("event-id") Long eventId);
 
     @ApiExceptionExamples(RegistrationForEventExceptionDocs.class)
-    @Operation(summary = "사물함 신청", description = "사물함 이벤트에 신청합니다. 사물함을 선택할 수 있습니다.")
+    @Operation(summary = "사물함 신청", description = "이벤트에 신청합니다. 사물함을 선택할 수 있습니다.")
     @ApiResponse(responseCode = "201", description = "사물함 신청 성공")
     ResponseEntity<Void> registerForEvent(
             @PathVariable("event-id") Long eventId,
