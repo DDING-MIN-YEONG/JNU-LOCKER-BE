@@ -8,6 +8,7 @@ public class ManagerSignupRequestTestDataBuilder {
     private String password = "abcde12345!";
     private Long departmentId = 1L;
     private String phoneNumber = "010-1234-1234";
+    private String studentNumber = "221965";
 
     private ManagerSignupRequestTestDataBuilder() {}
 
@@ -40,7 +41,13 @@ public class ManagerSignupRequestTestDataBuilder {
         return this;
     }
 
+    public ManagerSignupRequestTestDataBuilder withStudentNumber(String studentNumber) {
+        this.studentNumber = studentNumber;
+        return this;
+    }
+
     public ManagerSignupRequest build() {
-        return new ManagerSignupRequest(name, email, password, departmentId, phoneNumber);
+        return new ManagerSignupRequest(
+                name, email, password, departmentId, phoneNumber, studentNumber);
     }
 }

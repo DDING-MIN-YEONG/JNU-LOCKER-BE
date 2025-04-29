@@ -25,4 +25,8 @@ public record UserSignupRequest(
         @Schema(description = "전화번호", example = "010-1234-1234")
                 @NotBlank(message = "전화번호는 필수입니다.")
                 @Pattern(regexp = "^010-\\d{4}-\\d{4}$", message = "전화번호 형식이 올바르지 않습니다.")
-                String phoneNumber) {}
+                String phoneNumber,
+        @Schema(description = "학번", example = "221965")
+                @NotBlank(message = "학번은 필수입니다.")
+                @Pattern(regexp = "^\\d{6}$", message = "학번 형식이 올바르지 않습니다.")
+                String studentNumber) {}

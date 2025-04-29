@@ -4,8 +4,6 @@ import static auth.application.port.in.request.ManagerSignupRequestTestDataBuild
 import static auth.application.port.in.request.UserSignupRequestTestDataBuilder.userSignupRequestBuilder;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static organization.domain.DepartmentTestDataBuilder.*;
-import static organization.domain.OrganizationTestDataBuilder.*;
 
 import com.jnulocker.auth.adapter.out.TokenRepository;
 import com.jnulocker.auth.application.port.in.request.LoginRequest;
@@ -19,11 +17,9 @@ import com.jnulocker.member.adapter.out.MemberRepository;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.exception.MemberErrorCode;
 import com.jnulocker.member.utils.MemberTestUtil;
-import com.jnulocker.organization.adapter.out.DepartmentRepository;
-import com.jnulocker.organization.adapter.out.OrganizationRepository;
 import com.jnulocker.organization.domain.Department;
-import com.jnulocker.organization.domain.Organization;
 import com.jnulocker.organization.exception.DepartmentErrorCode;
+import com.jnulocker.organization.utils.OrganizationUtil;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import io.restassured.RestAssured;
@@ -61,13 +57,11 @@ class AuthControllerIntegrationTest {
 
     @Autowired private MemberRepository memberRepository;
 
-    @Autowired private OrganizationRepository organizationRepository;
-
-    @Autowired private DepartmentRepository departmentRepository;
-
     @Autowired private TokenRepository tokenRepository;
 
     @Autowired private MemberTestUtil memberTestUtil;
+
+    @Autowired private OrganizationUtil organizationUtil;
 
     @Value("${custom.jwt.access-secret-key}")
     String accessSecretKey;
@@ -88,14 +82,12 @@ class AuthControllerIntegrationTest {
 
     private void clearData() {
         memberRepository.deleteAll();
-        departmentRepository.deleteAll();
-        organizationRepository.deleteAll();
     }
 
     // USER 회원가입 테스트 (변경 없음)
     @Test
     void USER_회원가입을_할_수_있다() {
-        Department department = setDepartment();
+        Department department = organizationUtil.createDepartment();
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
         ValidatableResponse response = signupUser(request);
@@ -119,7 +111,7 @@ class AuthControllerIntegrationTest {
 
     @Test
     void USER_동일메일로_회원가입하면_User_Already_Exist_에러_응답을_받는다() {
-        Department department = setDepartment();
+        Department department = organizationUtil.createDepartment();
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
         signupUser(request).statusCode(HttpStatus.CREATED.value());
@@ -134,9 +126,50 @@ class AuthControllerIntegrationTest {
 
     @Test
     void MANAGER_회원가입을_할_수_있다() {
-        Department department = setDepartment();
+        Department department = organizationUtil.createDepartment();
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
+        ValidatableResponse response = signupManager(request);
+        response.statusCode(HttpStatus.CREATED.value());
+    }
+
+    @Test
+    void MANAGER_학생회_회원가입_시_학번이_null이면_Student_Number_Required_에러_응답을_받는다() {
+        Department department = organizationUtil.createDepartment();
+        ManagerSignupRequest request =
+                managerSignupRequestBuilder()
+                        .withDepartmentId(department.getId())
+                        .withStudentNumber(null)
+                        .build();
+        ErrorResponse errorResponse =
+                signupManager(request)
+                        .statusCode(AuthErrorCode.STUDENT_NUMBER_REQUIRED.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+        assertThat(errorResponse.message())
+                .isEqualTo(AuthErrorCode.STUDENT_NUMBER_REQUIRED.getMessage());
+    }
+
+    @Test
+    void MANAGER_학생회_회원가입_시_학번이_입력되면_정상적으로_회원가입된다() {
+        Department department = organizationUtil.createDepartment();
+        ManagerSignupRequest request =
+                managerSignupRequestBuilder()
+                        .withDepartmentId(department.getId())
+                        .withStudentNumber("221965")
+                        .build();
+        ValidatableResponse response = signupManager(request);
+        response.statusCode(HttpStatus.CREATED.value());
+    }
+
+    @Test
+    void MANAGER_자치회_회원가입_시_학번이_입력되지_않으면_정상적으로_회원가입된다() {
+        Department department = organizationUtil.createCommitteeDepartment();
+        ManagerSignupRequest request =
+                managerSignupRequestBuilder()
+                        .withDepartmentId(department.getId())
+                        .withStudentNumber(null)
+                        .build();
         ValidatableResponse response = signupManager(request);
         response.statusCode(HttpStatus.CREATED.value());
     }
@@ -158,7 +191,7 @@ class AuthControllerIntegrationTest {
 
     @Test
     void MANAGER_동일메일로_회원가입하면_User_Already_Exist_에러_응답을_받는다() {
-        Department department = setDepartment();
+        Department department = organizationUtil.createDepartment();
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
         signupManager(request).statusCode(HttpStatus.CREATED.value());
@@ -174,7 +207,7 @@ class AuthControllerIntegrationTest {
     @Test
     void 로그인_성공시_토큰을_반환한다() {
         // given
-        Department department = setDepartment();
+        Department department = organizationUtil.createDepartment();
         UserSignupRequest signupRequest =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
         signupUser(signupRequest);
@@ -198,7 +231,7 @@ class AuthControllerIntegrationTest {
     @Test
     void 토큰_재발급_요청시_새로운_AccessToken을_받는다() {
         // given
-        Department department = setDepartment();
+        Department department = organizationUtil.createDepartment();
         UserSignupRequest signupRequest =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
         signupUser(signupRequest);
@@ -301,7 +334,7 @@ class AuthControllerIntegrationTest {
     @Test
     void 올바르지_않은_이메일로_로그인하면_인증에_실패한다() {
         // given
-        Department department = setDepartment();
+        Department department = organizationUtil.createDepartment();
         UserSignupRequest signupRequest =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
         signupUser(signupRequest);
@@ -323,7 +356,7 @@ class AuthControllerIntegrationTest {
     @Test
     void 올바르지_않은_비밀번호로_로그인하면_인증에_실패한다() {
         // given
-        Department department = setDepartment();
+        Department department = organizationUtil.createDepartment();
         UserSignupRequest signupRequest =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
         signupUser(signupRequest);
@@ -364,15 +397,6 @@ class AuthControllerIntegrationTest {
 
     private String getCookieValue(Cookies cookies, String name) {
         return cookies.getValue(name);
-    }
-
-    // 기존 메서드 (변경 없음)
-    Department setDepartment() {
-        Organization organization = organizationBuilder().build();
-        Organization savedOrganization = organizationRepository.save(organization);
-        Department department = departmentBuilder().withOrganization(savedOrganization).build();
-        departmentRepository.save(department);
-        return department;
     }
 
     public static ValidatableResponse signupUser(UserSignupRequest request) {
