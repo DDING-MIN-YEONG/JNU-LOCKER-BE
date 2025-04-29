@@ -71,6 +71,7 @@ public class Member extends BaseEntity {
                 .email(email)
                 .password(password)
                 .phoneNumber(phoneNumber)
+                .studentNumber(studentNumber)
                 .role(Role.GUEST)
                 .department(department)
                 .build();
