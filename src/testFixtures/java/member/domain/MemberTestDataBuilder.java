@@ -40,6 +40,11 @@ public class MemberTestDataBuilder {
         return this;
     }
 
+    public MemberTestDataBuilder withStudentNumber(String studentNumber) {
+        this.studentNumber = studentNumber;
+        return this;
+    }
+
     public MemberTestDataBuilder withDepartment(Department department) {
         this.department = department;
         return this;
