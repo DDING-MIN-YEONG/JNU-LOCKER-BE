@@ -91,6 +91,9 @@ class RegistrationControllerIntegrationTest {
 
         registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
 
+        // TODO: 추후 manager로 변경
+        accessToken = generateAccessToken(Role.GUEST);
+
         // when
         RegistrationCustomPage registrationCustomPage =
                 getRegistrations(event.getId())
@@ -107,6 +110,7 @@ class RegistrationControllerIntegrationTest {
         assertThat(listItem.floorNumber()).isEqualTo(1);
         assertThat(listItem.lockerCode()).isEqualTo("A-002");
         assertThat(member.name()).isEqualTo("테스트 이름");
+        assertThat(member.studentNumber()).isEqualTo("221965");
         assertThat(member.department()).isEqualTo("테스트 학과명");
         assertThat(member.email()).isEqualTo("test@email.com");
     }
