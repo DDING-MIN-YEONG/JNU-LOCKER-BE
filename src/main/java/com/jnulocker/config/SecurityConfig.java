@@ -72,8 +72,7 @@ public class SecurityConfig {
                                         "/v1/events/*/lockers",
                                         "/v1/events/*/registrations/me")
                                 .authenticated()
-                                .requestMatchers(
-                                        HttpMethod.GET, "/v1/events/*/registrations")
+                                .requestMatchers(HttpMethod.GET, "/v1/events/*/registrations")
                                 .hasAuthority(Role.GUEST.getRole()) // TODO: 추후 manager로 변경
                                 .requestMatchers(HttpMethod.POST, "/v1/events")
                                 .hasAuthority(Role.GUEST.getRole()) // TODO: 추후 manager로 변경
