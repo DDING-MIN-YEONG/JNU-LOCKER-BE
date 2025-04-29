@@ -1,5 +1,6 @@
 package com.jnulocker.auth.adapter.in.docs;
 
+import com.jnulocker.auth.exception.StudentNumberRequiredException;
 import com.jnulocker.auth.exception.UserAlreadyExistException;
 import com.jnulocker.common.exception.BusinessException;
 import com.jnulocker.common.swagger.ExceptionDoc;
@@ -19,4 +20,7 @@ public class SignupExceptionDocs implements SwaggerExceptionDoc {
 
     @ExplainError("학과가 존재하지 않을 때 발생하는 예외입니다.")
     public static final BusinessException 학과가_존재하지_않을_때 = DepartmentNotFoundException.EXCEPTION;
+
+    @ExplainError("MANAGER-학생회 회원가입 시 학번이 필수 입력사항일 때 발생하는 예외입니다.")
+    public static final BusinessException MANAGER_학생회_회원가입_시_학번이_null일_때 = StudentNumberRequiredException.EXCEPTION;
 }
