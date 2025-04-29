@@ -28,11 +28,11 @@ public class RegistrationPersistenceAdapter
 
     @Override
     public Page<Registration> getRegistrationsByEventId(Long eventId, Pageable pageable) {
-        return registrationRepository.findAllByEventId(eventId, pageable);
+        return registrationRepository.findAllByLocker_Floor_EventId(eventId, pageable);
     }
 
     @Override
     public Optional<Registration> getRegistrationByMemberIdAndEventId(Long memberId, Long eventId) {
-        return registrationRepository.findByMemberAndEvent(memberId, eventId);
+        return registrationRepository.findByMemberIdAndLocker_Floor_EventId(memberId, eventId);
     }
 }
