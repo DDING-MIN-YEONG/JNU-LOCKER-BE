@@ -16,11 +16,17 @@ import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.utils.MemberTestUtil;
 import com.jnulocker.registration.application.port.in.request.RegisterForEventRequest;
+import com.jnulocker.registration.application.port.in.response.RegistrationCustomPage;
+import com.jnulocker.registration.application.port.in.response.RegistrationListItem;
+import com.jnulocker.registration.application.port.in.response.RegistrationMemberInfo;
+import com.jnulocker.registration.application.port.in.response.RegistrationResponse;
 import com.jnulocker.registration.exception.RegistrationErrorCode;
+import com.jnulocker.registration.utils.RegistrationTestUtil;
 import io.restassured.RestAssured;
 import io.restassured.http.Cookie;
 import io.restassured.response.ValidatableResponse;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,12 +56,21 @@ class RegistrationControllerIntegrationTest {
 
     @Autowired private MemberTestUtil memberTestUtil;
 
+    @Autowired private RegistrationTestUtil registrationTestUtil;
+
     private String accessToken;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
         accessToken = generateAccessToken(Role.USER);
+    }
+
+    @AfterEach
+    void tearDown() {
+        registrationTestUtil.deleteAll();
+        memberTestUtil.deleteAll();
+        eventTestUtil.deleteAll();
     }
 
     @Test
@@ -66,6 +81,52 @@ class RegistrationControllerIntegrationTest {
 
         // when, then
         registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
+    }
+
+    @Test
+    void 신청된_사물함_목록을_조회할_수_있다() {
+        // given
+        Event event = createEventWithLockers(EventStatus.OPEN, true);
+        RegisterForEventRequest request = createRequestForAvailableLocker(event);
+
+        registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
+
+        // when
+        RegistrationCustomPage registrationCustomPage =
+                getRegistrations(event.getId())
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(RegistrationCustomPage.class);
+
+        // then
+        List<RegistrationListItem> content = registrationCustomPage.content();
+        RegistrationListItem listItem = content.getFirst();
+        RegistrationMemberInfo member = listItem.member();
+
+        assertThat(registrationCustomPage.totalElements()).isEqualTo(1);
+        assertThat(listItem.floorNumber()).isEqualTo(1);
+        assertThat(listItem.lockerCode()).isEqualTo("A-002");
+        assertThat(member.name()).isEqualTo("테스트 이름");
+        assertThat(member.department()).isEqualTo("테스트 학과명");
+        assertThat(member.email()).isEqualTo("test@email.com");
+    }
+
+    @Test
+    void 자신이_신청한_사물함을_조회할_수_있다() {
+        // given
+        Event event = createEventWithLockers(EventStatus.OPEN, true);
+        RegisterForEventRequest request = createRequestForAvailableLocker(event);
+
+        registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
+
+        RegistrationResponse registrationResponse =
+                getMyRegistration(event.getId())
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(RegistrationResponse.class);
+
+        assertThat(registrationResponse.lockerCode()).isEqualTo("A-002");
+        assertThat(registrationResponse.department()).isEqualTo("테스트 학과명");
     }
 
     @Test
@@ -222,6 +283,24 @@ class RegistrationControllerIntegrationTest {
 
         // when, then
         registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
+    }
+
+    private ValidatableResponse getRegistrations(Long eventId) {
+        return given().cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .when()
+                .get(REGISTRATION_URL, eventId)
+                .then()
+                .log()
+                .ifError();
+    }
+
+    private ValidatableResponse getMyRegistration(Long eventId) {
+        return given().cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .when()
+                .get(REGISTRATION_URL + "/me", eventId)
+                .then()
+                .log()
+                .ifError();
     }
 
     private ValidatableResponse registerForEvent(Long eventId, RegisterForEventRequest request) {
