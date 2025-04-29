@@ -17,8 +17,6 @@ import com.jnulocker.member.adapter.out.MemberRepository;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.exception.MemberErrorCode;
 import com.jnulocker.member.utils.MemberTestUtil;
-import com.jnulocker.organization.adapter.out.DepartmentRepository;
-import com.jnulocker.organization.adapter.out.OrganizationRepository;
 import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.exception.DepartmentErrorCode;
 import com.jnulocker.organization.utils.OrganizationUtil;
@@ -59,10 +57,6 @@ class AuthControllerIntegrationTest {
 
     @Autowired private MemberRepository memberRepository;
 
-    @Autowired private OrganizationRepository organizationRepository;
-
-    @Autowired private DepartmentRepository departmentRepository;
-
     @Autowired private TokenRepository tokenRepository;
 
     @Autowired private MemberTestUtil memberTestUtil;
@@ -88,8 +82,6 @@ class AuthControllerIntegrationTest {
 
     private void clearData() {
         memberRepository.deleteAll();
-        departmentRepository.deleteAll();
-        organizationRepository.deleteAll();
     }
 
     // USER 회원가입 테스트 (변경 없음)
