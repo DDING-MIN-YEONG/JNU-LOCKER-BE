@@ -4,7 +4,10 @@ import com.jnulocker.common.annotation.PersistenceAdapter;
 import com.jnulocker.registration.application.port.out.RegistrationLoadPort;
 import com.jnulocker.registration.application.port.out.RegistrationRecordPort;
 import com.jnulocker.registration.domain.Registration;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @PersistenceAdapter
 @RequiredArgsConstructor
@@ -21,5 +24,15 @@ public class RegistrationPersistenceAdapter
     @Override
     public boolean existsByMemberIdAndEventId(Long memberId, Long eventId) {
         return registrationRepository.existsByMemberIdAndLocker_Floor_EventId(memberId, eventId);
+    }
+
+    @Override
+    public Page<Registration> getRegistrationsByEventId(Long eventId, Pageable pageable) {
+        return registrationRepository.findAllByEventId(eventId, pageable);
+    }
+
+    @Override
+    public Optional<Registration> getRegistrationByMemberIdAndEventId(Long memberId, Long eventId) {
+        return registrationRepository.findByMemberAndEvent(memberId, eventId);
     }
 }
