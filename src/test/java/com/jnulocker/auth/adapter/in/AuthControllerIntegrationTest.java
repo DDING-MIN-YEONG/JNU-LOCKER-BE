@@ -134,7 +134,7 @@ class AuthControllerIntegrationTest {
     }
 
     @Test
-    void MANAGER_학생회_회원가입_시_학번이_null이면_Student_NUmber_Required_에러_응답을_받는다() {
+    void MANAGER_학생회_회원가입_시_학번이_null이면_Student_Number_Required_에러_응답을_받는다() {
         Department department = organizationUtil.createDepartment();
         ManagerSignupRequest request =
                 managerSignupRequestBuilder()
