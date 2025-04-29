@@ -111,6 +111,7 @@ class RegistrationControllerIntegrationTest {
         assertThat(listItem.lockerCode()).isEqualTo("A-002");
         assertThat(member.name()).isEqualTo("테스트 이름");
         assertThat(member.studentNumber()).isEqualTo("221965");
+        assertThat(member.organization()).isEqualTo("테스트 조직명");
         assertThat(member.department()).isEqualTo("테스트 학과명");
         assertThat(member.email()).isEqualTo("test@email.com");
     }
