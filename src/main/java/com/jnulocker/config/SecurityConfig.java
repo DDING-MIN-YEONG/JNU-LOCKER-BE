@@ -67,11 +67,10 @@ public class SecurityConfig {
                                 .requestMatchers("/v1/auth/**")
                                 .permitAll() // 인증 API 모든 접근 허용
                                 .requestMatchers(
-                                        HttpMethod.GET,
-                                        "/v1/events",
-                                        "/v1/events/*/lockers",
-                                        "/v1/events/*/registrations/me")
+                                        HttpMethod.GET, "/v1/events", "/v1/events/*/lockers")
                                 .authenticated()
+                                .requestMatchers(HttpMethod.GET, "/v1/events/*/registrations/me")
+                                .hasAuthority(Role.USER.getRole())
                                 .requestMatchers(HttpMethod.GET, "/v1/events/*/registrations")
                                 .hasAuthority(Role.GUEST.getRole()) // TODO: 추후 manager로 변경
                                 .requestMatchers(HttpMethod.POST, "/v1/events")
