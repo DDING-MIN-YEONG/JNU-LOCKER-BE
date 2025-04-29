@@ -50,6 +50,7 @@ public class AuthService
                         request.email(),
                         encodedPassword,
                         request.phoneNumber(),
+                        request.studentNumber(),
                         department);
 
         memberCommand.save(member);

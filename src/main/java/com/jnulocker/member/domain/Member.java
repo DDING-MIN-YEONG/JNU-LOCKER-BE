@@ -41,6 +41,8 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private String phoneNumber;
 
+    @Column private String studentNumber;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -64,12 +66,18 @@ public class Member extends BaseEntity {
 
     // 유저 회원가입시 사용
     public static Member createUser(
-            String name, String email, String password, String phoneNumber, Department department) {
+            String name,
+            String email,
+            String password,
+            String phoneNumber,
+            String studentNumber,
+            Department department) {
         return Member.builder()
                 .name(name)
                 .email(email)
                 .password(password)
                 .phoneNumber(phoneNumber)
+                .studentNumber(studentNumber)
                 .role(Role.USER)
                 .department(department)
                 .build();
