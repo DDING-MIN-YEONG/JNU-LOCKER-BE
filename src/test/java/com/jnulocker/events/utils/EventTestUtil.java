@@ -78,4 +78,12 @@ public class EventTestUtil {
         }
         lockerRepository.saveAll(lockers);
     }
+
+    public void deleteAll() {
+        lockerRepository.deleteAll();
+        floorRepository.deleteAll();
+        eventRepository.deleteAll();
+        departmentRepository.deleteAll();
+        organizationRepository.deleteAll();
+    }
 }
