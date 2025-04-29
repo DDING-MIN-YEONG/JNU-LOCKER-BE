@@ -67,13 +67,14 @@ public class SecurityConfig {
                                 .requestMatchers("/v1/auth/**")
                                 .permitAll() // 인증 API 모든 접근 허용
                                 .requestMatchers(
-                                        HttpMethod.GET, "/v1/events", "/v1/events/*/lockers")
+                                        HttpMethod.GET,
+                                        "/v1/events",
+                                        "/v1/events/*/lockers",
+                                        "/v1/{event-id}/registrations",
+                                        "/v1/events/*/registrations/me")
                                 .authenticated()
-                                .requestMatchers(HttpMethod.GET, "/v1/{event-id}/registrations")
-                                .hasAuthority(Role.GUEST.getRole()) // TODO: 추후 manager로 변경
                                 .requestMatchers(HttpMethod.POST, "/v1/events")
-                                .hasAuthority(
-                                        Role.GUEST.getRole()) // 권한이 MANAGER인 유저만 사용 가능 // TODO: 추후 manager로 변경,
+                                .hasAuthority(Role.GUEST.getRole()) // TODO: 추후 manager로 변경
                                 // 토큰의 role과 db의 role과 다른 문제 고려
                                 .anyRequest()
                                 .authenticated());
