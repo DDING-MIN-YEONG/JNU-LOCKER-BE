@@ -8,9 +8,11 @@ import com.jnulocker.auth.application.port.in.request.LoginRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.response.AuthToken;
+import com.jnulocker.auth.exception.EmailNotVerifiedException;
 import com.jnulocker.auth.exception.UserAlreadyExistException;
 import com.jnulocker.auth.jwt.TokenProvider;
 import com.jnulocker.auth.jwt.exception.InvalidRefreshTokenException;
+import com.jnulocker.common.util.RedisUtil;
 import com.jnulocker.member.application.port.in.MemberCommand;
 import com.jnulocker.member.application.port.in.MemberQuery;
 import com.jnulocker.member.domain.Member;
@@ -34,10 +36,13 @@ public class AuthService
     private final MemberCommand memberCommand;
     private final DepartmentQuery departmentQuery;
     private final TokenProvider tokenProvider;
+    private final RedisUtil redisUtil;
 
     @Override
     @Transactional
     public void signupUser(UserSignupRequest request) {
+        checkEmailVerified(request.email());
+
         validateDuplicateEmail(request.email());
 
         String encodedPassword = passwordEncoder.encode(request.password());
@@ -59,6 +64,8 @@ public class AuthService
     @Override
     @Transactional
     public void signupManager(ManagerSignupRequest request) {
+        checkEmailVerified(request.email());
+
         validateDuplicateEmail(request.email());
 
         String encodedPassword = passwordEncoder.encode(request.password());
@@ -111,6 +118,13 @@ public class AuthService
     private void validateDuplicateEmail(String email) {
         if (memberQuery.existsByEmail(email)) {
             throw UserAlreadyExistException.EXCEPTION;
+        }
+    }
+
+    public void checkEmailVerified(String email) {
+        String verifiedStatus = redisUtil.getData(email + ":verified");
+        if (!"true".equals(verifiedStatus)) {
+            throw EmailNotVerifiedException.EXCEPTION;
         }
     }
 }

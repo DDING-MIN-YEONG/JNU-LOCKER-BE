@@ -16,6 +16,11 @@ public class RedisUtil {
         return valueOperations.get(key);
     }
 
+    public void setData(String key, String emailStatus) {
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        valueOperations.set(key, emailStatus.toString());
+    }
+
     public void setDataExpire(String key, String value, long duration) {
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
         Duration expireDuration = Duration.ofSeconds(duration);

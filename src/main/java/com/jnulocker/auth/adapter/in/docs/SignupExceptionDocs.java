@@ -1,5 +1,6 @@
 package com.jnulocker.auth.adapter.in.docs;
 
+import com.jnulocker.auth.exception.EmailNotVerifiedException;
 import com.jnulocker.auth.exception.StudentNumberRequiredException;
 import com.jnulocker.auth.exception.UserAlreadyExistException;
 import com.jnulocker.common.exception.BusinessException;
@@ -24,4 +25,7 @@ public class SignupExceptionDocs implements SwaggerExceptionDoc {
     @ExplainError("MANAGER-학생회 회원가입 시 학번이 필수 입력사항일 때 발생하는 예외입니다.")
     public static final BusinessException MANAGER_학생회_회원가입_시_학번이_null일_때 =
             StudentNumberRequiredException.EXCEPTION;
+
+    @ExplainError("회원가입 전 이메일 인증이 완료되지 않았거나 재인증이 필요할 때 발생하는 예외입니다.")
+    public static final BusinessException 이메일_인증이_완료되지_않았을_때 = EmailNotVerifiedException.EXCEPTION;
 }
