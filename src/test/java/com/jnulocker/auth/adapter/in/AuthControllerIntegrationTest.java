@@ -89,6 +89,8 @@ class AuthControllerIntegrationTest {
 
     private void clearData() {
         memberRepository.deleteAll();
+        tokenRepository.deleteAll();
+        redisUtil.deleteData("*");
     }
 
     // USER 회원가입 테스트 (변경 없음)
@@ -476,7 +478,8 @@ class AuthControllerIntegrationTest {
         return cookies.getValue(name);
     }
 
-    public static ValidatableResponse signupUser(UserSignupRequest request) {
+    public ValidatableResponse signupUser(UserSignupRequest request) {
+        setEmailVerified(request.email());
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
@@ -486,7 +489,8 @@ class AuthControllerIntegrationTest {
                 .all();
     }
 
-    public static ValidatableResponse signupManager(ManagerSignupRequest request) {
+    public ValidatableResponse signupManager(ManagerSignupRequest request) {
+        setEmailVerified(request.email());
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
@@ -527,5 +531,9 @@ class AuthControllerIntegrationTest {
                 .expiration(expiredAt)
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
+    }
+
+    public void setEmailVerified(String email) {
+        redisUtil.setDataExpire(email + ":verified", "true", 3600);
     }
 }
