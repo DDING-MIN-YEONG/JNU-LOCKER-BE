@@ -2,7 +2,9 @@ package com.jnulocker.auth.adapter.in.docs;
 
 import com.jnulocker.auth.application.port.in.request.LoginRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
+import com.jnulocker.auth.application.port.in.request.SendEmailRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
+import com.jnulocker.auth.application.port.in.request.VerifyCodeRequest;
 import com.jnulocker.common.swagger.ApiExceptionExamples;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -31,7 +33,18 @@ public interface AuthApi {
     @ApiResponse(responseCode = "200", description = "로그인 성공")
     ResponseEntity<Void> login(@RequestBody LoginRequest request, HttpServletResponse response);
 
+    @ApiExceptionExamples(ReissueExceptionDocs.class)
     @Operation(summary = "토큰 재발급", description = "refreshToken을 이용하여 토큰을 재발급합니다.")
     @ApiResponse(responseCode = "200", description = "토큰 재발급 성공")
     ResponseEntity<Void> reissue(HttpServletRequest request, HttpServletResponse response);
+
+    @ApiExceptionExamples(MailSendExceptionDocs.class)
+    @Operation(summary = "인증 메일 전송", description = "유효한 이메일인지 확인하기 위해 인증 코드를 전송합니다.")
+    @ApiResponse(responseCode = "200", description = "메일 전송 성공")
+    ResponseEntity<Void> sendEmail(@Valid @RequestBody SendEmailRequest request);
+
+    @ApiExceptionExamples(CodeVerficiationExceptionDocs.class)
+    @Operation(summary = "인증 코드 검증", description = "메일 전송에 포함된 인증 코드의 일치 여부를 확인합ㄴ디ㅏ.")
+    @ApiResponse(responseCode = "200", description = "메일 인증 성공")
+    ResponseEntity<Void> verify(@Valid @RequestBody VerifyCodeRequest request);
 }
