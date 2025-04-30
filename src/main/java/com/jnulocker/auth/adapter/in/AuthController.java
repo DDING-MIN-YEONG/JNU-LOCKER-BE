@@ -70,12 +70,14 @@ public class AuthController implements AuthApi {
         return ResponseEntity.ok().build();
     }
 
+    @Override
     @PostMapping("/send-email")
     public ResponseEntity<Void> sendEmail(@Valid @RequestBody SendEmailRequest request) {
         sendEmailCommand.sendEmail(request);
         return ResponseEntity.ok().build();
     }
 
+    @Override
     @PostMapping("/verify")
     public ResponseEntity<Void> verify(@Valid @RequestBody VerifyCodeRequest request) {
         verifyCodeCommand.verify(request);
