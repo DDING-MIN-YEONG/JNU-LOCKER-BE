@@ -18,6 +18,8 @@ import org.thymeleaf.context.Context;
 @Service
 @RequiredArgsConstructor
 public class EmailService implements SendEmailCommand, VerifyCodeCommand {
+    private static final int FIVE_MINUTIES = 300;
+
     private final TemplateEngine templateEngine;
     private final JavaMailSender javaMailSender;
     private final RedisUtil redisUtil;
@@ -36,7 +38,7 @@ public class EmailService implements SendEmailCommand, VerifyCodeCommand {
             helper.setText(form, true);
 
             javaMailSender.send(message);
-            redisUtil.setDataExpire(request.email(), Integer.toString(code), 300);
+            redisUtil.setDataExpire(request.email(), Integer.toString(code), FIVE_MINUTIES);
         } catch (Exception e) {
             throw SendEmailException.EXCEPTION;
         }
