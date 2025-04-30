@@ -290,6 +290,36 @@ class RegistrationControllerIntegrationTest {
         registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
     }
 
+    @Test
+    void 신청한_이벤트를_취소할_수_있다() {
+        // given
+        Event event = createEventWithLockers(EventStatus.OPEN, true);
+        RegisterForEventRequest request = createRequestForAvailableLocker(event);
+
+        registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
+
+        // when, then
+        cancelMyRegistration(event.getId()).statusCode(HttpStatus.NO_CONTENT.value());
+    }
+
+    @Test
+    void 존재하지_않는_이벤트를_취소할_수_없다() {
+        // given
+        Event event = createEventWithLockers(EventStatus.OPEN, true);
+        RegisterForEventRequest request = createRequestForAvailableLocker(event);
+
+        registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
+
+        // when, then
+        ErrorResponse errorResponse =
+                cancelMyRegistration(Long.MAX_VALUE)
+                        .statusCode(EventErrorCode.EVENT_NOT_FOUND.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        assertThat(errorResponse.message()).isEqualTo(EventErrorCode.EVENT_NOT_FOUND.getMessage());
+    }
+
     private ValidatableResponse getRegistrations(Long eventId) {
         return given().cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .when()
@@ -325,6 +355,15 @@ class RegistrationControllerIntegrationTest {
                 .body(request)
                 .when()
                 .post(REGISTRATION_URL, eventId)
+                .then()
+                .log()
+                .ifError();
+    }
+
+    private ValidatableResponse cancelMyRegistration(Long eventId) {
+        return given().cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .when()
+                .delete(REGISTRATION_URL + "/me", eventId)
                 .then()
                 .log()
                 .ifError();
