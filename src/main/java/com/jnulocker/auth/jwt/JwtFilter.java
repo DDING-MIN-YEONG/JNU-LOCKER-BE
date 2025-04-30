@@ -47,6 +47,8 @@ public class JwtFilter extends OncePerRequestFilter {
                         "/swagger-resources/**",
                         "/v3/api-docs/**",
                         "/api-docs/**",
+                        "/v1/organizations",
+                        "/v1/organizations/*/departments",
                         actuatorBasePath,
                         actuatorBasePath + "/health",
                         actuatorBasePath + "/prometheus");
