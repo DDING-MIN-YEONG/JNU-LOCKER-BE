@@ -44,7 +44,7 @@ public interface AuthApi {
     ResponseEntity<Void> sendEmail(@Valid @RequestBody SendEmailRequest request);
 
     @ApiExceptionExamples(CodeVerficiationExceptionDocs.class)
-    @Operation(summary = "인증 코드 검증", description = "메일 전송에 포함된 인증 코드의 일치 여부를 확인합ㄴ디ㅏ.")
+    @Operation(summary = "인증 코드 검증", description = "메일 전송에 포함된 인증 코드의 일치 여부를 확인합니다.")
     @ApiResponse(responseCode = "200", description = "메일 인증 성공")
     ResponseEntity<Void> verify(@Valid @RequestBody VerifyCodeRequest request);
 }
