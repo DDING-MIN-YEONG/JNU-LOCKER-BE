@@ -303,7 +303,7 @@ class RegistrationControllerIntegrationTest {
     }
 
     @Test
-    void 존재하지_않는_이벤트를_취소할_수_없다() {
+    void 존재하지_않는_이벤트의_사물함_신청을_취소할_수_없다() {
         // given
         Event event = createEventWithLockers(EventStatus.OPEN, true);
         RegisterForEventRequest request = createRequestForAvailableLocker(event);
