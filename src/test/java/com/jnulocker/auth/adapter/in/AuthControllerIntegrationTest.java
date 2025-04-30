@@ -134,6 +134,28 @@ class AuthControllerIntegrationTest {
     }
 
     @Test
+    void USER_회원가입_시_이메일_인증이_완료되지_않았으면_Email_Not_Verified_에러_응답을_받는다() {
+        Department department = organizationUtil.createDepartment();
+        UserSignupRequest request =
+                userSignupRequestBuilder().withDepartmentId(department.getId()).build();
+
+        redisUtil.deleteData(request.email() + ":verified");
+        ErrorResponse errorResponse =
+                given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .body(request)
+                        .when()
+                        .post(AUTH_URL + "/users/signup")
+                        .then()
+                        .log()
+                        .all()
+                        .statusCode(AuthErrorCode.EMAIL_NOT_VERIFIED.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+        assertThat(errorResponse.message())
+                .isEqualTo(AuthErrorCode.EMAIL_NOT_VERIFIED.getMessage());
+    }
+
+    @Test
     void MANAGER_회원가입을_할_수_있다() {
         Department department = organizationUtil.createDepartment();
         ManagerSignupRequest request =
@@ -211,6 +233,28 @@ class AuthControllerIntegrationTest {
                         .as(ErrorResponse.class);
         assertThat(errorResponse.message())
                 .isEqualTo(AuthErrorCode.USER_ALREADY_EXIST.getMessage());
+    }
+
+    @Test
+    void MANAGER_회원가입_시_이메일_인증이_완료되지_않았으면_Email_Not_Verified_에러_응답을_받는다() {
+        Department department = organizationUtil.createDepartment();
+
+        ManagerSignupRequest request =
+                managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
+        redisUtil.deleteData(request.email() + ":verified");
+        ErrorResponse errorResponse =
+                given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .body(request)
+                        .when()
+                        .post(AUTH_URL + "/managers/signup")
+                        .then()
+                        .log()
+                        .all()
+                        .statusCode(AuthErrorCode.EMAIL_NOT_VERIFIED.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+        assertThat(errorResponse.message())
+                .isEqualTo(AuthErrorCode.EMAIL_NOT_VERIFIED.getMessage());
     }
 
     @Test
