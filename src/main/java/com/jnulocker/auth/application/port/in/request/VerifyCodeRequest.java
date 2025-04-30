@@ -1,6 +1,6 @@
 package com.jnulocker.auth.application.port.in.request;
 
-import com.jnulocker.auth.application.port.in.request.valid.ValidCode;
+import com.jnulocker.auth.application.port.in.request.validation.ValidCode;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 

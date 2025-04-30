@@ -1,4 +1,4 @@
-package com.jnulocker.auth.application.port.in.request.valid;
+package com.jnulocker.auth.application.port.in.request.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
