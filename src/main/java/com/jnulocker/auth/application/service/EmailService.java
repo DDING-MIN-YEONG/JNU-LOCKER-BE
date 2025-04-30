@@ -54,6 +54,8 @@ public class EmailService implements SendEmailCommand, VerifyCodeCommand {
         if (!request.code().equals(storedCode)) {
             throw CodeNotCorrectException.EXCEPTION;
         }
+
+        redisUtil.deleteData(request.email());
     }
 
     public int createCode() {
