@@ -291,7 +291,7 @@ class RegistrationControllerIntegrationTest {
     }
 
     @Test
-    void 신청한_이벤트를_취소할_수_있다() {
+    void 신청한_사물함을_취소할_수_있다() {
         // given
         Event event = createEventWithLockers(EventStatus.OPEN, true);
         RegisterForEventRequest request = createRequestForAvailableLocker(event);
