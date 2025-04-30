@@ -9,6 +9,7 @@ import com.jnulocker.auth.exception.CodeNotCorrectException;
 import com.jnulocker.auth.exception.SendEmailException;
 import com.jnulocker.common.util.RedisUtil;
 import jakarta.mail.internet.MimeMessage;
+import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -61,7 +62,8 @@ public class EmailService implements SendEmailCommand, VerifyCodeCommand {
     }
 
     public int createCode() {
-        return (int) (Math.random() * 900000) + 100000;
+        Random random = new Random();
+        return 100000 + random.nextInt(900000);
     }
 
     public String generateHtml(int code) {
