@@ -123,7 +123,7 @@ public class AuthService
 
     public void checkEmailVerified(String email) {
         String verifiedStatus = redisUtil.getData(email + ":verified");
-        if (!"true".equals(verifiedStatus)) {
+        if (!Boolean.TRUE.toString().equals(verifiedStatus)) {
             throw EmailNotVerifiedException.EXCEPTION;
         }
     }
