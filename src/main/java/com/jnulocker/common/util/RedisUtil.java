@@ -25,4 +25,9 @@ public class RedisUtil {
     public void deleteData(String key) {
         redisTemplate.delete(key);
     }
+
+    public boolean isVerified(String email) {
+        String verifiedStatus = getData(email + ":verified");
+        return Boolean.TRUE.toString().equals(verifiedStatus);
+    }
 }

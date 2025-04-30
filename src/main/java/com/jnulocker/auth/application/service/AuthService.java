@@ -41,7 +41,9 @@ public class AuthService
     @Override
     @Transactional
     public void signupUser(UserSignupRequest request) {
-        checkEmailVerified(request.email());
+        if (!redisUtil.isVerified(request.email())) {
+            throw EmailNotVerifiedException.EXCEPTION;
+        }
 
         validateDuplicateEmail(request.email());
 
@@ -64,7 +66,9 @@ public class AuthService
     @Override
     @Transactional
     public void signupManager(ManagerSignupRequest request) {
-        checkEmailVerified(request.email());
+        if (!redisUtil.isVerified(request.email())) {
+            throw EmailNotVerifiedException.EXCEPTION;
+        }
 
         validateDuplicateEmail(request.email());
 
@@ -118,13 +122,6 @@ public class AuthService
     private void validateDuplicateEmail(String email) {
         if (memberQuery.existsByEmail(email)) {
             throw UserAlreadyExistException.EXCEPTION;
-        }
-    }
-
-    public void checkEmailVerified(String email) {
-        String verifiedStatus = redisUtil.getData(email + ":verified");
-        if (!Boolean.TRUE.toString().equals(verifiedStatus)) {
-            throw EmailNotVerifiedException.EXCEPTION;
         }
     }
 }
