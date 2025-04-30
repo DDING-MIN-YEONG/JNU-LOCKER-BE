@@ -76,9 +76,9 @@ public class AuthController implements AuthApi {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("verify")
+    @PostMapping("/verify")
     public ResponseEntity<Void> verify(@Valid @RequestBody VerifyCodeRequest request) {
-        verifyCodeCommand.verify((request));
+        verifyCodeCommand.verify(request);
         return ResponseEntity.ok().build();
     }
 }
