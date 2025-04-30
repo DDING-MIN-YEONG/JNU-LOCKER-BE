@@ -490,12 +490,12 @@ class AuthControllerIntegrationTest {
         // when
         ErrorResponse errorResponse =
                 verify(request)
-                        .statusCode(AuthErrorCode.CODE_TTL_EXPIRED.getHttpStatus().value())
+                        .statusCode(AuthErrorCode.CODE_EXPIRED.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
 
         // then
-        assertThat(errorResponse.message()).isEqualTo(AuthErrorCode.CODE_TTL_EXPIRED.getMessage());
+        assertThat(errorResponse.message()).isEqualTo(AuthErrorCode.CODE_EXPIRED.getMessage());
     }
 
     public static ValidatableResponse loginUser(LoginRequest request) {
