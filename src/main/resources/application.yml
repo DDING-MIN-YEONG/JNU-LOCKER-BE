@@ -27,6 +27,19 @@ spring:
       password: ${REDIS_PASSWORD}
       port: ${REDIS_PORT}
 
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${SPRING_MAIL_USERNAME}
+    password: ${SPRING_MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          timeout: 5000
+          starttls:
+            enable: true
+
 management:
   endpoints:
     web:
@@ -73,6 +86,9 @@ custom:
     refresh-secret-key: ${JWT_REFRESH_SECRET_KEY:dGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNo}
     access-token-expire-time: ${JWT_ACCESS_TOKEN_EXPIRE_TIME:3600}
     refresh-token-expire-time: ${JWT_REFRESH_TOKEN_EXPIRE_TIME:86400}
+
+email:
+  sender: ${EMAIL_SENDER}
 
 ---
 spring:
