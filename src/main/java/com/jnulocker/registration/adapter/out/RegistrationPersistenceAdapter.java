@@ -22,6 +22,11 @@ public class RegistrationPersistenceAdapter
     }
 
     @Override
+    public void delete(Registration registration) {
+        registrationRepository.delete(registration);
+    }
+
+    @Override
     public boolean existsByMemberIdAndEventId(Long memberId, Long eventId) {
         return registrationRepository.existsByMemberIdAndLocker_Floor_EventId(memberId, eventId);
     }

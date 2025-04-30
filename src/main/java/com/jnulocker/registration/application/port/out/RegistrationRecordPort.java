@@ -5,4 +5,6 @@ import com.jnulocker.registration.domain.Registration;
 public interface RegistrationRecordPort {
 
     void save(Registration registration);
+
+    void delete(Registration registration);
 }

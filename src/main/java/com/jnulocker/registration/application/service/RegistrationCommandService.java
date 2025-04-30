@@ -13,6 +13,7 @@ import com.jnulocker.registration.application.port.out.RegistrationLoadPort;
 import com.jnulocker.registration.application.port.out.RegistrationRecordPort;
 import com.jnulocker.registration.domain.Registration;
 import com.jnulocker.registration.exception.RegistrationAlreadyExistsException;
+import com.jnulocker.registration.exception.RegistrationNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,5 +47,17 @@ public class RegistrationCommandService implements RegistrationCommand {
 
         Registration registration = Registration.create(member, locker);
         registrationRecordPort.save(registration);
+    }
+
+    @Override
+    @Transactional
+    public void cancelMyRegistration(Long eventId) {
+        Long memberId = SecurityUtils.getCurrentMemberId();
+        Event event = eventQuery.getByIdOrThrow(eventId);
+        Registration registration =
+                registrationLoadPort
+                        .getRegistrationByMemberIdAndEventId(memberId, event.getId())
+                        .orElseThrow(() -> RegistrationNotFoundException.EXCEPTION);
+        registrationRecordPort.delete(registration);
     }
 }
