@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class RedisUtil {
+    private static final String VERIFIED_PREFIX = ":verified";
+
     private final StringRedisTemplate redisTemplate;
 
     public String getData(String key) {
@@ -27,7 +29,7 @@ public class RedisUtil {
     }
 
     public boolean isVerified(String email) {
-        String verifiedStatus = getData(email + ":verified");
+        String verifiedStatus = getData(email + VERIFIED_PREFIX);
         return Boolean.TRUE.toString().equals(verifiedStatus);
     }
 }

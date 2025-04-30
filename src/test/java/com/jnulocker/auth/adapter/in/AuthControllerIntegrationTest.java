@@ -57,6 +57,7 @@ class AuthControllerIntegrationTest {
     private static final String AUTH_URL = "/v1/auth";
     private static final String ACCESS_TOKEN = "access_token";
     private static final String REFRESH_TOKEN = "refresh_token";
+    private static final String VERIFIED_PREFIX = ":verified";
 
     @LocalServerPort private int port;
 
@@ -139,7 +140,7 @@ class AuthControllerIntegrationTest {
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
 
-        redisUtil.deleteData(request.email() + ":verified");
+        redisUtil.deleteData(request.email() + VERIFIED_PREFIX);
         ErrorResponse errorResponse =
                 given().contentType(MediaType.APPLICATION_JSON_VALUE)
                         .body(request)
@@ -241,7 +242,7 @@ class AuthControllerIntegrationTest {
 
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
-        redisUtil.deleteData(request.email() + ":verified");
+        redisUtil.deleteData(request.email() + VERIFIED_PREFIX);
         ErrorResponse errorResponse =
                 given().contentType(MediaType.APPLICATION_JSON_VALUE)
                         .body(request)
@@ -578,6 +579,6 @@ class AuthControllerIntegrationTest {
     }
 
     public void setEmailVerified(String email) {
-        redisUtil.setDataExpire(email + ":verified", "true", 3600);
+        redisUtil.setDataExpire(email + VERIFIED_PREFIX, "true", 3600);
     }
 }

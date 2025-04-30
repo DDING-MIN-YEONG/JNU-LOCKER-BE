@@ -22,6 +22,7 @@ import org.thymeleaf.context.Context;
 public class EmailService implements SendEmailCommand, VerifyCodeCommand {
     private static final int FIVE_MINUTIES = 300;
     private static final int ONE_HOUR = 3600;
+    private static final String VERIFIED_PREFIX = ":verified";
 
     private final TemplateEngine templateEngine;
     private final JavaMailSender javaMailSender;
@@ -57,7 +58,7 @@ public class EmailService implements SendEmailCommand, VerifyCodeCommand {
             throw CodeNotCorrectException.EXCEPTION;
         }
 
-        redisUtil.setDataExpire(request.email() + ":verified", "true", ONE_HOUR);
+        redisUtil.setDataExpire(request.email() + VERIFIED_PREFIX, "true", ONE_HOUR);
         redisUtil.deleteData(request.email());
     }
 
