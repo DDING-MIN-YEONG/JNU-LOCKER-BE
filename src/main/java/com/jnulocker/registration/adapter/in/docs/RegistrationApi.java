@@ -50,4 +50,9 @@ public interface RegistrationApi {
     ResponseEntity<Void> registerForEvent(
             @PathVariable("event-id") Long eventId,
             @Valid @RequestBody RegisterForEventRequest request);
+
+    @ApiExceptionExamples(CancelMyRegistrationExceptionDocs.class)
+    @Operation(summary = "사물함 신청 취소", description = "해당 이벤트에 대한 사물함 신청을 취소합니다.")
+    @ApiResponse(responseCode = "204", description = "사물함 신청 취소 성공")
+    ResponseEntity<Void> cancelMyRegistration(@PathVariable("event-id") Long eventId);
 }
