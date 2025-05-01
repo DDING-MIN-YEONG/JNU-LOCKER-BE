@@ -135,6 +135,23 @@ class RegistrationControllerIntegrationTest {
     }
 
     @Test
+    void 자신의_사물함_내역이_존재하지_않으면_예외가_발생한다() {
+        // given
+        Event event = createEventWithLockers(EventStatus.OPEN, true);
+
+        // when : 신청 없이 신청 내역 조회
+        ErrorResponse errorResponse =
+                getMyRegistration(event.getId())
+                        .statusCode(RegistrationErrorCode.REGISTRATION_NOT_FOUND.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(RegistrationErrorCode.REGISTRATION_NOT_FOUND.getMessage());
+    }
+
+    @Test
     void 인증되지_않은_사용자는_신청할_수_없다() {
         // given
         Event event = createEventWithLockers(EventStatus.OPEN, true);
