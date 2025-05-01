@@ -46,9 +46,14 @@ public class MemberTestUtil {
                 return memberRepository.save(
                         memberBuilder().withDepartment(department).buildUser());
             }
-            case GUEST, MANAGER -> {
+            case GUEST-> {
                 return memberRepository.save(
                         memberBuilder().withDepartment(department).buildManager());
+            }
+            case MANAGER -> {
+                Member member = memberBuilder().withDepartment(department).buildManager();
+                member.approveManager();
+                return memberRepository.save(member);
             }
             default -> throw new IllegalArgumentException("Invalid role: " + role);
         }
