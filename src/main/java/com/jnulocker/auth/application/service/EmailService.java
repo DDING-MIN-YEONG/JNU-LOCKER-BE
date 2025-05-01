@@ -42,7 +42,7 @@ public class EmailService implements SendEmailCommand, VerifyCodeCommand {
             helper.setText(form, true);
 
             javaMailSender.send(message);
-            redisUtil.setDataExpire(request.email(), Integer.toString(code), FIVE_MINUTIES);
+            redisUtil.setEmailVerificationCode(request.email(), code);
         } catch (Exception e) {
             throw SendEmailException.EXCEPTION;
         }
@@ -58,7 +58,7 @@ public class EmailService implements SendEmailCommand, VerifyCodeCommand {
             throw CodeNotCorrectException.EXCEPTION;
         }
 
-        redisUtil.setDataExpire(request.email() + VERIFIED_PREFIX, "true", ONE_HOUR);
+        redisUtil.setEmailVerified(request.email());
         redisUtil.deleteData(request.email());
     }
 

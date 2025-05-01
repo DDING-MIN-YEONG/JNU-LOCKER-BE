@@ -448,7 +448,7 @@ class AuthControllerIntegrationTest {
         String code = "123456";
         VerifyCodeRequest request =
                 verifyCodeRequestBuilder().withEmail(email).withCode(code).build();
-        redisUtil.setDataExpire(email, code, 300);
+        redisUtil.setEmailVerificationCode(request.email(), Integer.parseInt(code));
 
         // when
         ValidatableResponse response = verify(request);
@@ -462,7 +462,7 @@ class AuthControllerIntegrationTest {
         // given
         String email = "test@example.com";
         String incorrectCode = "12347";
-        redisUtil.setDataExpire(email, incorrectCode, 300);
+        redisUtil.setEmailVerificationCode(email, Integer.parseInt(incorrectCode));
 
         VerifyCodeRequest request =
                 verifyCodeRequestBuilder().withEmail(email).withCode("123456").build();
@@ -479,7 +479,7 @@ class AuthControllerIntegrationTest {
     }
 
     @Test
-    void 만료된_인증코드를_사용하면_Code_Ttl_Expired_에러_응답을_받는다() {
+    void 만료된_인증코드를_사용하면_Code_Expired_에러_응답을_받는다() {
         // given
         String email = "test@example.com";
         String expiredCode = "123456";
@@ -524,7 +524,7 @@ class AuthControllerIntegrationTest {
     }
 
     public ValidatableResponse signupUser(UserSignupRequest request) {
-        setEmailVerified(request.email());
+        redisUtil.setEmailVerified(request.email());
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
@@ -535,7 +535,7 @@ class AuthControllerIntegrationTest {
     }
 
     public ValidatableResponse signupManager(ManagerSignupRequest request) {
-        setEmailVerified(request.email());
+        redisUtil.setEmailVerified(request.email());
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
@@ -576,9 +576,5 @@ class AuthControllerIntegrationTest {
                 .expiration(expiredAt)
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
-    }
-
-    public void setEmailVerified(String email) {
-        redisUtil.setDataExpire(email + VERIFIED_PREFIX, "true", 3600);
     }
 }
