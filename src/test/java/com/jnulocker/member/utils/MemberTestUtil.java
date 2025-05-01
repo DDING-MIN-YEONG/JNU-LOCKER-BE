@@ -46,7 +46,7 @@ public class MemberTestUtil {
                 return memberRepository.save(
                         memberBuilder().withDepartment(department).buildUser());
             }
-            case GUEST-> {
+            case GUEST -> {
                 return memberRepository.save(
                         memberBuilder().withDepartment(department).buildManager());
             }
