@@ -52,6 +52,7 @@ public class EventController implements EventApi {
         return ResponseEntity.ok(eventQuery.getLockersByEventId(eventId));
     }
 
+    @Override
     @DeleteMapping("/{event-id}")
     public ResponseEntity<Void> deleteEvent(@PathVariable("event-id") Long eventId) {
         eventCommand.deleteEvent(eventId);
