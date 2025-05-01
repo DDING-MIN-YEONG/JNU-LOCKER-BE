@@ -14,7 +14,6 @@ import com.jnulocker.events.domain.Floor;
 import com.jnulocker.events.domain.Locker;
 import com.jnulocker.events.event.LockerEventCreatedEvent;
 import com.jnulocker.events.event.LockerEventDeletedEvent;
-import com.jnulocker.events.exception.OnlyOrganizerCanDeleteException;
 import com.jnulocker.member.application.port.in.MemberQuery;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.organization.application.port.in.DepartmentQuery;
@@ -50,11 +49,7 @@ public class EventCommandService implements EventCommand {
         Member member = memberQuery.findByIdOrThrow(memberId);
 
         Event event = eventQuery.getByIdOrThrow(eventId);
-
-        // 이벤트를 주최하는 department가 아닌 경우 예외 발생
-        if (!event.getDepartment().equals(member.getDepartment())) {
-            throw OnlyOrganizerCanDeleteException.EXCEPTION;
-        }
+        event.validateDeletable(member.getDepartment());
 
         eventRecordPort.deleteEvent(event);
 
