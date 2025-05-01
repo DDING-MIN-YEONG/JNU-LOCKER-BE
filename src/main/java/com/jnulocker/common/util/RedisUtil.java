@@ -51,7 +51,9 @@ public class RedisUtil {
     }
 
     public void validVerified(String email) {
-        getVerifiedStatus(email);
+        if (!TRUE.equals(getVerifiedStatus(email))) {
+            throw EmailNotVerifiedException.EXCEPTION;
+        }
     }
 
     public boolean existsEmailVerified(String email) {
