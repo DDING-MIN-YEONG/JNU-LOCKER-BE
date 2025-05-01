@@ -142,7 +142,10 @@ class RegistrationControllerIntegrationTest {
         // when : 신청 없이 신청 내역 조회
         ErrorResponse errorResponse =
                 getMyRegistration(event.getId())
-                        .statusCode(RegistrationErrorCode.REGISTRATION_NOT_FOUND.getHttpStatus().value())
+                        .statusCode(
+                                RegistrationErrorCode.REGISTRATION_NOT_FOUND
+                                        .getHttpStatus()
+                                        .value())
                         .extract()
                         .as(ErrorResponse.class);
 
