@@ -2,6 +2,7 @@ package com.jnulocker.events.application.service;
 
 import com.jnulocker.auth.security.SecurityUtils;
 import com.jnulocker.events.application.port.in.EventCommand;
+import com.jnulocker.events.application.port.in.EventQuery;
 import com.jnulocker.events.application.port.in.request.CreateEventRequest;
 import com.jnulocker.events.application.port.in.request.FloorInfo;
 import com.jnulocker.events.application.port.in.request.LockerRange;
@@ -12,7 +13,10 @@ import com.jnulocker.events.domain.EventParticipation;
 import com.jnulocker.events.domain.Floor;
 import com.jnulocker.events.domain.Locker;
 import com.jnulocker.events.event.LockerEventCreatedEvent;
+import com.jnulocker.events.event.LockerEventDeletedEvent;
+import com.jnulocker.events.exception.OnlyOrganizerCanDeleteException;
 import com.jnulocker.member.application.port.in.MemberQuery;
+import com.jnulocker.member.domain.Member;
 import com.jnulocker.organization.application.port.in.DepartmentQuery;
 import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.exception.DepartmentNotFoundException;
@@ -30,12 +34,32 @@ public class EventCommandService implements EventCommand {
     private final ApplicationEventPublisher eventPublisher;
     private final MemberQuery memberQuery;
     private final DepartmentQuery departmentQuery;
+    private final EventQuery eventQuery;
     private final EventRecordPort eventRecordPort;
 
     @Override
     @Transactional
     public void save(Event event) {
         eventRecordPort.saveEvent(event);
+    }
+
+    @Override
+    @Transactional
+    public void deleteEvent(Long eventId) {
+        Long memberId = SecurityUtils.getCurrentMemberId();
+        Member member = memberQuery.findByIdOrThrow(memberId);
+
+        Event event = eventQuery.getByIdOrThrow(eventId);
+
+        // 이벤트를 주최하는 department가 아닌 경우 예외 발생
+        if (!event.getDepartment().equals(member.getDepartment())) {
+            throw OnlyOrganizerCanDeleteException.EXCEPTION;
+        }
+
+        eventRecordPort.deleteEvent(event);
+
+        // 이벤트 삭제 이벤트 발행
+        eventPublisher.publishEvent(LockerEventDeletedEvent.of(event.getId()));
     }
 
     @Override
@@ -57,7 +81,8 @@ public class EventCommandService implements EventCommand {
     private Event createAndSaveEvent(CreateEventRequest request) {
         // 이벤트를 주최하는 department 조회
         Long memberId = SecurityUtils.getCurrentMemberId();
-        Department organizerDepartment = memberQuery.findByIdOrThrow(memberId).getDepartment();
+        Department organizerDepartment =
+                memberQuery.findByIdWithDepartmentOrThrow(memberId).getDepartment();
 
         // 이벤트 생성 및 저장
         return eventRecordPort.saveEvent(
