@@ -56,7 +56,7 @@ public class RedisUtil {
         }
     }
 
-    public boolean existsEmailVerified(String email) {
+    public boolean existsVerifiedEmail(String email) {
         return emailVerificationRepository.findById(getVerifiedKey(email)).isPresent();
     }
 

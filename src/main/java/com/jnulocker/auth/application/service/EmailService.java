@@ -26,7 +26,7 @@ public class EmailService implements SendEmailCommand, VerifyCodeCommand {
     @Override
     public void sendEmail(SendEmailRequest request) {
         // 기존 이메일 인증 완료 기록이 있으면 삭제
-        if (redisUtil.existsEmailVerified(request.email())) {
+        if (redisUtil.existsVerifiedEmail(request.email())) {
             redisUtil.deleteVerifiedData(request.email());
         }
 
