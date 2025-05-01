@@ -29,4 +29,11 @@ public class MemberQueryService implements MemberQuery {
     public Member findByIdOrThrow(Long id) {
         return memberLoadPort.findById(id).orElseThrow(() -> MemberNotFoundException.EXCEPTION);
     }
+
+    @Override
+    public Member findByIdWithDepartmentOrThrow(Long id) {
+        return memberLoadPort
+                .findByIdWithDepartment(id)
+                .orElseThrow(() -> MemberNotFoundException.EXCEPTION);
+    }
 }

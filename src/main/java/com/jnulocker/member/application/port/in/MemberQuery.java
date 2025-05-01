@@ -9,4 +9,6 @@ public interface MemberQuery {
     Member findByEmailOrThrow(String email);
 
     Member findByIdOrThrow(Long id);
+
+    Member findByIdWithDepartmentOrThrow(Long memberId);
 }
