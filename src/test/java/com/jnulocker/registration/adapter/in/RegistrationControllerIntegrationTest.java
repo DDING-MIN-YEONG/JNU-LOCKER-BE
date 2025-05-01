@@ -4,15 +4,14 @@ import static com.jnulocker.events.adapter.in.EventControllerIntegrationTest.get
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.jnulocker.auth.jwt.TokenProvider;
 import com.jnulocker.auth.jwt.exception.JwtErrorCode;
+import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.exception.EventErrorCode;
 import com.jnulocker.events.utils.EventTestUtil;
-import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.utils.MemberTestUtil;
 import com.jnulocker.registration.application.port.in.request.RegisterForEventRequest;
@@ -52,9 +51,9 @@ class RegistrationControllerIntegrationTest {
 
     @Autowired private EventTestUtil eventTestUtil;
 
-    @Autowired private TokenProvider tokenProvider;
-
     @Autowired private MemberTestUtil memberTestUtil;
+
+    @Autowired private AuthTestUtil authTestUtil;
 
     @Autowired private RegistrationTestUtil registrationTestUtil;
 
@@ -63,7 +62,7 @@ class RegistrationControllerIntegrationTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-        accessToken = generateAccessToken(Role.USER);
+        accessToken = authTestUtil.generateAccessToken(Role.USER);
     }
 
     @AfterEach
@@ -92,7 +91,7 @@ class RegistrationControllerIntegrationTest {
         registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
 
         // TODO: 추후 manager로 변경
-        accessToken = generateAccessToken(Role.GUEST);
+        accessToken = authTestUtil.generateAccessToken(Role.GUEST);
 
         // when
         RegistrationCustomPage registrationCustomPage =
@@ -302,7 +301,7 @@ class RegistrationControllerIntegrationTest {
     @Test
     void MANAGER는_publish_false인_이벤트도_신청할_수_있다() {
         // given
-        accessToken = generateAccessToken(Role.MANAGER);
+        accessToken = authTestUtil.generateAccessToken(Role.MANAGER);
         Event event = createEventWithLockers(EventStatus.OPEN, false);
         RegisterForEventRequest request = createRequestForAvailableLocker(event);
 
@@ -391,12 +390,6 @@ class RegistrationControllerIntegrationTest {
 
     private Event createEventWithLockers(EventStatus status, boolean publish) {
         return eventTestUtil.createEventWithFloorAndLockers(List.of(5, 10), status, publish);
-    }
-
-    private String generateAccessToken(Role role) {
-        Member member =
-                role == Role.MANAGER ? memberTestUtil.createManager() : memberTestUtil.createUser();
-        return tokenProvider.generateAccessToken(member.getId(), role);
     }
 
     private RegisterForEventRequest createRequestForAvailableLocker(Event event) {

@@ -6,6 +6,7 @@ import static organization.domain.OrganizationTestDataBuilder.organizationBuilde
 
 import com.jnulocker.member.adapter.out.MemberRepository;
 import com.jnulocker.member.domain.Member;
+import com.jnulocker.member.domain.Role;
 import com.jnulocker.organization.adapter.out.DepartmentRepository;
 import com.jnulocker.organization.adapter.out.OrganizationRepository;
 import com.jnulocker.organization.domain.Department;
@@ -22,10 +23,32 @@ public class MemberTestUtil {
 
     @Autowired private MemberRepository memberRepository;
 
+    public Member createMemberFromRole(Role role) {
+        switch (role) {
+            case USER -> {
+                return createUser();
+            }
+            case GUEST -> {
+                return createGuest();
+            }
+            case MANAGER -> {
+                return createManager();
+            }
+            default -> throw new IllegalArgumentException("Invalid role: " + role);
+        }
+    }
+
     public Member createUser() {
         Department department = getDepartment();
 
         Member member = memberBuilder().withDepartment(department).buildUser();
+        return memberRepository.save(member);
+    }
+
+    public Member createGuest() {
+        Department department = getDepartment();
+
+        Member member = memberBuilder().withDepartment(department).buildManager();
         return memberRepository.save(member);
     }
 
