@@ -99,7 +99,10 @@ spring:
   sql:
     init:
       mode: never
-
+  jpa:
+    hibernate:
+      ddl-auto: update
+      
 ---
 spring:
   config:
