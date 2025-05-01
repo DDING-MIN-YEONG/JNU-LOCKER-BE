@@ -140,7 +140,7 @@ class AuthControllerIntegrationTest {
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
 
-        redisUtil.deleteData(request.email() + VERIFIED_PREFIX);
+        redisUtil.deleteVerifiedData(request.email());
         ErrorResponse errorResponse =
                 signupUserNotEmailVerified(request)
                         .statusCode(AuthErrorCode.EMAIL_NOT_VERIFIED.getHttpStatus().value())
@@ -236,7 +236,7 @@ class AuthControllerIntegrationTest {
 
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
-        redisUtil.deleteData(request.email() + VERIFIED_PREFIX);
+        redisUtil.deleteVerifiedData(request.email());
         ErrorResponse errorResponse =
                 signupManagerNotEmailVerified(request)
                         .statusCode(AuthErrorCode.EMAIL_NOT_VERIFIED.getHttpStatus().value())
