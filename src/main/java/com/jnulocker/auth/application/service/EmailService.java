@@ -4,8 +4,8 @@ import com.jnulocker.auth.application.port.in.SendEmailCommand;
 import com.jnulocker.auth.application.port.in.VerifyCodeCommand;
 import com.jnulocker.auth.application.port.in.request.SendEmailRequest;
 import com.jnulocker.auth.application.port.in.request.VerifyCodeRequest;
-import com.jnulocker.auth.exception.CodeExpiredException;
 import com.jnulocker.auth.exception.CodeNotCorrectException;
+import com.jnulocker.auth.exception.CodeNotFoundException;
 import com.jnulocker.auth.exception.SendEmailException;
 import com.jnulocker.common.util.RedisUtil;
 import jakarta.mail.internet.MimeMessage;
@@ -27,7 +27,7 @@ public class EmailService implements SendEmailCommand, VerifyCodeCommand {
     @Override
     public void sendEmail(SendEmailRequest request) {
         // 기존 이메일 인증 완료 기록이 있으면 삭제
-        if (redisUtil.isVerified(request.email())) {
+        if (redisUtil.existsEmailVerified(request.email())) {
             redisUtil.deleteVerifiedData(request.email());
         }
 
@@ -53,7 +53,7 @@ public class EmailService implements SendEmailCommand, VerifyCodeCommand {
     public void verify(VerifyCodeRequest request) {
         String storedCode = redisUtil.getData(request.email());
         if (storedCode == null) {
-            throw CodeExpiredException.EXCEPTION;
+            throw CodeNotFoundException.EXCEPTION;
         }
         if (!request.code().equals(storedCode)) {
             throw CodeNotCorrectException.EXCEPTION;

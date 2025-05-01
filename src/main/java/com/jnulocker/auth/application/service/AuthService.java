@@ -8,7 +8,6 @@ import com.jnulocker.auth.application.port.in.request.LoginRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.response.AuthToken;
-import com.jnulocker.auth.exception.EmailNotVerifiedException;
 import com.jnulocker.auth.exception.UserAlreadyExistException;
 import com.jnulocker.auth.jwt.TokenProvider;
 import com.jnulocker.auth.jwt.exception.InvalidRefreshTokenException;
@@ -41,9 +40,7 @@ public class AuthService
     @Override
     @Transactional
     public void signupUser(UserSignupRequest request) {
-        if (!redisUtil.isVerified(request.email())) {
-            throw EmailNotVerifiedException.EXCEPTION;
-        }
+        redisUtil.validVerified(request.email());
 
         validateDuplicateEmail(request.email());
 
@@ -66,9 +63,7 @@ public class AuthService
     @Override
     @Transactional
     public void signupManager(ManagerSignupRequest request) {
-        if (!redisUtil.isVerified(request.email())) {
-            throw EmailNotVerifiedException.EXCEPTION;
-        }
+        redisUtil.validVerified(request.email());
 
         validateDuplicateEmail(request.email());
 

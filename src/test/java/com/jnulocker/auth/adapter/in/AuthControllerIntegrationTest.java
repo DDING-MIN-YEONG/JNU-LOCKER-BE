@@ -479,12 +479,12 @@ class AuthControllerIntegrationTest {
         // when
         ErrorResponse errorResponse =
                 verify(request)
-                        .statusCode(AuthErrorCode.CODE_EXPIRED.getHttpStatus().value())
+                        .statusCode(AuthErrorCode.CODE_NOT_FOUND.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
 
         // then
-        assertThat(errorResponse.message()).isEqualTo(AuthErrorCode.CODE_EXPIRED.getMessage());
+        assertThat(errorResponse.message()).isEqualTo(AuthErrorCode.CODE_NOT_FOUND.getMessage());
     }
 
     public static ValidatableResponse login(LoginRequest request) {
