@@ -91,7 +91,7 @@ class AuthControllerIntegrationTest {
     private void clearData() {
         memberRepository.deleteAll();
         tokenRepository.deleteAll();
-        redisUtil.deleteData("*");
+        redisUtil.deleteAll();
     }
 
     // USER 회원가입 테스트 (변경 없음)

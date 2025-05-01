@@ -42,4 +42,8 @@ public class RedisUtil {
     private String getVerifiedKey(String email) {
         return email + VERIFIED_PREFIX;
     }
+
+    public void deleteAll() {
+        deleteData("*");
+    }
 }
