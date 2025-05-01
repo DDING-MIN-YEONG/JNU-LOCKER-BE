@@ -1,18 +1,23 @@
 package com.jnulocker.auth.adapter.in;
 
 import static auth.application.port.in.request.ManagerSignupRequestTestDataBuilder.managerSignupRequestBuilder;
+import static auth.application.port.in.request.SendEmailRequestTestDataBuilder.sendEmailRequestBuilder;
 import static auth.application.port.in.request.UserSignupRequestTestDataBuilder.userSignupRequestBuilder;
+import static auth.application.port.in.request.VerifyCodeRequestTestDataBuilder.verifyCodeRequestBuilder;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import com.jnulocker.auth.adapter.out.TokenRepository;
 import com.jnulocker.auth.application.port.in.request.LoginRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
+import com.jnulocker.auth.application.port.in.request.SendEmailRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
+import com.jnulocker.auth.application.port.in.request.VerifyCodeRequest;
 import com.jnulocker.auth.exception.AuthErrorCode;
 import com.jnulocker.auth.jwt.RefreshToken;
 import com.jnulocker.auth.jwt.exception.JwtErrorCode;
 import com.jnulocker.common.exception.ErrorResponse;
+import com.jnulocker.common.util.RedisUtil;
 import com.jnulocker.member.adapter.out.MemberRepository;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.exception.MemberErrorCode;
@@ -52,6 +57,7 @@ class AuthControllerIntegrationTest {
     private static final String AUTH_URL = "/v1/auth";
     private static final String ACCESS_TOKEN = "access_token";
     private static final String REFRESH_TOKEN = "refresh_token";
+    private static final String VERIFIED_PREFIX = ":verified";
 
     @LocalServerPort private int port;
 
@@ -62,6 +68,8 @@ class AuthControllerIntegrationTest {
     @Autowired private MemberTestUtil memberTestUtil;
 
     @Autowired private OrganizationUtil organizationUtil;
+
+    @Autowired private RedisUtil redisUtil;
 
     @Value("${custom.jwt.access-secret-key}")
     String accessSecretKey;
@@ -82,6 +90,8 @@ class AuthControllerIntegrationTest {
 
     private void clearData() {
         memberRepository.deleteAll();
+        tokenRepository.deleteAll();
+        redisUtil.deleteAll();
     }
 
     // USER 회원가입 테스트 (변경 없음)
@@ -122,6 +132,22 @@ class AuthControllerIntegrationTest {
                         .as(ErrorResponse.class);
         assertThat(errorResponse.message())
                 .isEqualTo(AuthErrorCode.USER_ALREADY_EXIST.getMessage());
+    }
+
+    @Test
+    void USER_회원가입_시_이메일_인증이_완료되지_않았으면_Email_Not_Verified_에러_응답을_받는다() {
+        Department department = organizationUtil.createDepartment();
+        UserSignupRequest request =
+                userSignupRequestBuilder().withDepartmentId(department.getId()).build();
+
+        redisUtil.deleteVerifiedData(request.email());
+        ErrorResponse errorResponse =
+                signupUserNotEmailVerified(request)
+                        .statusCode(AuthErrorCode.EMAIL_NOT_VERIFIED.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+        assertThat(errorResponse.message())
+                .isEqualTo(AuthErrorCode.EMAIL_NOT_VERIFIED.getMessage());
     }
 
     @Test
@@ -205,6 +231,22 @@ class AuthControllerIntegrationTest {
     }
 
     @Test
+    void MANAGER_회원가입_시_이메일_인증이_완료되지_않았으면_Email_Not_Verified_에러_응답을_받는다() {
+        Department department = organizationUtil.createDepartment();
+
+        ManagerSignupRequest request =
+                managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
+        redisUtil.deleteVerifiedData(request.email());
+        ErrorResponse errorResponse =
+                signupManagerNotEmailVerified(request)
+                        .statusCode(AuthErrorCode.EMAIL_NOT_VERIFIED.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+        assertThat(errorResponse.message())
+                .isEqualTo(AuthErrorCode.EMAIL_NOT_VERIFIED.getMessage());
+    }
+
+    @Test
     void 로그인_성공시_토큰을_반환한다() {
         // given
         Department department = organizationUtil.createDepartment();
@@ -217,7 +259,7 @@ class AuthControllerIntegrationTest {
 
         // when
         ExtractableResponse<Response> response =
-                loginUser(loginRequest).statusCode(HttpStatus.OK.value()).extract();
+                login(loginRequest).statusCode(HttpStatus.OK.value()).extract();
 
         // then
         Cookies cookies = response.detailedCookies();
@@ -239,7 +281,7 @@ class AuthControllerIntegrationTest {
         LoginRequest loginRequest =
                 new LoginRequest(signupRequest.email(), signupRequest.password());
         ExtractableResponse<Response> loginResponse =
-                loginUser(loginRequest).statusCode(HttpStatus.OK.value()).extract();
+                login(loginRequest).statusCode(HttpStatus.OK.value()).extract();
         String refreshToken = getCookieValue(loginResponse.detailedCookies(), REFRESH_TOKEN);
 
         // when
@@ -343,7 +385,7 @@ class AuthControllerIntegrationTest {
 
         // when
         ErrorResponse errorResponse =
-                loginUser(loginRequest)
+                login(loginRequest)
                         .statusCode(MemberErrorCode.MEMBER_NOT_FOUND.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -365,7 +407,7 @@ class AuthControllerIntegrationTest {
 
         // when
         ErrorResponse errorResponse =
-                loginUser(loginRequest)
+                login(loginRequest)
                         .statusCode(AuthErrorCode.FAIL_AUTHENTICATION.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -375,7 +417,77 @@ class AuthControllerIntegrationTest {
                 .isEqualTo(AuthErrorCode.FAIL_AUTHENTICATION.getMessage());
     }
 
-    public static ValidatableResponse loginUser(LoginRequest request) {
+    @Test
+    void 이메일_전송_요청시_성공한다() {
+        // given
+        SendEmailRequest request = sendEmailRequestBuilder().build();
+
+        // when
+        ValidatableResponse response = sendEmail(request);
+
+        // then
+        response.statusCode(HttpStatus.OK.value());
+    }
+
+    @Test
+    void 인증코드_검증_요청시_성공한다() {
+        // given
+        String email = "test@example.com";
+        String code = "123456";
+        VerifyCodeRequest request =
+                verifyCodeRequestBuilder().withEmail(email).withCode(code).build();
+        redisUtil.setEmailVerificationCode(request.email(), Integer.parseInt(code));
+
+        // when
+        ValidatableResponse response = verify(request);
+
+        // then
+        response.statusCode(HttpStatus.OK.value());
+    }
+
+    @Test
+    void 인증코드가_일치하지_않으면_Code_Not_Correct_에러_응답을_받는다() {
+        // given
+        String email = "test@example.com";
+        String incorrectCode = "12347";
+        redisUtil.setEmailVerificationCode(email, Integer.parseInt(incorrectCode));
+
+        VerifyCodeRequest request =
+                verifyCodeRequestBuilder().withEmail(email).withCode("123456").build();
+
+        // when
+        ErrorResponse errorResponse =
+                verify(request)
+                        .statusCode(AuthErrorCode.CODE_NOT_CORRECT.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message()).isEqualTo(AuthErrorCode.CODE_NOT_CORRECT.getMessage());
+    }
+
+    @Test
+    void 만료된_인증코드를_사용하면_Code_Expired_에러_응답을_받는다() {
+        // given
+        String email = "test@example.com";
+        String expiredCode = "123456";
+        redisUtil.deleteData(email);
+
+        VerifyCodeRequest request =
+                verifyCodeRequestBuilder().withEmail(email).withCode(expiredCode).build();
+
+        // when
+        ErrorResponse errorResponse =
+                verify(request)
+                        .statusCode(AuthErrorCode.CODE_NOT_FOUND.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message()).isEqualTo(AuthErrorCode.CODE_NOT_FOUND.getMessage());
+    }
+
+    public static ValidatableResponse login(LoginRequest request) {
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
@@ -399,21 +511,49 @@ class AuthControllerIntegrationTest {
         return cookies.getValue(name);
     }
 
-    public static ValidatableResponse signupUser(UserSignupRequest request) {
+    private ValidatableResponse postSignup(String path, Object request) {
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
-                .post(AUTH_URL + "/users/signup")
+                .post(AUTH_URL + path)
                 .then()
                 .log()
                 .all();
     }
 
-    public static ValidatableResponse signupManager(ManagerSignupRequest request) {
+    private ValidatableResponse signupUser(UserSignupRequest request) {
+        redisUtil.setEmailVerified(request.email());
+        return postSignup("/users/signup", request);
+    }
+
+    private ValidatableResponse signupManager(ManagerSignupRequest request) {
+        redisUtil.setEmailVerified(request.email());
+        return postSignup("/managers/signup", request);
+    }
+
+    private ValidatableResponse signupUserNotEmailVerified(UserSignupRequest request) {
+        return postSignup("/users/signup", request);
+    }
+
+    private ValidatableResponse signupManagerNotEmailVerified(ManagerSignupRequest request) {
+        return postSignup("/managers/signup", request);
+    }
+
+    public static ValidatableResponse sendEmail(SendEmailRequest request) {
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
-                .post(AUTH_URL + "/managers/signup")
+                .post(AUTH_URL + "/send-email")
+                .then()
+                .log()
+                .all();
+    }
+
+    public static ValidatableResponse verify(VerifyCodeRequest request) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(request)
+                .when()
+                .post(AUTH_URL + "/verify")
                 .then()
                 .log()
                 .all();

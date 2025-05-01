@@ -7,10 +7,14 @@ import com.jnulocker.auth.adapter.in.docs.AuthApi;
 import com.jnulocker.auth.application.port.in.LoginCommand;
 import com.jnulocker.auth.application.port.in.ManagerSignupCommand;
 import com.jnulocker.auth.application.port.in.ReissueCommand;
+import com.jnulocker.auth.application.port.in.SendEmailCommand;
 import com.jnulocker.auth.application.port.in.UserSignupCommand;
+import com.jnulocker.auth.application.port.in.VerifyCodeCommand;
 import com.jnulocker.auth.application.port.in.request.LoginRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
+import com.jnulocker.auth.application.port.in.request.SendEmailRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
+import com.jnulocker.auth.application.port.in.request.VerifyCodeRequest;
 import com.jnulocker.auth.application.port.in.response.AuthToken;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,6 +35,8 @@ public class AuthController implements AuthApi {
     private final ManagerSignupCommand managerSignupCommand;
     private final LoginCommand loginCommand;
     private final ReissueCommand reissueCommand;
+    private final SendEmailCommand sendEmailCommand;
+    private final VerifyCodeCommand verifyCodeCommand;
 
     @Override
     @PostMapping("/users/signup")
@@ -61,6 +67,20 @@ public class AuthController implements AuthApi {
         String refreshToken = getCookieValueFromRefreshToken(request);
         AuthToken authToken = reissueCommand.reissue(refreshToken);
         addCookieFromAuthToken(response, authToken);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @PostMapping("/send-email")
+    public ResponseEntity<Void> sendEmail(@Valid @RequestBody SendEmailRequest request) {
+        sendEmailCommand.sendEmail(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @PostMapping("/verify")
+    public ResponseEntity<Void> verify(@Valid @RequestBody VerifyCodeRequest request) {
+        verifyCodeCommand.verify(request);
         return ResponseEntity.ok().build();
     }
 }
