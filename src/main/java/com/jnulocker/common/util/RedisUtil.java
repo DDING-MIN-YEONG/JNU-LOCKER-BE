@@ -5,6 +5,7 @@ import com.jnulocker.auth.adapter.out.EmailVerificationRepository;
 import com.jnulocker.auth.exception.CodeNotFoundException;
 import com.jnulocker.auth.exception.EmailNotVerifiedException;
 import java.time.Duration;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -18,17 +19,16 @@ public class RedisUtil {
 
     private final EmailVerificationRepository emailVerificationRepository;
 
-    public String getData(String email) {
-        return emailVerificationRepository
-                .findById(email)
-                .map(EmailVerification::getCode)
-                .orElseThrow(() -> CodeNotFoundException.EXCEPTION);
+    private Optional<String> getData(String key) {
+        return emailVerificationRepository.findById(key).map(EmailVerification::getCode);
+    }
+
+    public String getVerificationCode(String email) {
+        return getData(email).orElseThrow(() -> CodeNotFoundException.EXCEPTION);
     }
 
     public String getVerifiedStatus(String email) {
-        return emailVerificationRepository
-                .findById(email + VERIFIED_PREFIX)
-                .map(EmailVerification::getCode)
+        return getData(email + VERIFIED_PREFIX)
                 .orElseThrow(() -> EmailNotVerifiedException.EXCEPTION);
     }
 
@@ -48,10 +48,6 @@ public class RedisUtil {
 
     public void deleteVerifiedData(String email) {
         deleteData(getVerifiedKey(email));
-    }
-
-    public boolean isVerified(String email) {
-        return TRUE.equals(getData(getVerifiedKey(email)));
     }
 
     public void validVerified(String email) {

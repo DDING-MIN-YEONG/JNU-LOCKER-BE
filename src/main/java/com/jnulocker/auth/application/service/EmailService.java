@@ -5,7 +5,6 @@ import com.jnulocker.auth.application.port.in.VerifyCodeCommand;
 import com.jnulocker.auth.application.port.in.request.SendEmailRequest;
 import com.jnulocker.auth.application.port.in.request.VerifyCodeRequest;
 import com.jnulocker.auth.exception.CodeNotCorrectException;
-import com.jnulocker.auth.exception.CodeNotFoundException;
 import com.jnulocker.auth.exception.SendEmailException;
 import com.jnulocker.common.util.RedisUtil;
 import jakarta.mail.internet.MimeMessage;
@@ -51,10 +50,7 @@ public class EmailService implements SendEmailCommand, VerifyCodeCommand {
 
     @Override
     public void verify(VerifyCodeRequest request) {
-        String storedCode = redisUtil.getData(request.email());
-        if (storedCode == null) {
-            throw CodeNotFoundException.EXCEPTION;
-        }
+        String storedCode = redisUtil.getVerificationCode(request.email());
         if (!request.code().equals(storedCode)) {
             throw CodeNotCorrectException.EXCEPTION;
         }
