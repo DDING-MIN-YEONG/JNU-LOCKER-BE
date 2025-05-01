@@ -50,7 +50,7 @@ public class RedisUtil {
         deleteData(getVerifiedKey(email));
     }
 
-    public void validVerified(String email) {
+    public void checkEmailVerified(String email) {
         if (!TRUE.equals(getVerifiedStatus(email))) {
             throw EmailNotVerifiedException.EXCEPTION;
         }

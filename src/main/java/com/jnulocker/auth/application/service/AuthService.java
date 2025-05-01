@@ -40,7 +40,7 @@ public class AuthService
     @Override
     @Transactional
     public void signupUser(UserSignupRequest request) {
-        redisUtil.validVerified(request.email());
+        redisUtil.checkEmailVerified(request.email());
 
         validateDuplicateEmail(request.email());
 
@@ -63,7 +63,7 @@ public class AuthService
     @Override
     @Transactional
     public void signupManager(ManagerSignupRequest request) {
-        redisUtil.validVerified(request.email());
+        redisUtil.checkEmailVerified(request.email());
 
         validateDuplicateEmail(request.email());
 
