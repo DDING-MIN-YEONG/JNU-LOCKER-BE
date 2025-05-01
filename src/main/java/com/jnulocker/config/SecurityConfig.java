@@ -75,6 +75,8 @@ public class SecurityConfig {
                                 .hasAuthority(Role.GUEST.getRole()) // TODO: 추후 manager로 변경
                                 .requestMatchers(HttpMethod.POST, "/v1/events")
                                 .hasAuthority(Role.GUEST.getRole()) // TODO: 추후 manager로 변경
+                                .requestMatchers(HttpMethod.DELETE, "/v1/events/*")
+                                .hasAuthority(Role.GUEST.getRole()) // TODO: 추후 manager로 변경
                                 // 토큰의 role과 db의 role과 다른 문제 고려
                                 .anyRequest()
                                 .authenticated());

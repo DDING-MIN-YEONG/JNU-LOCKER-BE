@@ -2,6 +2,8 @@ package com.jnulocker.events.domain;
 
 import com.jnulocker.common.persistence.BaseEntity;
 import com.jnulocker.events.exception.EventNotOpenException;
+import com.jnulocker.events.exception.OnlyManagerCanDeleteException;
+import com.jnulocker.events.exception.OpenEventCannotBeDeletedException;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.organization.domain.Department;
 import jakarta.persistence.Column;
@@ -88,6 +90,16 @@ public class Event extends BaseEntity {
     private void validateEventStatus() {
         if (eventStatus != EventStatus.OPEN) {
             throw EventNotOpenException.EXCEPTION;
+        }
+    }
+
+    public void validateDeletable(Department department) {
+        if (!this.department.equals(department)) {
+            throw OnlyManagerCanDeleteException.EXCEPTION;
+        }
+
+        if (eventStatus == EventStatus.OPEN) {
+            throw OpenEventCannotBeDeletedException.EXCEPTION;
         }
     }
 

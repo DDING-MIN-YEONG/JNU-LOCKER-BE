@@ -1,19 +1,22 @@
 package com.jnulocker.events.adapter.in;
 
+import static events.application.port.in.request.CreateEventRequestTestDataBuilder.createEventRequestBuilder;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.jnulocker.auth.jwt.TokenProvider;
+import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.common.exception.ErrorResponse;
+import com.jnulocker.events.application.port.in.request.CreateEventRequest;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.exception.EventErrorCode;
 import com.jnulocker.events.utils.EventTestUtil;
-import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.utils.MemberTestUtil;
+import com.jnulocker.organization.domain.Department;
+import com.jnulocker.organization.utils.OrganizationUtil;
 import io.restassured.RestAssured;
 import io.restassured.http.Cookie;
 import io.restassured.response.ValidatableResponse;
@@ -49,30 +52,24 @@ public class EventControllerIntegrationTest {
 
     @Autowired private EventTestUtil eventTestUtil;
 
-    @Autowired private TokenProvider tokenProvider;
-
     @Autowired private MemberTestUtil memberTestUtil;
+
+    @Autowired private AuthTestUtil authTestUtil;
+
+    @Autowired private OrganizationUtil organizationUtil;
 
     private static String accessToken;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-        clearData();
-
-        // 테스트 사용자 생성
-        Member member = memberTestUtil.createManager();
 
         // 토큰 생성
-        accessToken = tokenProvider.generateAccessToken(member.getId(), Role.GUEST);
+        accessToken = authTestUtil.generateAccessToken(Role.GUEST);
     }
 
     @AfterEach
     void tearDown() {
-        clearData();
-    }
-
-    private void clearData() {
         memberTestUtil.deleteAll();
         eventTestUtil.deleteAll();
     }
@@ -189,5 +186,121 @@ public class EventControllerIntegrationTest {
                 .then()
                 .log()
                 .all();
+    }
+
+    @Test
+    void 이벤트를_생성할_수_있다() {
+        // given
+        createEvent();
+
+        // then
+        // 생성된 이벤트 조회
+        EventCustomPage eventCustomPage =
+                getEvents(0, 10, accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(EventCustomPage.class);
+
+        // 생성된 이벤트가 목록에 포함되어 있는지 확인
+        assertThat(eventCustomPage.content()).hasSize(1);
+    }
+
+    private void createEvent() {
+        Department department = organizationUtil.createDepartment();
+
+        CreateEventRequest request =
+                createEventRequestBuilder()
+                        .withParticipationDepartmentIds(List.of(department.getId()))
+                        .build();
+
+        given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .body(request)
+                .when()
+                .post(EVENT_URL)
+                .then()
+                .statusCode(HttpStatus.CREATED.value());
+    }
+
+    @Test
+    void 이벤트를_삭제할_수_있다() {
+        // given
+        createEvent();
+
+        // 생성된 이벤트 조회
+        Long eventId = getLastEventId();
+
+        // when
+        deleteEvent(eventId).statusCode(HttpStatus.NO_CONTENT.value());
+
+        // then
+        // 삭제된 이벤트 조회 시 예외 발생
+        ErrorResponse errorResponse =
+                getEventLockers(eventId, accessToken)
+                        .statusCode(EventErrorCode.EVENT_NOT_FOUND.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        assertThat(errorResponse.message()).isEqualTo(EventErrorCode.EVENT_NOT_FOUND.getMessage());
+    }
+
+    private Long getLastEventId() {
+        return getEvents(0, 10, accessToken)
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .as(EventCustomPage.class)
+                .content()
+                .getLast()
+                .id();
+    }
+
+    private ValidatableResponse deleteEvent(Long eventId) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .when()
+                .delete(EVENT_URL + "/{event-id}", eventId)
+                .then()
+                .log()
+                .all();
+    }
+
+    @Test
+    void 존재하지_않는_이벤트는_삭제할_수_없다() {
+        // given
+        Long nonExistentEventId = Long.MAX_VALUE;
+
+        // when
+        ErrorResponse errorResponse =
+                deleteEvent(nonExistentEventId)
+                        .statusCode(EventErrorCode.EVENT_NOT_FOUND.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message()).isEqualTo(EventErrorCode.EVENT_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void 권한이_없는_사용자는_이벤트를_삭제할_수_없다() {
+        // given
+        createEvent();
+
+        // 생성된 이벤트 조회
+        Long eventId = getLastEventId();
+
+        // 비조직원으로 로그인
+        accessToken = authTestUtil.generateAccessTokenWithAnotherDepartment(Role.GUEST);
+
+        // when
+        ErrorResponse errorResponse =
+                deleteEvent(eventId)
+                        .statusCode(
+                                EventErrorCode.ONLY_MANAGER_CAN_DELETE.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(EventErrorCode.ONLY_MANAGER_CAN_DELETE.getMessage());
     }
 }

@@ -4,6 +4,7 @@ import static events.domain.EventTestDataBuilder.*;
 import static organization.domain.DepartmentTestDataBuilder.*;
 import static organization.domain.OrganizationTestDataBuilder.*;
 
+import com.jnulocker.events.adapter.out.EventParticipationRepository;
 import com.jnulocker.events.adapter.out.EventRepository;
 import com.jnulocker.events.adapter.out.FloorRepository;
 import com.jnulocker.events.adapter.out.LockerRepository;
@@ -28,6 +29,8 @@ public class EventTestUtil {
     @Autowired private DepartmentRepository departmentRepository;
 
     @Autowired private EventRepository eventRepository;
+
+    @Autowired private EventParticipationRepository eventParticipationRepository;
 
     @Autowired private FloorRepository floorRepository;
 
@@ -82,6 +85,7 @@ public class EventTestUtil {
     public void deleteAll() {
         lockerRepository.deleteAll();
         floorRepository.deleteAll();
+        eventParticipationRepository.deleteAll();
         eventRepository.deleteAll();
         departmentRepository.deleteAll();
         organizationRepository.deleteAll();

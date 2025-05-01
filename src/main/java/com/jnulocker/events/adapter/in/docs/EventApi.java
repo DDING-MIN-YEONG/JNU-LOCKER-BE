@@ -56,4 +56,9 @@ public interface EventApi {
                                                                             .class))))
     ResponseEntity<List<FloorWithLockersResponse>> getLockers(
             @PathVariable("event-id") Long eventId);
+
+    @ApiExceptionExamples(DeleteEventExceptionDocs.class)
+    @Operation(summary = "이벤트 삭제", description = "이벤트를 삭제합니다. 이벤트가 진행 중인 경우에는 삭제할 수 없습니다.")
+    @ApiResponse(responseCode = "204", description = "이벤트 삭제 성공")
+    ResponseEntity<Void> deleteEvent(@PathVariable("event-id") Long eventId);
 }

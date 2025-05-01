@@ -9,4 +9,6 @@ public interface MemberLoadPort {
     Optional<Member> findByEmail(String email);
 
     Optional<Member> findById(Long id);
+
+    Optional<Member> findByIdWithDepartment(Long memberId);
 }
