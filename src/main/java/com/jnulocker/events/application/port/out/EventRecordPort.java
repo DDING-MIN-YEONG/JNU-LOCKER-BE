@@ -14,4 +14,6 @@ public interface EventRecordPort {
     Floor saveFloor(Floor floor);
 
     void saveLockers(List<Locker> lockers);
+
+    void deleteEvent(Event event);
 }

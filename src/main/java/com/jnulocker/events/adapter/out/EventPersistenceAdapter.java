@@ -56,4 +56,12 @@ public class EventPersistenceAdapter implements EventLoadPort, EventRecordPort {
     public void saveLockers(List<Locker> lockers) {
         lockerRepository.saveAll(lockers);
     }
+
+    @Override
+    public void deleteEvent(Event event) {
+        lockerRepository.deleteAllByFloor_Event(event);
+        floorRepository.deleteAllByEvent(event);
+        eventParticipationRepository.deleteAllByEvent(event);
+        eventRepository.delete(event);
+    }
 }
