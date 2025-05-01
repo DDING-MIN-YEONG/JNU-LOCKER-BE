@@ -1,10 +1,10 @@
 package com.jnulocker.events.adapter.in;
 
-import static events.application.port.in.request.CreateEventRequestTestDataBuilder.*;
+import static events.application.port.in.request.CreateEventRequestTestDataBuilder.createEventRequestBuilder;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.jnulocker.auth.jwt.TokenProvider;
+import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.events.application.port.in.request.CreateEventRequest;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
@@ -13,7 +13,6 @@ import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.exception.EventErrorCode;
 import com.jnulocker.events.utils.EventTestUtil;
-import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.utils.MemberTestUtil;
 import com.jnulocker.organization.domain.Department;
@@ -53,9 +52,9 @@ public class EventControllerIntegrationTest {
 
     @Autowired private EventTestUtil eventTestUtil;
 
-    @Autowired private TokenProvider tokenProvider;
-
     @Autowired private MemberTestUtil memberTestUtil;
+
+    @Autowired private AuthTestUtil authTestUtil;
 
     @Autowired private OrganizationUtil organizationUtil;
 
@@ -65,11 +64,8 @@ public class EventControllerIntegrationTest {
     void setUp() {
         RestAssured.port = port;
 
-        // 테스트 사용자 생성
-        Member member = memberTestUtil.createManager();
-
         // 토큰 생성
-        accessToken = tokenProvider.generateAccessToken(member.getId(), Role.GUEST);
+        accessToken = authTestUtil.generateAccessToken(Role.GUEST);
     }
 
     @AfterEach
@@ -282,5 +278,29 @@ public class EventControllerIntegrationTest {
 
         // then
         assertThat(errorResponse.message()).isEqualTo(EventErrorCode.EVENT_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void 권한이_없는_사용자는_이벤트를_삭제할_수_없다() {
+        // given
+        createEvent();
+
+        // 생성된 이벤트 조회
+        Long eventId = getLastEventId();
+
+        // 비조직원으로 로그인
+        accessToken = authTestUtil.generateAccessTokenWithAnotherDepartment(Role.GUEST);
+
+        // when
+        ErrorResponse errorResponse =
+                deleteEvent(eventId)
+                        .statusCode(
+                                EventErrorCode.ONLY_ORGANIZER_CAN_DELETE.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(EventErrorCode.ONLY_ORGANIZER_CAN_DELETE.getMessage());
     }
 }

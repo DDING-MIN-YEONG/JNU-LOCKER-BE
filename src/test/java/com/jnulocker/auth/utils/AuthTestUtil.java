@@ -18,4 +18,9 @@ public class AuthTestUtil {
         Member member = memberTestUtil.createMemberFromRole(role);
         return tokenProvider.generateAccessToken(member.getId(), member.getRole());
     }
+
+    public String generateAccessTokenWithAnotherDepartment(Role role) {
+        Member member = memberTestUtil.createMemberFromRoleWithAnotherDepartment(role);
+        return tokenProvider.generateAccessToken(member.getId(), member.getRole());
+    }
 }

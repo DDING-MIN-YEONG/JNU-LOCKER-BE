@@ -38,6 +38,22 @@ public class MemberTestUtil {
         }
     }
 
+    public Member createMemberFromRoleWithAnotherDepartment(Role role) {
+        Department department = getDepartment();
+
+        switch (role) {
+            case USER -> {
+                return memberRepository.save(
+                        memberBuilder().withDepartment(department).buildUser());
+            }
+            case GUEST, MANAGER -> {
+                return memberRepository.save(
+                        memberBuilder().withDepartment(department).buildManager());
+            }
+            default -> throw new IllegalArgumentException("Invalid role: " + role);
+        }
+    }
+
     public Member createUser() {
         Department department = getDepartment();
 
