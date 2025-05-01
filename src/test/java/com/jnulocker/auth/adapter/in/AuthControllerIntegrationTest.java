@@ -142,13 +142,7 @@ class AuthControllerIntegrationTest {
 
         redisUtil.deleteData(request.email() + VERIFIED_PREFIX);
         ErrorResponse errorResponse =
-                given().contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .body(request)
-                        .when()
-                        .post(AUTH_URL + "/users/signup")
-                        .then()
-                        .log()
-                        .all()
+                signupUserNotEmailVerified(request)
                         .statusCode(AuthErrorCode.EMAIL_NOT_VERIFIED.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -244,13 +238,7 @@ class AuthControllerIntegrationTest {
                 managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
         redisUtil.deleteData(request.email() + VERIFIED_PREFIX);
         ErrorResponse errorResponse =
-                given().contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .body(request)
-                        .when()
-                        .post(AUTH_URL + "/managers/signup")
-                        .then()
-                        .log()
-                        .all()
+                signupManagerNotEmailVerified(request)
                         .statusCode(AuthErrorCode.EMAIL_NOT_VERIFIED.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -271,7 +259,7 @@ class AuthControllerIntegrationTest {
 
         // when
         ExtractableResponse<Response> response =
-                loginUser(loginRequest).statusCode(HttpStatus.OK.value()).extract();
+                login(loginRequest).statusCode(HttpStatus.OK.value()).extract();
 
         // then
         Cookies cookies = response.detailedCookies();
@@ -293,7 +281,7 @@ class AuthControllerIntegrationTest {
         LoginRequest loginRequest =
                 new LoginRequest(signupRequest.email(), signupRequest.password());
         ExtractableResponse<Response> loginResponse =
-                loginUser(loginRequest).statusCode(HttpStatus.OK.value()).extract();
+                login(loginRequest).statusCode(HttpStatus.OK.value()).extract();
         String refreshToken = getCookieValue(loginResponse.detailedCookies(), REFRESH_TOKEN);
 
         // when
@@ -397,7 +385,7 @@ class AuthControllerIntegrationTest {
 
         // when
         ErrorResponse errorResponse =
-                loginUser(loginRequest)
+                login(loginRequest)
                         .statusCode(MemberErrorCode.MEMBER_NOT_FOUND.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -419,7 +407,7 @@ class AuthControllerIntegrationTest {
 
         // when
         ErrorResponse errorResponse =
-                loginUser(loginRequest)
+                login(loginRequest)
                         .statusCode(AuthErrorCode.FAIL_AUTHENTICATION.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -499,7 +487,7 @@ class AuthControllerIntegrationTest {
         assertThat(errorResponse.message()).isEqualTo(AuthErrorCode.CODE_EXPIRED.getMessage());
     }
 
-    public static ValidatableResponse loginUser(LoginRequest request) {
+    public static ValidatableResponse login(LoginRequest request) {
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
@@ -523,26 +511,32 @@ class AuthControllerIntegrationTest {
         return cookies.getValue(name);
     }
 
-    public ValidatableResponse signupUser(UserSignupRequest request) {
-        redisUtil.setEmailVerified(request.email());
+    private ValidatableResponse postSignup(String path, Object request) {
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
-                .post(AUTH_URL + "/users/signup")
+                .post(AUTH_URL + path)
                 .then()
                 .log()
                 .all();
     }
 
-    public ValidatableResponse signupManager(ManagerSignupRequest request) {
+    private ValidatableResponse signupUser(UserSignupRequest request) {
         redisUtil.setEmailVerified(request.email());
-        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(request)
-                .when()
-                .post(AUTH_URL + "/managers/signup")
-                .then()
-                .log()
-                .all();
+        return postSignup("/users/signup", request);
+    }
+
+    private ValidatableResponse signupManager(ManagerSignupRequest request) {
+        redisUtil.setEmailVerified(request.email());
+        return postSignup("/managers/signup", request);
+    }
+
+    private ValidatableResponse signupUserNotEmailVerified(UserSignupRequest request) {
+        return postSignup("/users/signup", request);
+    }
+
+    private ValidatableResponse signupManagerNotEmailVerified(ManagerSignupRequest request) {
+        return postSignup("/managers/signup", request);
     }
 
     public static ValidatableResponse sendEmail(SendEmailRequest request) {
