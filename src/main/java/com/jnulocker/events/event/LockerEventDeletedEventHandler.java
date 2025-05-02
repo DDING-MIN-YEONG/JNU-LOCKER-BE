@@ -40,9 +40,9 @@ public class LockerEventDeletedEventHandler {
     }
 
     private void deleteJob(String jobName, Long eventId) throws SchedulerException {
-        JobKey publishJobKey = new JobKey(jobName + eventId, EVENT_JOB_GROUP);
-        if (scheduler.checkExists(publishJobKey)) {
-            scheduler.deleteJob(publishJobKey);
+        JobKey jobKey = new JobKey(jobName + eventId, EVENT_JOB_GROUP);
+        if (scheduler.checkExists(jobKey)) {
+            scheduler.deleteJob(jobKey);
         }
     }
 }
