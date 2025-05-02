@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.events.application.port.in.request.CreateEventRequest;
+import com.jnulocker.events.application.port.in.request.PublishEventRequest;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import com.jnulocker.events.domain.Event;
@@ -301,5 +302,70 @@ public class EventControllerIntegrationTest {
         // then
         assertThat(errorResponse.message())
                 .isEqualTo(EventErrorCode.ONLY_MANAGER_CAN_DELETE.getMessage());
+    }
+
+    @Test
+    void 생성된_이벤트는_publish_상태로_변경할_수_있다() {
+        // given
+        createEvent();
+
+        // 생성된 이벤트 조회
+        Long eventId = getLastEventId();
+
+        PublishEventRequest request = new PublishEventRequest(true);
+
+        // when
+        publishEvent(eventId, request).statusCode(HttpStatus.NO_CONTENT.value());
+
+        // then
+        Event event = eventTestUtil.getEventById(eventId);
+        assertThat(event.getPublish()).isTrue();
+    }
+
+    @Test
+    void 생성된_이벤트는_unpublish_상태로_변경할_수_있다() {
+        // given
+        createEvent();
+
+        // 생성된 이벤트 조회
+        Long eventId = getLastEventId();
+
+        PublishEventRequest request = new PublishEventRequest(false);
+
+        // when
+        publishEvent(eventId, request).statusCode(HttpStatus.NO_CONTENT.value());
+
+        // then
+        Event event = eventTestUtil.getEventById(eventId);
+        assertThat(event.getPublish()).isFalse();
+    }
+
+    @Test
+    void 존재하지_않는_이벤트는_publish_상태로_변경할_수_없다() {
+        // given
+        Long nonExistentEventId = Long.MAX_VALUE;
+
+        PublishEventRequest request = new PublishEventRequest(true);
+
+        // when
+        ErrorResponse errorResponse =
+                publishEvent(nonExistentEventId, request)
+                        .statusCode(EventErrorCode.EVENT_NOT_FOUND.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message()).isEqualTo(EventErrorCode.EVENT_NOT_FOUND.getMessage());
+    }
+
+    private ValidatableResponse publishEvent(Long eventId, PublishEventRequest request) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .body(request)
+                .when()
+                .put(EVENT_URL + "/{event-id}/publish", eventId)
+                .then()
+                .log()
+                .all();
     }
 }
