@@ -21,6 +21,5 @@ public class DeleteEventExceptionDocs implements SwaggerExceptionDoc {
     public static final BusinessException 이벤트가_존재하지_않을_때 = EventNotFoundException.EXCEPTION;
 
     @ExplainError("이벤트 주최 학과가 아닐 때 발생하는 예외입니다")
-    public static final BusinessException 이벤트_주최_학과가_아닐_때 =
-            OnlyManagerCanDeleteException.EXCEPTION;
+    public static final BusinessException 이벤트_주최_학과가_아닐_때 = OnlyManagerCanDeleteException.EXCEPTION;
 }
