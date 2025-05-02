@@ -77,7 +77,7 @@ public class LockerEventCreatedEventHandler {
                 CLOSE_TRIGGER_NAME);
 
         scheduleEventJob( // Event Unpublish Job 등록: CLOSE 1일 후에 publish를 false로 변경
-                lockerEventCreatedEvent.getStartAt().plusDays(ONE_DAY),
+                lockerEventCreatedEvent.getEndAt().plusDays(ONE_DAY),
                 newJob(EventUnpublishJob.class),
                 UNPUBLISH_JOB_NAME,
                 eventId,
