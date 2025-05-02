@@ -97,151 +97,205 @@ class AuthControllerIntegrationTest {
     // USER 회원가입 테스트 (변경 없음)
     @Test
     void USER_회원가입을_할_수_있다() {
+        // given
         Department department = organizationUtil.createDepartment();
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
+
+        // when
         ValidatableResponse response = signupUser(request);
+
+        // then
         response.statusCode(HttpStatus.CREATED.value());
     }
 
     @Test
     void USER_존재하지_않는_학과로_회원가입하면_Department_Not_Found_에러_응답을_받는다() {
+        // given
         Long nonexistentDepartmentId = -1L;
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(nonexistentDepartmentId).build();
+
+        // when
         ErrorResponse errorResponse =
                 signupUser(request)
                         .statusCode(
                                 DepartmentErrorCode.DEPARTMENT_NOT_FOUND.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
+
+        // then
         assertThat(errorResponse.message())
                 .isEqualTo(DepartmentErrorCode.DEPARTMENT_NOT_FOUND.getMessage());
     }
 
     @Test
     void USER_동일메일로_회원가입하면_User_Already_Exist_에러_응답을_받는다() {
+        // given
         Department department = organizationUtil.createDepartment();
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
         signupUser(request).statusCode(HttpStatus.CREATED.value());
+
+        // when
         ErrorResponse errorResponse =
                 signupUser(request)
                         .statusCode(AuthErrorCode.USER_ALREADY_EXIST.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
+
+        // then
         assertThat(errorResponse.message())
                 .isEqualTo(AuthErrorCode.USER_ALREADY_EXIST.getMessage());
     }
 
     @Test
     void USER_회원가입_시_이메일_인증이_완료되지_않았으면_Email_Not_Verified_에러_응답을_받는다() {
+        // given
         Department department = organizationUtil.createDepartment();
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
-
         redisUtil.deleteVerifiedData(request.email());
+
+        // when
         ErrorResponse errorResponse =
                 signupUserNotEmailVerified(request)
                         .statusCode(AuthErrorCode.EMAIL_NOT_VERIFIED.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
+
+        // then
         assertThat(errorResponse.message())
                 .isEqualTo(AuthErrorCode.EMAIL_NOT_VERIFIED.getMessage());
     }
 
     @Test
     void MANAGER_회원가입을_할_수_있다() {
+        // given
         Department department = organizationUtil.createDepartment();
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
+
+        // when
         ValidatableResponse response = signupManager(request);
+
+        // then
         response.statusCode(HttpStatus.CREATED.value());
     }
 
     @Test
     void MANAGER_학생회_회원가입_시_학번이_null이면_Student_Number_Required_에러_응답을_받는다() {
+        // given
         Department department = organizationUtil.createDepartment();
         ManagerSignupRequest request =
                 managerSignupRequestBuilder()
                         .withDepartmentId(department.getId())
                         .withStudentNumber(null)
                         .build();
+
+        // when
         ErrorResponse errorResponse =
                 signupManager(request)
                         .statusCode(AuthErrorCode.STUDENT_NUMBER_REQUIRED.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
+
+        // then
         assertThat(errorResponse.message())
                 .isEqualTo(AuthErrorCode.STUDENT_NUMBER_REQUIRED.getMessage());
     }
 
     @Test
     void MANAGER_학생회_회원가입_시_학번이_입력되면_정상적으로_회원가입된다() {
+        // given
         Department department = organizationUtil.createDepartment();
         ManagerSignupRequest request =
                 managerSignupRequestBuilder()
                         .withDepartmentId(department.getId())
                         .withStudentNumber("221965")
                         .build();
+
+        // when
         ValidatableResponse response = signupManager(request);
+
+        // then
         response.statusCode(HttpStatus.CREATED.value());
     }
 
     @Test
     void MANAGER_자치회_회원가입_시_학번이_입력되지_않으면_정상적으로_회원가입된다() {
+        // given
         Department department = organizationUtil.createCommitteeDepartment();
         ManagerSignupRequest request =
                 managerSignupRequestBuilder()
                         .withDepartmentId(department.getId())
                         .withStudentNumber(null)
                         .build();
+
+        // when
         ValidatableResponse response = signupManager(request);
+
+        // then
         response.statusCode(HttpStatus.CREATED.value());
     }
 
     @Test
     void MANAGER_존재하지_않는_학과로_회원가입하면_Department_Not_Found_에러_응답을_받는다() {
+        // given
         Long nonexistentDepartmentId = -1L;
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(nonexistentDepartmentId).build();
+
+        // when
         ErrorResponse errorResponse =
                 signupManager(request)
                         .statusCode(
                                 DepartmentErrorCode.DEPARTMENT_NOT_FOUND.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
+
+        // then
         assertThat(errorResponse.message())
                 .isEqualTo(DepartmentErrorCode.DEPARTMENT_NOT_FOUND.getMessage());
     }
 
     @Test
     void MANAGER_동일메일로_회원가입하면_User_Already_Exist_에러_응답을_받는다() {
+        // given
         Department department = organizationUtil.createDepartment();
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
         signupManager(request).statusCode(HttpStatus.CREATED.value());
+
+        // when
         ErrorResponse errorResponse =
                 signupManager(request)
                         .statusCode(AuthErrorCode.USER_ALREADY_EXIST.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
+
+        // then
         assertThat(errorResponse.message())
                 .isEqualTo(AuthErrorCode.USER_ALREADY_EXIST.getMessage());
     }
 
     @Test
     void MANAGER_회원가입_시_이메일_인증이_완료되지_않았으면_Email_Not_Verified_에러_응답을_받는다() {
+        // given
         Department department = organizationUtil.createDepartment();
 
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
         redisUtil.deleteVerifiedData(request.email());
+
+        // when
         ErrorResponse errorResponse =
                 signupManagerNotEmailVerified(request)
                         .statusCode(AuthErrorCode.EMAIL_NOT_VERIFIED.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
+
+        // then
         assertThat(errorResponse.message())
                 .isEqualTo(AuthErrorCode.EMAIL_NOT_VERIFIED.getMessage());
     }
@@ -427,6 +481,29 @@ class AuthControllerIntegrationTest {
 
         // then
         response.statusCode(HttpStatus.OK.value());
+    }
+
+    @Test
+    void 이미_사용중인_이메일로_인증_요청_시_User_Already_Exist_에러_응답을_받는다() {
+        // given
+        Department department = organizationUtil.createDepartment();
+        UserSignupRequest signupRequest =
+                userSignupRequestBuilder().withDepartmentId(department.getId()).build();
+        signupUser(signupRequest).statusCode(HttpStatus.CREATED.value());
+
+        SendEmailRequest sendEmailRequest =
+                sendEmailRequestBuilder().withEmail(signupRequest.email()).build();
+
+        // when
+        ErrorResponse errorResponse =
+                sendEmail(sendEmailRequest)
+                        .statusCode(AuthErrorCode.USER_ALREADY_EXIST.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(AuthErrorCode.USER_ALREADY_EXIST.getMessage());
     }
 
     @Test
