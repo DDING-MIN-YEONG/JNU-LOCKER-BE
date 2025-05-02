@@ -4,6 +4,7 @@ import com.jnulocker.events.adapter.in.docs.EventApi;
 import com.jnulocker.events.application.port.in.EventCommand;
 import com.jnulocker.events.application.port.in.EventQuery;
 import com.jnulocker.events.application.port.in.request.CreateEventRequest;
+import com.jnulocker.events.application.port.in.request.PublishEventRequest;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.EventPageable;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -56,6 +58,15 @@ public class EventController implements EventApi {
     @DeleteMapping("/{event-id}")
     public ResponseEntity<Void> deleteEvent(@PathVariable("event-id") Long eventId) {
         eventCommand.deleteEvent(eventId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @Override
+    @PutMapping("/{event-id}/publish")
+    public ResponseEntity<Void> publishEvent(
+            @PathVariable("event-id") Long eventId,
+            @RequestBody @Valid PublishEventRequest request) {
+        eventCommand.publishEvent(eventId, request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
