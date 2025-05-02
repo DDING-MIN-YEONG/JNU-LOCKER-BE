@@ -114,7 +114,7 @@ public class AuthService
         return tokenProvider.createAuthToken(memberId, member.getRole());
     }
 
-    private void validateDuplicateEmail(String email) {
+    public void validateDuplicateEmail(String email) {
         if (memberQuery.existsByEmail(email)) {
             throw UserAlreadyExistException.EXCEPTION;
         }

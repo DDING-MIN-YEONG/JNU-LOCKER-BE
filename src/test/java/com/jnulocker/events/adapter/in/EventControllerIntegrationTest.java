@@ -294,8 +294,7 @@ public class EventControllerIntegrationTest {
         // when
         ErrorResponse errorResponse =
                 deleteEvent(eventId)
-                        .statusCode(
-                                EventErrorCode.ONLY_MANAGER_CAN_DELETE.getHttpStatus().value())
+                        .statusCode(EventErrorCode.ONLY_MANAGER_CAN_DELETE.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
 

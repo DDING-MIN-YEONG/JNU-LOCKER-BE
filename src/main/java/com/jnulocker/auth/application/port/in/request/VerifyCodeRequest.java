@@ -9,7 +9,7 @@ public record VerifyCodeRequest(
                 String email,
         @NotBlank(message = "인증 코드는 필수 입력 값입니다") String code) {
     @AssertTrue(message = "인증 코드는 100000에서 999999 사이의 6자리 숫자여야 합니다")
-    public boolean isCodeValid() {
+    private boolean isCodeValid() {
         if (code == null) {
             return false;
         }
