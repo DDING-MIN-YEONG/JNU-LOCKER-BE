@@ -4,7 +4,7 @@ import com.jnulocker.auth.exception.OnlyManagerCanApproveException;
 import com.jnulocker.auth.exception.OnlySameDepartmentCanApproveException;
 import com.jnulocker.auth.exception.StudentNumberRequiredException;
 import com.jnulocker.common.persistence.BaseEntity;
-import com.jnulocker.member.exception.OnlyGuestCanBeManagerException;
+import com.jnulocker.auth.exception.OnlyGuestCanBeManagerException;
 import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.domain.OrganizationType;
 import jakarta.persistence.Column;

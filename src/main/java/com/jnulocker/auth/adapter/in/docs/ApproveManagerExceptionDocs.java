@@ -8,7 +8,7 @@ import com.jnulocker.common.swagger.ExplainError;
 import com.jnulocker.common.swagger.SwaggerExceptionDoc;
 import com.jnulocker.events.exception.EventNotFoundException;
 import com.jnulocker.member.exception.MemberNotFoundException;
-import com.jnulocker.member.exception.OnlyGuestCanBeManagerException;
+import com.jnulocker.auth.exception.OnlyGuestCanBeManagerException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
