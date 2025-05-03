@@ -1,5 +1,6 @@
 package com.jnulocker.auth.adapter.in.docs;
 
+import com.jnulocker.auth.exception.OnlyGuestCanBeManagerException;
 import com.jnulocker.auth.exception.OnlyManagerCanApproveException;
 import com.jnulocker.auth.exception.OnlySameDepartmentCanApproveException;
 import com.jnulocker.common.exception.BusinessException;
@@ -8,7 +9,6 @@ import com.jnulocker.common.swagger.ExplainError;
 import com.jnulocker.common.swagger.SwaggerExceptionDoc;
 import com.jnulocker.events.exception.EventNotFoundException;
 import com.jnulocker.member.exception.MemberNotFoundException;
-import com.jnulocker.auth.exception.OnlyGuestCanBeManagerException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
