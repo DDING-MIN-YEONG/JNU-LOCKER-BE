@@ -53,6 +53,7 @@ public class AuthController implements AuthApi {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @Override
     @PostMapping("/managers/approve")
     public ResponseEntity<Void> approveManager(@Valid @RequestBody ManagerApproveRequest request) {
         managerSignupCommand.approveManager(request);

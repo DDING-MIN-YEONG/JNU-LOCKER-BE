@@ -1,6 +1,7 @@
 package com.jnulocker.auth.adapter.in.docs;
 
 import com.jnulocker.auth.application.port.in.request.LoginRequest;
+import com.jnulocker.auth.application.port.in.request.ManagerApproveRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.SendEmailRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
@@ -27,6 +28,11 @@ public interface AuthApi {
     @Operation(summary = "MANAGER 회원가입", description = "사물함 신청 이벤트 관리자인 MANAGER에 대한 회원가입입니다.")
     @ApiResponse(responseCode = "201", description = "MANAGER 회원가입 성공")
     ResponseEntity<Void> signupManager(@Valid @RequestBody ManagerSignupRequest request);
+
+    @ApiExceptionExamples(ApproveManagerExceptionDocs.class)
+    @Operation(summary = "MANAGER 가입 승인", description = "MANAGER 가입을 승인합니다.")
+    @ApiResponse(responseCode = "200", description = "MANAGER 가입 승인 성공")
+    ResponseEntity<Void> approveManager(@Valid @RequestBody ManagerApproveRequest request);
 
     @ApiExceptionExamples(LoginExcepitonDocs.class)
     @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인합니다.")
