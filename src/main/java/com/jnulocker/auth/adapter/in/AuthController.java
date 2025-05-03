@@ -11,6 +11,7 @@ import com.jnulocker.auth.application.port.in.SendEmailCommand;
 import com.jnulocker.auth.application.port.in.UserSignupCommand;
 import com.jnulocker.auth.application.port.in.VerifyCodeCommand;
 import com.jnulocker.auth.application.port.in.request.LoginRequest;
+import com.jnulocker.auth.application.port.in.request.ManagerApproveRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.SendEmailRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
@@ -50,6 +51,12 @@ public class AuthController implements AuthApi {
     public ResponseEntity<Void> signupManager(@Valid @RequestBody ManagerSignupRequest request) {
         managerSignupCommand.signupManager(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PostMapping("/managers/approve")
+    public ResponseEntity<Void> approveManager(@Valid @RequestBody ManagerApproveRequest request) {
+        managerSignupCommand.approveManager(request);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @Override
