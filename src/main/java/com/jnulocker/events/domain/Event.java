@@ -110,4 +110,8 @@ public class Event extends BaseEntity {
     public void closeEvent() {
         eventStatus = EventStatus.CLOSED;
     }
+
+    public void updatePublishStatus(Boolean publish) {
+        this.publish = publish;
+    }
 }

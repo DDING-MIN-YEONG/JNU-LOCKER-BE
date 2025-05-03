@@ -2,6 +2,7 @@ package com.jnulocker.events.adapter.in.docs;
 
 import com.jnulocker.common.swagger.ApiExceptionExamples;
 import com.jnulocker.events.application.port.in.request.CreateEventRequest;
+import com.jnulocker.events.application.port.in.request.PublishEventRequest;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.EventPageable;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
@@ -61,4 +62,10 @@ public interface EventApi {
     @Operation(summary = "이벤트 삭제", description = "이벤트를 삭제합니다. 이벤트가 진행 중인 경우에는 삭제할 수 없습니다.")
     @ApiResponse(responseCode = "204", description = "이벤트 삭제 성공")
     ResponseEntity<Void> deleteEvent(@PathVariable("event-id") Long eventId);
+
+    @Operation(summary = "이벤트 publish", description = "이벤트를 publish 또는 unpublish합니다.")
+    @ApiExceptionExamples(PublishEventExceptionDocs.class)
+    ResponseEntity<Void> publishEvent(
+            @PathVariable("event-id") Long eventId,
+            @RequestBody @Valid PublishEventRequest request);
 }

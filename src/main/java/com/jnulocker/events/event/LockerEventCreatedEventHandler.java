@@ -5,6 +5,8 @@ import static org.quartz.TriggerBuilder.newTrigger;
 
 import com.jnulocker.events.quartz.job.EventCloseJob;
 import com.jnulocker.events.quartz.job.EventOpenJob;
+import com.jnulocker.events.quartz.job.EventPublishJob;
+import com.jnulocker.events.quartz.job.EventUnpublishJob;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -22,6 +24,12 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 public class LockerEventCreatedEventHandler {
 
+    private static final String PUBLISH_JOB_NAME = "EVENT_PUBLISH_JOB-";
+    private static final String PUBLISH_TRIGGER_NAME = "EVENT_PUBLISH_TRIGGER-";
+
+    private static final String UNPUBLISH_JOB_NAME = "EVENT_UNPUBLISH_JOB-";
+    private static final String UNPUBLISH_TRIGGER_NAME = "EVENT_UNPUBLISH_TRIGGER-";
+
     private static final String OPEN_JOB_NAME = "EVENT_OPEN_JOB-";
     private static final String OPEN_TRIGGER_NAME = "EVENT_OPEN_TRIGGER-";
 
@@ -34,6 +42,9 @@ public class LockerEventCreatedEventHandler {
     private static final String EVENT_ID = "eventId";
     private static final String ASIA_SEOUL = "Asia/Seoul";
 
+    private static final Long TWO_HOURS = 2L;
+    private static final Long ONE_DAY = 1L;
+
     private final Scheduler scheduler;
 
     @TransactionalEventListener(
@@ -42,6 +53,13 @@ public class LockerEventCreatedEventHandler {
     public void handle(LockerEventCreatedEvent lockerEventCreatedEvent) throws SchedulerException {
 
         Long eventId = lockerEventCreatedEvent.getEventId();
+
+        scheduleEventJob( // Event Publish Job 등록: OPEN 2시간 전에 publish를 true로 변경
+                lockerEventCreatedEvent.getStartAt().minusHours(TWO_HOURS),
+                newJob(EventPublishJob.class),
+                PUBLISH_JOB_NAME,
+                eventId,
+                PUBLISH_TRIGGER_NAME);
 
         scheduleEventJob( // Event Open Job 등록
                 lockerEventCreatedEvent.getStartAt(),
@@ -56,6 +74,13 @@ public class LockerEventCreatedEventHandler {
                 CLOSE_JOB_NAME,
                 eventId,
                 CLOSE_TRIGGER_NAME);
+
+        scheduleEventJob( // Event Unpublish Job 등록: CLOSE 1일 후에 publish를 false로 변경
+                lockerEventCreatedEvent.getEndAt().plusDays(ONE_DAY),
+                newJob(EventUnpublishJob.class),
+                UNPUBLISH_JOB_NAME,
+                eventId,
+                UNPUBLISH_TRIGGER_NAME);
     }
 
     private void scheduleEventJob(
