@@ -40,23 +40,7 @@ public class MemberTestUtil {
 
     public Member createMemberFromRoleWithAnotherDepartment(Role role) {
         Department department = getDepartment();
-
-        switch (role) {
-            case USER -> {
-                return memberRepository.save(
-                        memberBuilder().withDepartment(department).buildUser());
-            }
-            case GUEST -> {
-                return memberRepository.save(
-                        memberBuilder().withDepartment(department).buildManager());
-            }
-            case MANAGER -> {
-                Member member = memberBuilder().withDepartment(department).buildManager();
-                member.approveManager();
-                return memberRepository.save(member);
-            }
-            default -> throw new IllegalArgumentException("Invalid role: " + role);
-        }
+        return createMemberFromRoleWithDepartment(role, department);
     }
 
     public Member createUser() {
@@ -91,5 +75,28 @@ public class MemberTestUtil {
 
     public void deleteAll() {
         memberRepository.deleteAll();
+    }
+
+    public Member findMemberByEmail(String email) {
+        return memberRepository.findByEmail(email).orElseThrow();
+    }
+
+    public Member createMemberFromRoleWithDepartment(Role role, Department department) {
+        switch (role) {
+            case USER -> {
+                return memberRepository.save(
+                        memberBuilder().withDepartment(department).buildUser());
+            }
+            case GUEST -> {
+                return memberRepository.save(
+                        memberBuilder().withDepartment(department).buildManager());
+            }
+            case MANAGER -> {
+                Member member = memberBuilder().withDepartment(department).buildManager();
+                member.approveManager();
+                return memberRepository.save(member);
+            }
+            default -> throw new IllegalArgumentException("Invalid role: " + role);
+        }
     }
 }
