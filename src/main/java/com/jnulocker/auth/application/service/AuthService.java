@@ -5,12 +5,14 @@ import com.jnulocker.auth.application.port.in.ManagerSignupCommand;
 import com.jnulocker.auth.application.port.in.ReissueCommand;
 import com.jnulocker.auth.application.port.in.UserSignupCommand;
 import com.jnulocker.auth.application.port.in.request.LoginRequest;
+import com.jnulocker.auth.application.port.in.request.ManagerApproveRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.response.AuthToken;
 import com.jnulocker.auth.exception.UserAlreadyExistException;
 import com.jnulocker.auth.jwt.TokenProvider;
 import com.jnulocker.auth.jwt.exception.InvalidRefreshTokenException;
+import com.jnulocker.auth.security.SecurityUtils;
 import com.jnulocker.common.util.RedisUtil;
 import com.jnulocker.member.application.port.in.MemberCommand;
 import com.jnulocker.member.application.port.in.MemberQuery;
@@ -81,6 +83,19 @@ public class AuthService
                         department);
 
         memberCommand.save(member);
+    }
+
+    @Override
+    @Transactional
+    public void approveManager(ManagerApproveRequest request) {
+        Long memberId = SecurityUtils.getCurrentMemberId();
+        Member approver = memberQuery.findByIdOrThrow(memberId); // 승인자
+        Member approvee = memberQuery.findByIdOrThrow(request.memberId()); // 승인받는 사람
+
+        approver.validateManagerApproval(approvee.getDepartment());
+
+        approvee.approveManager();
+        memberCommand.save(approvee);
     }
 
     @Override
