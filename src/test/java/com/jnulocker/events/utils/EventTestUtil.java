@@ -90,4 +90,8 @@ public class EventTestUtil {
         departmentRepository.deleteAll();
         organizationRepository.deleteAll();
     }
+
+    public Event getEventById(Long eventId) {
+        return eventRepository.findById(eventId).orElseThrow();
+    }
 }

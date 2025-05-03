@@ -1,6 +1,7 @@
 package com.jnulocker.events.application.port.in;
 
 import com.jnulocker.events.application.port.in.request.CreateEventRequest;
+import com.jnulocker.events.application.port.in.request.PublishEventRequest;
 import com.jnulocker.events.domain.Event;
 
 public interface EventCommand {
@@ -9,4 +10,6 @@ public interface EventCommand {
     void deleteEvent(Long eventId);
 
     void save(Event event);
+
+    void publishEvent(Long eventId, PublishEventRequest request);
 }

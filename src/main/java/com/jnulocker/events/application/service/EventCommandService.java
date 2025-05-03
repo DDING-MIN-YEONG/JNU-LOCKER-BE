@@ -7,6 +7,7 @@ import com.jnulocker.events.application.port.in.request.CreateEventRequest;
 import com.jnulocker.events.application.port.in.request.FloorInfo;
 import com.jnulocker.events.application.port.in.request.LockerRange;
 import com.jnulocker.events.application.port.in.request.PrefixInfo;
+import com.jnulocker.events.application.port.in.request.PublishEventRequest;
 import com.jnulocker.events.application.port.out.EventRecordPort;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.EventParticipation;
@@ -71,6 +72,13 @@ public class EventCommandService implements EventCommand {
 
         // 사물함 이벤트 생성 이벤트 발행
         publishEventCreatedEvent(savedEvent);
+    }
+
+    @Override
+    @Transactional
+    public void publishEvent(Long eventId, PublishEventRequest request) {
+        Event event = eventQuery.getByIdOrThrow(eventId);
+        event.updatePublishStatus(request.isPublish());
     }
 
     private Event createAndSaveEvent(CreateEventRequest request) {
