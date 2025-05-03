@@ -90,8 +90,7 @@ class RegistrationControllerIntegrationTest {
 
         registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
 
-        // TODO: 추후 manager로 변경
-        accessToken = authTestUtil.generateAccessToken(Role.GUEST);
+        accessToken = authTestUtil.generateAccessToken(Role.MANAGER);
 
         // when
         RegistrationCustomPage registrationCustomPage =
