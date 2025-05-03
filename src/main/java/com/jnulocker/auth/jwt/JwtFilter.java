@@ -36,13 +36,18 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final TokenProvider tokenProvider;
 
-    private static List<String> EXCLUDE_URLS = new ArrayList<>();
+    private List<String> EXCLUDE_URLS = new ArrayList<>();
 
     @PostConstruct
     public void init() {
         EXCLUDE_URLS =
                 Arrays.asList(
-                        "/v1/auth/**",
+                        "/v1/auth/*/signup",
+                        "/v1/auth/login",
+                        "/v1/auth/reissue",
+                        "/v1/auth/logout",
+                        "/v1/auth/send-email",
+                        "/v1/auth/verify",
                         "/swagger-ui/**",
                         "/swagger-resources/**",
                         "/v3/api-docs/**",
