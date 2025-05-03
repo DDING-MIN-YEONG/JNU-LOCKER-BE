@@ -66,7 +66,7 @@ public class EventControllerIntegrationTest {
         RestAssured.port = port;
 
         // 토큰 생성
-        accessToken = authTestUtil.generateAccessToken(Role.GUEST);
+        accessToken = authTestUtil.generateAccessToken(Role.MANAGER);
     }
 
     @AfterEach
@@ -290,7 +290,7 @@ public class EventControllerIntegrationTest {
         Long eventId = getLastEventId();
 
         // 비조직원으로 로그인
-        accessToken = authTestUtil.generateAccessTokenWithAnotherDepartment(Role.GUEST);
+        accessToken = authTestUtil.generateAccessTokenWithAnotherDepartment(Role.MANAGER);
 
         // when
         ErrorResponse errorResponse =

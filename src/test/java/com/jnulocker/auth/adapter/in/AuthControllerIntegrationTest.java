@@ -9,6 +9,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import com.jnulocker.auth.adapter.out.TokenRepository;
 import com.jnulocker.auth.application.port.in.request.LoginRequest;
+import com.jnulocker.auth.application.port.in.request.ManagerApproveRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.SendEmailRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
@@ -16,10 +17,12 @@ import com.jnulocker.auth.application.port.in.request.VerifyCodeRequest;
 import com.jnulocker.auth.exception.AuthErrorCode;
 import com.jnulocker.auth.jwt.RefreshToken;
 import com.jnulocker.auth.jwt.exception.JwtErrorCode;
+import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.common.util.RedisUtil;
 import com.jnulocker.member.adapter.out.MemberRepository;
 import com.jnulocker.member.domain.Member;
+import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.exception.MemberErrorCode;
 import com.jnulocker.member.utils.MemberTestUtil;
 import com.jnulocker.organization.domain.Department;
@@ -57,7 +60,6 @@ class AuthControllerIntegrationTest {
     private static final String AUTH_URL = "/v1/auth";
     private static final String ACCESS_TOKEN = "access_token";
     private static final String REFRESH_TOKEN = "refresh_token";
-    private static final String VERIFIED_PREFIX = ":verified";
 
     @LocalServerPort private int port;
 
@@ -72,10 +74,12 @@ class AuthControllerIntegrationTest {
     @Autowired private RedisUtil redisUtil;
 
     @Value("${custom.jwt.access-secret-key}")
-    String accessSecretKey;
+    private String accessSecretKey;
 
     @Value("${custom.jwt.refresh-secret-key}")
     private String refreshSecretKey;
+
+    @Autowired private AuthTestUtil authTestUtil;
 
     @BeforeEach
     void setUp() {
@@ -102,11 +106,8 @@ class AuthControllerIntegrationTest {
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
 
-        // when
-        ValidatableResponse response = signupUser(request);
-
-        // then
-        response.statusCode(HttpStatus.CREATED.value());
+        // when, then
+        signupUser(request).statusCode(HttpStatus.CREATED.value());
     }
 
     @Test
@@ -176,11 +177,8 @@ class AuthControllerIntegrationTest {
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
 
-        // when
-        ValidatableResponse response = signupManager(request);
-
-        // then
-        response.statusCode(HttpStatus.CREATED.value());
+        // when, then
+        signupManager(request).statusCode(HttpStatus.CREATED.value());
     }
 
     @Test
@@ -562,6 +560,101 @@ class AuthControllerIntegrationTest {
 
         // then
         assertThat(errorResponse.message()).isEqualTo(AuthErrorCode.CODE_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void MANAGER는_새로_가입한_학생회_회원의_가입을_승인할_수_있다() {
+        // given
+        Department department = organizationUtil.createDepartment();
+        ManagerSignupRequest signupRequest =
+                managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
+        signupManager(signupRequest).statusCode(HttpStatus.CREATED.value());
+
+        // 가입 요청한 학생회 회원의 정보 조회
+        Member approveeMember = memberTestUtil.findMemberByEmail(signupRequest.email());
+
+        String accessToken =
+                authTestUtil.generateAccessTokenWithDepartment(Role.MANAGER, department);
+        ManagerApproveRequest approveRequest = new ManagerApproveRequest(approveeMember.getId());
+
+        // when, then
+        approveManagerSignup(accessToken, approveRequest).statusCode(HttpStatus.OK.value());
+    }
+
+    @Test
+    void 이미_MANAGER인_회원은_가입을_승인할_수_없다() {
+        // given
+        Department department = organizationUtil.createDepartment();
+        ManagerSignupRequest signupRequest =
+                managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
+        signupManager(signupRequest).statusCode(HttpStatus.CREATED.value());
+
+        // 가입 요청한 MANAGER 회원의 정보 조회
+        Member approveeMember = memberTestUtil.findMemberByEmail(signupRequest.email());
+
+        String accessToken =
+                authTestUtil.generateAccessTokenWithDepartment(Role.MANAGER, department);
+        ManagerApproveRequest approveRequest = new ManagerApproveRequest(approveeMember.getId());
+
+        // 미리 가입 승인하기
+        approveManagerSignup(accessToken, approveRequest).statusCode(HttpStatus.OK.value());
+
+        // when
+        ErrorResponse errorResponse =
+                approveManagerSignup(accessToken, approveRequest)
+                        .statusCode(AuthErrorCode.ONLY_GUEST_CAN_BE_MANAGER.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(AuthErrorCode.ONLY_GUEST_CAN_BE_MANAGER.getMessage());
+    }
+
+    @Test
+    void MANAGER는_다른_학과의_학생회_회원의_가입을_승인할_수_없다() {
+        // given
+        Department department1 = organizationUtil.createDepartment();
+        Department department2 = organizationUtil.createDepartment();
+        ManagerSignupRequest signupRequest =
+                managerSignupRequestBuilder().withDepartmentId(department1.getId()).build();
+        signupManager(signupRequest).statusCode(HttpStatus.CREATED.value());
+
+        // 가입 요청한 학생회 회원의 정보 조회
+        Member approveeMember = memberTestUtil.findMemberByEmail(signupRequest.email());
+
+        String accessToken =
+                authTestUtil.generateAccessTokenWithDepartment(Role.MANAGER, department2);
+
+        ManagerApproveRequest approveRequest = new ManagerApproveRequest(approveeMember.getId());
+
+        // when
+        ErrorResponse errorResponse =
+                approveManagerSignup(accessToken, approveRequest)
+                        .statusCode(
+                                AuthErrorCode.ONLY_SAME_DEPARTMENT_CAN_APPROVE
+                                        .getHttpStatus()
+                                        .value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(AuthErrorCode.ONLY_SAME_DEPARTMENT_CAN_APPROVE.getMessage());
+    }
+
+    private ValidatableResponse approveManagerSignup(
+            String accessToken, ManagerApproveRequest request) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .body(request)
+                .log()
+                .all()
+                .when()
+                .post(AUTH_URL + "/managers/approve")
+                .then()
+                .log()
+                .all();
     }
 
     public static ValidatableResponse login(LoginRequest request) {

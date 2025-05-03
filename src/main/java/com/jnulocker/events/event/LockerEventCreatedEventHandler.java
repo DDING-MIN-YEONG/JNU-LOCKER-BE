@@ -59,8 +59,7 @@ public class LockerEventCreatedEventHandler {
                 newJob(EventPublishJob.class),
                 PUBLISH_JOB_NAME,
                 eventId,
-                PUBLISH_TRIGGER_NAME
-        );
+                PUBLISH_TRIGGER_NAME);
 
         scheduleEventJob( // Event Open Job 등록
                 lockerEventCreatedEvent.getStartAt(),
@@ -81,8 +80,7 @@ public class LockerEventCreatedEventHandler {
                 newJob(EventUnpublishJob.class),
                 UNPUBLISH_JOB_NAME,
                 eventId,
-                UNPUBLISH_TRIGGER_NAME
-        );
+                UNPUBLISH_TRIGGER_NAME);
     }
 
     private void scheduleEventJob(

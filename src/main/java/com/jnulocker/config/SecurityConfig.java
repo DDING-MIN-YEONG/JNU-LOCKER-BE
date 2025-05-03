@@ -64,21 +64,28 @@ public class SecurityConfig {
                                         "/v1/organizations",
                                         "/v1/organizations/*/departments")
                                 .permitAll() // 소속대학/학과 조회 API 모든 접근 허용
-                                .requestMatchers("/v1/auth/**")
-                                .permitAll() // 인증 API 모든 접근 허용
+                                .requestMatchers(
+                                        "/v1/auth/*/signup",
+                                        "/v1/auth/login",
+                                        "/v1/auth/reissue",
+                                        "/v1/auth/logout",
+                                        "/v1/auth/send-email",
+                                        "/v1/auth/verify")
+                                .permitAll()
                                 .requestMatchers(
                                         HttpMethod.GET, "/v1/events", "/v1/events/*/lockers")
                                 .authenticated()
                                 .requestMatchers(HttpMethod.GET, "/v1/events/*/registrations/me")
                                 .hasAuthority(Role.USER.getRole())
                                 .requestMatchers(HttpMethod.GET, "/v1/events/*/registrations")
-                                .hasAuthority(Role.GUEST.getRole()) // TODO: 추후 manager로 변경
-                                .requestMatchers(HttpMethod.POST, "/v1/events")
-                                .hasAuthority(Role.GUEST.getRole()) // TODO: 추후 manager로 변경
+                                .hasAuthority(Role.MANAGER.getRole())
+                                .requestMatchers(
+                                        HttpMethod.POST, "/v1/events", "/v1/auth/managers/approve")
+                                .hasAuthority(Role.MANAGER.getRole())
                                 .requestMatchers(HttpMethod.DELETE, "/v1/events/*")
-                                .hasAuthority(Role.GUEST.getRole()) // TODO: 추후 manager로 변경
+                                .hasAuthority(Role.MANAGER.getRole())
                                 .requestMatchers(HttpMethod.PUT, "/v1/events/*/publish")
-                                .hasAuthority(Role.GUEST.getRole()) // TODO: 추후 manager로 변경
+                                .hasAuthority(Role.MANAGER.getRole())
                                 // 토큰의 role과 db의 role과 다른 문제 고려
                                 .anyRequest()
                                 .authenticated());
