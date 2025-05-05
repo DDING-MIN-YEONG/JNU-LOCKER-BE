@@ -43,7 +43,7 @@ public class MemberQueryService implements MemberQuery {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public MemberInfoResponse getMemberInfo() {
         Long memberId = SecurityUtils.getCurrentMemberId();
         Member member = findByIdOrThrow(memberId);
