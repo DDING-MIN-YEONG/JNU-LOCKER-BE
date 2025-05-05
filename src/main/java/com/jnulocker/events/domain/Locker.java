@@ -47,10 +47,13 @@ public class Locker extends BaseEntity {
         checkAvailability();
     }
 
-    // 새로 추가: 사물함을 사용 불가 상태로 변경
     public void markAsUnavailable() {
         checkAvailability();
         this.available = false;
+    }
+
+    public void markAsAvailable() {
+        this.available = true;
     }
 
     private void checkAvailability() {
