@@ -58,6 +58,10 @@ public class RegistrationCommandService implements RegistrationCommand {
                 registrationLoadPort
                         .getRegistrationByMemberIdAndEventId(memberId, event.getId())
                         .orElseThrow(() -> RegistrationNotFoundException.EXCEPTION);
+
+        Locker locker = registration.getLocker();
+        locker.markAsAvailable();
+
         registrationRecordPort.delete(registration);
     }
 }
