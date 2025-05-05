@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.member.application.port.in.response.MemberInfoResponse;
 import com.jnulocker.member.domain.Member;
-import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.utils.MemberTestUtil;
 import io.restassured.RestAssured;
 import io.restassured.http.Cookie;
@@ -39,14 +38,9 @@ public class MemberControllerIntegrationTest {
 
     @Autowired private AuthTestUtil authTestUtil;
 
-    private static String accessToken;
-
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-
-        // 토큰 생성
-        accessToken = authTestUtil.generateAccessToken(Role.USER);
     }
 
     @AfterEach
@@ -57,22 +51,27 @@ public class MemberControllerIntegrationTest {
     @Test
     void 회원_정보를_조회할_수_있다() {
         // given
-        Member expected = memberTestUtil.createUser();
+        Member expectedMember = memberTestUtil.createUser();
+        String accessToken =
+                authTestUtil.generateAccessTokenFromMemberId(
+                        expectedMember.getId(), expectedMember.getRole());
 
         // when
-        MemberInfoResponse actual =
+        MemberInfoResponse memberInfoResponse =
                 getMemberInfo(accessToken)
                         .statusCode(HttpStatus.OK.value())
                         .extract()
                         .as(MemberInfoResponse.class);
 
         // then
-        assertThat(actual).isNotNull();
-        assertThat(actual.name()).isEqualTo(expected.getName());
-        assertThat(actual.studentNumber()).isEqualTo(expected.getStudentNumber());
-        assertThat(actual.affiliation()).isEqualTo(expected.getDepartment().getName());
-        assertThat(actual.phoneNumber()).isEqualTo(expected.getPhoneNumber());
-        assertThat(actual.email()).isEqualTo(expected.getEmail());
+        assertThat(memberInfoResponse).isNotNull();
+        assertThat(memberInfoResponse.memberId()).isEqualTo(expectedMember.getId());
+        assertThat(memberInfoResponse.name()).isEqualTo(expectedMember.getName());
+        assertThat(memberInfoResponse.studentNumber()).isEqualTo(expectedMember.getStudentNumber());
+        assertThat(memberInfoResponse.affiliation())
+                .isEqualTo(expectedMember.getDepartment().getName());
+        assertThat(memberInfoResponse.phoneNumber()).isEqualTo(expectedMember.getPhoneNumber());
+        assertThat(memberInfoResponse.email()).isEqualTo(expectedMember.getEmail());
     }
 
     public static ValidatableResponse getMemberInfo(String accessToken) {
