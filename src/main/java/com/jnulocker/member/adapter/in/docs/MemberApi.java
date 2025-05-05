@@ -2,7 +2,6 @@ package com.jnulocker.member.adapter.in.docs;
 
 import com.jnulocker.member.application.port.in.response.MemberInfoResponse;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -20,11 +19,6 @@ public interface MemberApi {
             content =
                     @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array =
-                                    @ArraySchema(
-                                            schema =
-                                                    @Schema(
-                                                            implementation =
-                                                                    MemberInfoResponse.class))))
+                            schema = @Schema(implementation = MemberInfoResponse.class)))
     ResponseEntity<MemberInfoResponse> getMemberInfo();
 }
