@@ -82,7 +82,7 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         HttpMethod.POST, "/v1/events", "/v1/auth/managers/approve")
                                 .hasAuthority(Role.MANAGER.getRole())
-                                .requestMatchers(HttpMethod.GET, "/v1/members/mypage")
+                                .requestMatchers(HttpMethod.GET, "/v1/members/*")
                                 .authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/v1/events/*")
                                 .hasAuthority(Role.MANAGER.getRole())
