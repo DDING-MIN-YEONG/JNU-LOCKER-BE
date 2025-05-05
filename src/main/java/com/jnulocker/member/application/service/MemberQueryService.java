@@ -5,7 +5,9 @@ import com.jnulocker.member.application.port.in.MemberQuery;
 import com.jnulocker.member.application.port.in.response.MemberInfoResponse;
 import com.jnulocker.member.application.port.out.MemberLoadPort;
 import com.jnulocker.member.domain.Member;
+import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.exception.MemberNotFoundException;
+import com.jnulocker.organization.domain.OrganizationType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +47,29 @@ public class MemberQueryService implements MemberQuery {
     public MemberInfoResponse getMemberInfo() {
         Long memberId = SecurityUtils.getCurrentMemberId();
         Member member = findByIdOrThrow(memberId);
-        return MemberInfoResponse.from(member);
+
+        String studentNumber = null;
+        String affiliation = null;
+
+        Role role = member.getRole();
+        OrganizationType orgType = member.getDepartment().getOrganization().getType();
+
+        if (role == Role.USER) {
+            studentNumber = member.getStudentNumber();
+            affiliation = member.getDepartment().getName();
+        } else if (role == Role.MANAGER) {
+            if (orgType == OrganizationType.COUNCIL) {
+                studentNumber = member.getStudentNumber();
+            }
+            affiliation = member.getDepartment().getNickname();
+        }
+
+        return MemberInfoResponse.of(
+                member.getId(),
+                member.getName(),
+                studentNumber,
+                affiliation,
+                member.getPhoneNumber(),
+                member.getEmail());
     }
 }
