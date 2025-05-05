@@ -84,15 +84,10 @@ class AuthControllerIntegrationTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-        clearData();
     }
 
     @AfterEach
     void tearDown() {
-        clearData();
-    }
-
-    private void clearData() {
         memberRepository.deleteAll();
         tokenRepository.deleteAll();
         redisUtil.deleteAll();
