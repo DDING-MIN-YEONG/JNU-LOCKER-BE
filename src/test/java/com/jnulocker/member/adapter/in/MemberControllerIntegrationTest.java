@@ -6,7 +6,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.member.application.port.in.response.MemberInfoResponse;
 import com.jnulocker.member.domain.Member;
+import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.utils.MemberTestUtil;
+import com.jnulocker.organization.domain.Department;
+import com.jnulocker.organization.utils.OrganizationUtil;
 import io.restassured.RestAssured;
 import io.restassured.http.Cookie;
 import io.restassured.response.ValidatableResponse;
@@ -38,6 +41,8 @@ public class MemberControllerIntegrationTest {
 
     @Autowired private AuthTestUtil authTestUtil;
 
+    @Autowired private OrganizationUtil organizationUtil;
+
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
@@ -49,7 +54,7 @@ public class MemberControllerIntegrationTest {
     }
 
     @Test
-    void 회원_정보를_조회할_수_있다() {
+    void USER_회원_정보를_조회할_수_있다() {
         // given
         Member expectedMember = memberTestUtil.createUser();
         String accessToken =
@@ -70,6 +75,62 @@ public class MemberControllerIntegrationTest {
         assertThat(memberInfoResponse.studentNumber()).isEqualTo(expectedMember.getStudentNumber());
         assertThat(memberInfoResponse.affiliation())
                 .isEqualTo(expectedMember.getDepartment().getName());
+        assertThat(memberInfoResponse.phoneNumber()).isEqualTo(expectedMember.getPhoneNumber());
+        assertThat(memberInfoResponse.email()).isEqualTo(expectedMember.getEmail());
+    }
+
+    @Test
+    void MANAGER_COUNCIL_회원_정보를_조회할_수_있다() {
+        // given
+        Department council = organizationUtil.createCouncilDepartment();
+        Member expectedMember =
+                memberTestUtil.createMemberFromRoleWithDepartment(Role.MANAGER, council);
+        String accessToken =
+                authTestUtil.generateAccessTokenFromMemberId(
+                        expectedMember.getId(), expectedMember.getRole());
+
+        // when
+        MemberInfoResponse memberInfoResponse =
+                getMemberInfo(accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(MemberInfoResponse.class);
+
+        // then
+        assertThat(memberInfoResponse).isNotNull();
+        assertThat(memberInfoResponse.memberId()).isEqualTo(expectedMember.getId());
+        assertThat(memberInfoResponse.name()).isEqualTo(expectedMember.getName());
+        assertThat(memberInfoResponse.studentNumber()).isEqualTo(expectedMember.getStudentNumber());
+        assertThat(memberInfoResponse.affiliation())
+                .isEqualTo(expectedMember.getDepartment().getNickname());
+        assertThat(memberInfoResponse.phoneNumber()).isEqualTo(expectedMember.getPhoneNumber());
+        assertThat(memberInfoResponse.email()).isEqualTo(expectedMember.getEmail());
+    }
+
+    @Test
+    void MANAGER_COMMITTEE_회원_정보를_조회할_수_있다() {
+        // given
+        Department committee = organizationUtil.createCommitteeDepartment();
+        Member expectedMember =
+                memberTestUtil.createMemberFromRoleWithDepartment(Role.MANAGER, committee);
+        String accessToken =
+                authTestUtil.generateAccessTokenFromMemberId(
+                        expectedMember.getId(), expectedMember.getRole());
+
+        // when
+        MemberInfoResponse memberInfoResponse =
+                getMemberInfo(accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(MemberInfoResponse.class);
+
+        // then
+        assertThat(memberInfoResponse).isNotNull();
+        assertThat(memberInfoResponse.memberId()).isEqualTo(expectedMember.getId());
+        assertThat(memberInfoResponse.name()).isEqualTo(expectedMember.getName());
+        assertThat(memberInfoResponse.studentNumber()).isEqualTo(null);
+        assertThat(memberInfoResponse.affiliation())
+                .isEqualTo(expectedMember.getDepartment().getNickname());
         assertThat(memberInfoResponse.phoneNumber()).isEqualTo(expectedMember.getPhoneNumber());
         assertThat(memberInfoResponse.email()).isEqualTo(expectedMember.getEmail());
     }
