@@ -15,7 +15,7 @@ public class MemberController {
 
     private final MemberQuery memberQuery;
 
-    @GetMapping("/mypage")
+    @GetMapping("/info")
     public ResponseEntity<MemberInfoResponse> getMemberInfo() {
         return ResponseEntity.ok(memberQuery.getMemberInfo());
     }
