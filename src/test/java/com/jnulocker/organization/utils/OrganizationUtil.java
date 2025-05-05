@@ -18,14 +18,14 @@ public class OrganizationUtil {
 
     @Autowired private DepartmentRepository departmentRepository;
 
-    public Department createDepartment() {
-        Organization organization = createOrganization();
+    public Department createCouncilDepartment() {
+        Organization organization = createCouncil();
         Department department = departmentBuilder().withOrganization(organization).build();
         departmentRepository.save(department);
         return department;
     }
 
-    public Organization createOrganization() {
+    public Organization createCouncil() {
         Organization organization = organizationBuilder().build();
         return organizationRepository.save(organization);
     }
