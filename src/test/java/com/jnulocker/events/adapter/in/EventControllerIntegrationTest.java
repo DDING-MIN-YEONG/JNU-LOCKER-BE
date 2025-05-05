@@ -207,7 +207,7 @@ public class EventControllerIntegrationTest {
     }
 
     private void createEvent() {
-        Department department = organizationUtil.createDepartment();
+        Department department = organizationUtil.createCouncilDepartment();
 
         CreateEventRequest request =
                 createEventRequestBuilder()

@@ -1,5 +1,6 @@
 package com.jnulocker.member.application.port.in;
 
+import com.jnulocker.member.application.port.in.response.MemberInfoResponse;
 import com.jnulocker.member.domain.Member;
 
 public interface MemberQuery {
@@ -11,4 +12,6 @@ public interface MemberQuery {
     Member findByIdOrThrow(Long id);
 
     Member findByIdWithDepartmentOrThrow(Long memberId);
+
+    MemberInfoResponse getMemberInfo();
 }
