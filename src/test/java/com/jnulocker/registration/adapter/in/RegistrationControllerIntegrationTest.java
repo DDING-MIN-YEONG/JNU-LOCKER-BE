@@ -318,6 +318,32 @@ class RegistrationControllerIntegrationTest {
 
         // when, then
         cancelMyRegistration(event.getId()).statusCode(HttpStatus.NO_CONTENT.value());
+
+        // 신청 내역이 삭제되었는지 확인
+        ErrorResponse errorResponse =
+                getMyRegistration(event.getId())
+                        .statusCode(
+                                RegistrationErrorCode.REGISTRATION_NOT_FOUND
+                                        .getHttpStatus()
+                                        .value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        assertThat(errorResponse.message())
+                .isEqualTo(RegistrationErrorCode.REGISTRATION_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void 취소한_사물함을_다시_신청할_수_있다() {
+        // given
+        Event event = createEventWithLockers(EventStatus.OPEN, true);
+        RegisterForEventRequest request = createRequestForAvailableLocker(event);
+
+        registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
+        cancelMyRegistration(event.getId()).statusCode(HttpStatus.NO_CONTENT.value());
+
+        // when, then
+        registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
     }
 
     @Test
