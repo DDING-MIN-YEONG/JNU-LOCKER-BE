@@ -72,9 +72,6 @@ public class SecurityConfig {
                                         "/v1/auth/send-email",
                                         "/v1/auth/verify")
                                 .permitAll()
-                                .requestMatchers(
-                                        HttpMethod.GET, "/v1/events", "/v1/events/*/lockers")
-                                .authenticated()
                                 .requestMatchers(HttpMethod.GET, "/v1/events/*/registrations/me")
                                 .hasAuthority(Role.USER.getRole())
                                 .requestMatchers(HttpMethod.GET, "/v1/events/*/registrations")
@@ -82,8 +79,6 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         HttpMethod.POST, "/v1/events", "/v1/auth/managers/approve")
                                 .hasAuthority(Role.MANAGER.getRole())
-                                .requestMatchers(HttpMethod.GET, "/v1/members/*")
-                                .authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/v1/events/*")
                                 .hasAuthority(Role.MANAGER.getRole())
                                 .requestMatchers(HttpMethod.PUT, "/v1/events/*/publish")
