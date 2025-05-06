@@ -1,6 +1,8 @@
 package com.jnulocker.events.application.port.out;
 
 import com.jnulocker.events.domain.Event;
+import com.jnulocker.organization.domain.Department;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,4 +14,6 @@ public interface EventLoadPort {
     Optional<Event> getById(Long eventId);
 
     Page<Event> getAllEvents(Pageable pageable);
+
+    List<Event> getEventsByParticipationDepartment(Department department);
 }

@@ -7,6 +7,7 @@ import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.EventParticipation;
 import com.jnulocker.events.domain.Floor;
 import com.jnulocker.events.domain.Locker;
+import com.jnulocker.organization.domain.Department;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,11 @@ public class EventPersistenceAdapter implements EventLoadPort, EventRecordPort {
     @Override
     public Page<Event> getAllEvents(Pageable pageable) {
         return eventRepository.findAll(pageable);
+    }
+
+    @Override
+    public List<Event> getEventsByParticipationDepartment(Department department) {
+        return eventRepository.findAllByEventParticipations_Department(department);
     }
 
     @Override
