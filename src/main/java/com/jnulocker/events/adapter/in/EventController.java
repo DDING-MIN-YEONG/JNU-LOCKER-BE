@@ -41,6 +41,7 @@ public class EventController implements EventApi {
         return ResponseEntity.ok(eventQuery.getAllEvents(pageable));
     }
 
+    @Override
     @GetMapping("/me")
     public ResponseEntity<List<MyEventResponse>> getMyEvents() {
         return ResponseEntity.ok(eventQuery.getMyEvents());
