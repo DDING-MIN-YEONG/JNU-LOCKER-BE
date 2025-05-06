@@ -6,6 +6,7 @@ import com.jnulocker.events.exception.OnlyManagerCanDeleteException;
 import com.jnulocker.events.exception.OpenEventCannotBeDeletedException;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.organization.domain.Department;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -17,7 +18,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,6 +45,9 @@ public class Event extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
     private Department department;
+
+    @OneToMany(mappedBy = "event", orphanRemoval = true, cascade = CascadeType.ALL)
+    private final List<EventParticipation> eventParticipations = new ArrayList<>();
 
     @Embedded private EventSchedule eventSchedule;
 
