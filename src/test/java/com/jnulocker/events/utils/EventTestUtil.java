@@ -19,6 +19,7 @@ import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.domain.Organization;
 import java.util.ArrayList;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,20 +45,25 @@ public class EventTestUtil {
             boolean publish) {
 
         // 이벤트 생성 및 저장
-        Event event =
-                eventBuilder()
-                        .withDepartment(department)
-                        .withEventStatus(eventStatus)
-                        .withPublish(publish)
-                        .build();
-        Event savedEvent = eventRepository.save(event);
+        Event savedEvent = createAndSaveEvent(department, eventStatus, publish);
 
+        // 이벤트 참여 학과 정보 생성 및 저장
         EventParticipation eventParticipation = EventParticipation.create(savedEvent, department);
         eventParticipationRepository.save(eventParticipation);
 
         // 층 생성 및 저장
         createFloorsWithEvent(lockersPerFloor, savedEvent);
         return savedEvent;
+    }
+
+    private Event createAndSaveEvent(Department department, EventStatus eventStatus, boolean publish) {
+        Event event =
+                eventBuilder()
+                        .withDepartment(department)
+                        .withEventStatus(eventStatus)
+                        .withPublish(publish)
+                        .build();
+        return eventRepository.save(event);
     }
 
     public Event createEventWithFloorAndLockers(
@@ -71,13 +77,7 @@ public class EventTestUtil {
         Department savedDepartment = departmentRepository.save(department);
 
         // 이벤트 생성 및 저장
-        Event event =
-                eventBuilder()
-                        .withDepartment(savedDepartment)
-                        .withEventStatus(eventStatus)
-                        .withPublish(publish)
-                        .build();
-        Event savedEvent = eventRepository.save(event);
+        Event savedEvent = createAndSaveEvent(savedDepartment, eventStatus, publish);
 
         // 층 생성 및 저장
         createFloorsWithEvent(lockersPerFloor, savedEvent);
