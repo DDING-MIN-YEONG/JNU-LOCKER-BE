@@ -10,10 +10,12 @@ import com.jnulocker.events.application.port.in.request.CreateEventRequest;
 import com.jnulocker.events.application.port.in.request.PublishEventRequest;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
+import com.jnulocker.events.application.port.in.response.MyEventResponse;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.exception.EventErrorCode;
 import com.jnulocker.events.utils.EventTestUtil;
+import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.utils.MemberTestUtil;
 import com.jnulocker.organization.domain.Department;
@@ -208,7 +210,10 @@ public class EventControllerIntegrationTest {
 
     private void createEvent() {
         Department department = organizationUtil.createCouncilDepartment();
+        createEventWithDepartment(department);
+    }
 
+    private void createEventWithDepartment(Department department) {
         CreateEventRequest request =
                 createEventRequestBuilder()
                         .withParticipationDepartmentIds(List.of(department.getId()))
@@ -364,6 +369,41 @@ public class EventControllerIntegrationTest {
                 .body(request)
                 .when()
                 .put(EVENT_URL + "/{event-id}/publish", eventId)
+                .then()
+                .log()
+                .all();
+    }
+
+    @Test
+    void 자신이_속한_학과가_참여하는_이벤트를_조회할_수_있다() {
+        // given
+        Department department = organizationUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
+
+        // 이벤트 생성
+        createEventWithDepartment(member.getDepartment());
+
+        // when
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+        List<MyEventResponse> myEvents =
+                getMyEvents(accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .jsonPath()
+                        .getList(".", MyEventResponse.class);
+
+        MyEventResponse myEventResponse = myEvents.getFirst();
+
+        // then
+        assertThat(myEvents).hasSize(1);
+        assertThat(myEventResponse.availableLockerCount()).isEqualTo(20);
+    }
+
+    public static ValidatableResponse getMyEvents(String accessToken) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .when()
+                .get(EVENT_URL + "/me")
                 .then()
                 .log()
                 .all();
