@@ -6,6 +6,7 @@ import com.jnulocker.events.application.port.in.request.PublishEventRequest;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.EventPageable;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
+import com.jnulocker.events.application.port.in.response.MyEventResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -32,6 +33,22 @@ public interface EventApi {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = EventCustomPage.class)))
     ResponseEntity<EventCustomPage> getEvents(@Valid @ParameterObject EventPageable eventPageable);
+
+    @ApiExceptionExamples(GetMyEventsExceptionDocs.class)
+    @Operation(summary = "자신의 소속학과 대상 이벤트 목록 조회", description = "자신의 소속학과가 참여한 이벤트 목록을 조회합니다.")
+    @ApiResponse(
+            responseCode = "200",
+            description = "자신의 소속학과 대상 이벤트 목록 조회 성공",
+            content =
+                    @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array =
+                                    @ArraySchema(
+                                            schema =
+                                                    @Schema(
+                                                            implementation =
+                                                                    MyEventResponse.class))))
+    ResponseEntity<List<MyEventResponse>> getMyEvents();
 
     @ApiExceptionExamples(CreateEventExceptionDocs.class)
     @Operation(
