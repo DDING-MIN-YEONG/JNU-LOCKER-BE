@@ -15,4 +15,6 @@ public interface LockerRepository extends JpaRepository<Locker, Long> {
     Optional<Locker> findByIdWithFloorAndEvent(Long lockerId);
 
     void deleteAllByFloor_Event(Event event);
+
+    Integer countAvailableLockersByAvailableTrueAndFloor_Event(Event event);
 }
