@@ -5,17 +5,20 @@ import com.jnulocker.auth.application.port.in.VerifyCodeCommand;
 import com.jnulocker.auth.application.port.in.request.SendEmailRequest;
 import com.jnulocker.auth.application.port.in.request.VerifyCodeRequest;
 import com.jnulocker.auth.exception.CodeNotCorrectException;
+import com.jnulocker.auth.exception.FailedToCreateCodeException;
 import com.jnulocker.auth.exception.SendEmailException;
 import com.jnulocker.common.util.RedisUtil;
 import jakarta.mail.internet.MimeMessage;
-import java.util.Random;
+import java.security.SecureRandom;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailService implements SendEmailCommand, VerifyCodeCommand {
@@ -62,12 +65,17 @@ public class EmailService implements SendEmailCommand, VerifyCodeCommand {
         redisUtil.deleteData(request.email());
     }
 
-    public int createCode() {
-        Random random = new Random();
-        return 100000 + random.nextInt(900000);
+    private int createCode() {
+        try {
+            SecureRandom random = SecureRandom.getInstanceStrong();
+            return 100000 + random.nextInt(900000);
+        } catch (Exception e) {
+            log.error("Error generating verification code", e);
+            throw FailedToCreateCodeException.EXCEPTION;
+        }
     }
 
-    public String generateHtml(int code) {
+    private String generateHtml(int code) {
         Context context = new Context();
         context.setVariable("code", code);
         return templateEngine.process("email-verification", context);
