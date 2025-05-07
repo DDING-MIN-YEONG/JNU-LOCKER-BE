@@ -25,11 +25,11 @@ public class EmailService implements SendEmailCommand, VerifyCodeCommand {
     private final TemplateEngine templateEngine;
     private final JavaMailSender javaMailSender;
     private final RedisUtil redisUtil;
-    private final AuthService authService;
+    private final AuthCommandService authCommandService;
 
     @Override
     public void sendEmail(SendEmailRequest request) {
-        authService.validateDuplicateEmail(request.email());
+        authCommandService.validateDuplicateEmail(request.email());
 
         // 기존 이메일 인증 완료 기록이 있으면 삭제
         if (redisUtil.existsVerifiedEmail(request.email())) {

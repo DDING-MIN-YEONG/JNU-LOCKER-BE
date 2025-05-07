@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class AuthService
+public class AuthCommandService
         implements UserSignupCommand, ManagerSignupCommand, LoginCommand, ReissueCommand {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
