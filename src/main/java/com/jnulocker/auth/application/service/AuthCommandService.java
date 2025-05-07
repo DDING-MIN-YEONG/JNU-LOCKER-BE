@@ -95,6 +95,10 @@ public class AuthCommandService
         approver.validateManagerApproval(approvee.getDepartment());
 
         approvee.approveManager();
+
+        // refreshToken 삭제
+        tokenProvider.deleteRefreshTokenById(approvee.getId());
+
         memberCommand.save(approvee);
     }
 
