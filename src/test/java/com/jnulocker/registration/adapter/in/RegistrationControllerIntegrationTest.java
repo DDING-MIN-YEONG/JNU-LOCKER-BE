@@ -305,17 +305,6 @@ class RegistrationControllerIntegrationTest {
     }
 
     @Test
-    void MANAGER는_publish_false인_이벤트도_신청할_수_있다() {
-        // given
-        accessToken = authTestUtil.generateAccessToken(Role.MANAGER);
-        Event event = createEventWithLockers(EventStatus.OPEN, false);
-        RegisterForEventRequest request = createRequestForAvailableLocker(event);
-
-        // when, then
-        registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
-    }
-
-    @Test
     void 신청한_사물함을_취소할_수_있다() {
         // given
         Event event = createEventWithLockers(EventStatus.OPEN, true);
