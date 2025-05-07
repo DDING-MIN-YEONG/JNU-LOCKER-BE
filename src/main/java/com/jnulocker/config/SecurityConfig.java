@@ -27,7 +27,7 @@ public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
 
-    @Value(("${management.endpoints.web.base-path}"))
+    @Value("${management.endpoints.web.base-path}")
     private String actuatorBasePath;
 
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
@@ -76,6 +76,8 @@ public class SecurityConfig {
                                 .hasAuthority(Role.USER.getRole())
                                 .requestMatchers(HttpMethod.GET, "/v1/events/*/registrations")
                                 .hasAuthority(Role.MANAGER.getRole())
+                                .requestMatchers(HttpMethod.POST, "/v1/events/*/registrations")
+                                .hasAuthority(Role.USER.getRole())
                                 .requestMatchers(
                                         HttpMethod.POST, "/v1/events", "/v1/auth/managers/approve")
                                 .hasAuthority(Role.MANAGER.getRole())
