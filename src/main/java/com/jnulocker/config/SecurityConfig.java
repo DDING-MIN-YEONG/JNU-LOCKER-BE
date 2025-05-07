@@ -76,6 +76,8 @@ public class SecurityConfig {
                                 .hasAuthority(Role.USER.getRole())
                                 .requestMatchers(HttpMethod.GET, "/v1/events/*/registrations")
                                 .hasAuthority(Role.MANAGER.getRole())
+                                .requestMatchers(HttpMethod.GET, "/v1/auth/managers/pending")
+                                .hasAuthority(Role.MANAGER.getRole())
                                 .requestMatchers(
                                         HttpMethod.POST, "/v1/events", "/v1/auth/managers/approve")
                                 .hasAuthority(Role.MANAGER.getRole())
