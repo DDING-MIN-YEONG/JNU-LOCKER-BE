@@ -40,7 +40,7 @@ public class EventPersistenceAdapter implements EventLoadPort, EventRecordPort {
 
     @Override
     public List<Event> getEventsByParticipationDepartment(Department department) {
-        return eventRepository.findAllByEventParticipations_Department(department);
+        return eventRepository.findAllByPublishTrueAndEventParticipations_Department(department);
     }
 
     @Override

@@ -9,5 +9,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface EventRepository extends JpaRepository<Event, Long> {
 
     @EntityGraph(attributePaths = {"department"})
-    List<Event> findAllByEventParticipations_Department(Department department);
+    List<Event> findAllByPublishTrueAndEventParticipations_Department(Department department);
 }
