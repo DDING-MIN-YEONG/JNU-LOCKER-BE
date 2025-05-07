@@ -1,6 +1,7 @@
 package com.jnulocker.registration.domain;
 
 import com.jnulocker.common.persistence.BaseEntity;
+import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.Locker;
 import com.jnulocker.member.domain.Member;
 import jakarta.persistence.Column;
@@ -38,8 +39,12 @@ public class Registration extends BaseEntity {
     private Locker locker;
 
     public static Registration create(Member member, Locker locker) {
-        locker.validateRegistration(member.getRole());
+        Event event = locker.getFloor().getEvent();
+        event.validateRegistration(member.getDepartment());
+
+        locker.validateRegistration();
         locker.markAsUnavailable();
+
         return Registration.builder().member(member).locker(locker).build();
     }
 }

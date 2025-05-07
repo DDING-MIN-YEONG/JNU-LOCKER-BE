@@ -15,6 +15,7 @@ public enum EventErrorCode implements ErrorCode {
     INVALID_LOCKER_FOR_EVENT("E005", HttpStatus.BAD_REQUEST, "이벤트에 해당하지 않는 사물함입니다"),
     ONLY_MANAGER_CAN_DELETE("E006", HttpStatus.FORBIDDEN, "이벤트 관리자만 삭제할 수 있습니다"),
     OPEN_EVENT_CAN_NOT_BE_DELETED("E007", HttpStatus.BAD_REQUEST, "진행중인 이벤트는 삭제할 수 없습니다"),
+    ONLY_PARTICIPATION_DEPARTMENT_CAN_REGISTER("E008", HttpStatus.BAD_REQUEST, "참여학과만 신청할 수 있습니다"),
     ;
 
     private final String code;

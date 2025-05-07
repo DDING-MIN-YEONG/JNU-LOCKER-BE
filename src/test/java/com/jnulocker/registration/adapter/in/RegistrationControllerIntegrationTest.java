@@ -14,11 +14,10 @@ import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.exception.EventErrorCode;
 import com.jnulocker.events.utils.EventTestUtil;
-import com.jnulocker.member.domain.Member;
+import com.jnulocker.events.utils.LockerEventContext;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.utils.MemberTestUtil;
-import com.jnulocker.organization.domain.Department;
-import com.jnulocker.organization.utils.OrganizationUtil;
+import com.jnulocker.organization.utils.OrganizationTestUtil;
 import com.jnulocker.registration.application.port.in.request.RegisterForEventRequest;
 import com.jnulocker.registration.application.port.in.response.RegistrationCustomPage;
 import com.jnulocker.registration.application.port.in.response.RegistrationListItem;
@@ -60,7 +59,7 @@ class RegistrationControllerIntegrationTest {
 
     @Autowired private AuthTestUtil authTestUtil;
 
-    @Autowired private OrganizationUtil organizationUtil;
+    @Autowired private OrganizationTestUtil organizationTestUtil;
 
     @Autowired private RegistrationTestUtil registrationTestUtil;
 
@@ -69,7 +68,6 @@ class RegistrationControllerIntegrationTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-        accessToken = authTestUtil.generateAccessToken(Role.USER);
     }
 
     @AfterEach
@@ -82,7 +80,13 @@ class RegistrationControllerIntegrationTest {
     @Test
     void 사물함_신청을_할_수_있다() {
         // given
-        Event event = createEventWithLockers(EventStatus.OPEN, true);
+        LockerEventContext context =
+                eventTestUtil.setUpLockerEventForRegistration(
+                        List.of(5, 10), Role.USER, EventStatus.OPEN, true);
+
+        accessToken = context.accessToken();
+
+        Event event = context.event();
         RegisterForEventRequest request = createRequestForAvailableLocker(event);
 
         // when, then
@@ -92,7 +96,13 @@ class RegistrationControllerIntegrationTest {
     @Test
     void 신청된_사물함_목록을_조회할_수_있다() {
         // given
-        Event event = createEventWithLockers(EventStatus.OPEN, true);
+        LockerEventContext context =
+                eventTestUtil.setUpLockerEventForRegistration(
+                        List.of(5, 10), Role.USER, EventStatus.OPEN, true);
+
+        accessToken = context.accessToken();
+
+        Event event = context.event();
         RegisterForEventRequest request = createRequestForAvailableLocker(event);
 
         registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
@@ -109,22 +119,28 @@ class RegistrationControllerIntegrationTest {
         // then
         List<RegistrationListItem> content = registrationCustomPage.content();
         RegistrationListItem listItem = content.getFirst();
-        RegistrationMemberInfo member = listItem.member();
+        RegistrationMemberInfo memberInfo = listItem.member();
 
         assertThat(registrationCustomPage.totalElements()).isEqualTo(1);
         assertThat(listItem.floorNumber()).isEqualTo(1);
         assertThat(listItem.lockerCode()).isEqualTo("A-002");
-        assertThat(member.name()).isEqualTo("테스트 이름");
-        assertThat(member.studentNumber()).isEqualTo("221965");
-        assertThat(member.organization()).isEqualTo("테스트 조직명");
-        assertThat(member.department()).isEqualTo("테스트 학과명");
-        assertThat(member.email()).isEqualTo("test@email.com");
+        assertThat(memberInfo.name()).isEqualTo("테스트 이름");
+        assertThat(memberInfo.studentNumber()).isEqualTo("221965");
+        assertThat(memberInfo.organization()).isEqualTo("테스트 조직명");
+        assertThat(memberInfo.department()).isEqualTo("테스트 학과명");
+        assertThat(memberInfo.email()).isEqualTo("test@email.com");
     }
 
     @Test
     void 자신이_신청한_사물함을_조회할_수_있다() {
         // given
-        Event event = createEventWithLockers(EventStatus.OPEN, true);
+        LockerEventContext context =
+                eventTestUtil.setUpLockerEventForRegistration(
+                        List.of(5, 10), Role.USER, EventStatus.OPEN, true);
+
+        accessToken = context.accessToken();
+
+        Event event = context.event();
         RegisterForEventRequest request = createRequestForAvailableLocker(event);
 
         registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
@@ -142,7 +158,13 @@ class RegistrationControllerIntegrationTest {
     @Test
     void 자신의_사물함_내역이_존재하지_않으면_예외가_발생한다() {
         // given
-        Event event = createEventWithLockers(EventStatus.OPEN, true);
+        LockerEventContext context =
+                eventTestUtil.setUpLockerEventForRegistration(
+                        List.of(5, 10), Role.USER, EventStatus.OPEN, true);
+
+        accessToken = context.accessToken();
+
+        Event event = context.event();
 
         // when : 신청 없이 신청 내역 조회
         ErrorResponse errorResponse =
@@ -162,12 +184,19 @@ class RegistrationControllerIntegrationTest {
     @Test
     void 인증되지_않은_사용자는_신청할_수_없다() {
         // given
-        Event event = createEventWithLockers(EventStatus.OPEN, true);
+        LockerEventContext context =
+                eventTestUtil.setUpLockerEventForRegistration(
+                        List.of(5, 10), Role.USER, EventStatus.OPEN, true);
+
+        accessToken = context.accessToken();
+
+        Event event = context.event();
         RegisterForEventRequest request = createRequestForAvailableLocker(event);
 
         // when
+        accessToken = null;
         ErrorResponse errorResponse =
-                registerForEventWithoutLoggedUser(event.getId(), request)
+                registerForEvent(event.getId(), request)
                         .statusCode(JwtErrorCode.INVALID_ACCESS_TOKEN.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -180,7 +209,14 @@ class RegistrationControllerIntegrationTest {
     @Test
     void 사용중인_사물함은_신청할_수_없다() {
         // given
-        Event event = createEventWithLockers(EventStatus.OPEN, true);
+        LockerEventContext context =
+                eventTestUtil.setUpLockerEventForRegistration(
+                        List.of(5, 10), Role.USER, EventStatus.OPEN, true);
+
+        accessToken = context.accessToken();
+
+        Event event = context.event();
+
         RegisterForEventRequest request = createRequestForUnavailableLocker(event);
 
         // when
@@ -198,7 +234,13 @@ class RegistrationControllerIntegrationTest {
     @Test
     void 동일한_이벤트에_대해_중복으로_신청할_수_없다() {
         // given
-        Event event = createEventWithLockers(EventStatus.OPEN, true);
+        LockerEventContext context =
+                eventTestUtil.setUpLockerEventForRegistration(
+                        List.of(5, 10), Role.USER, EventStatus.OPEN, true);
+
+        accessToken = context.accessToken();
+
+        Event event = context.event();
         RegisterForEventRequest request = createRequestForAvailableLocker(event);
 
         // when
@@ -221,7 +263,13 @@ class RegistrationControllerIntegrationTest {
     @Test
     void 존재하지_않는_이벤트는_신청할_수_없다() {
         // given
-        Event event = createEventWithLockers(EventStatus.OPEN, true);
+        LockerEventContext context =
+                eventTestUtil.setUpLockerEventForRegistration(
+                        List.of(5, 10), Role.USER, EventStatus.OPEN, true);
+
+        accessToken = context.accessToken();
+
+        Event event = context.event();
 
         // when
         ErrorResponse errorResponse =
@@ -237,7 +285,14 @@ class RegistrationControllerIntegrationTest {
     @Test
     void 이벤트에_해당하지_않는_사물함은_신청할_수_없다() {
         // given
-        Event event = createEventWithLockers(EventStatus.OPEN, true);
+        LockerEventContext context =
+                eventTestUtil.setUpLockerEventForRegistration(
+                        List.of(5, 10), Role.USER, EventStatus.OPEN, true);
+
+        accessToken = context.accessToken();
+
+        Event event = context.event();
+
         Event anotherEvent = createEventWithLockers(EventStatus.OPEN, true);
         RegisterForEventRequest request = createRequestForAvailableLocker(anotherEvent);
 
@@ -256,7 +311,13 @@ class RegistrationControllerIntegrationTest {
     @Test
     void 이벤트가_준비중인_경우_신청할_수_없다() {
         // given
-        Event event = createEventWithLockers(EventStatus.READY, true);
+        LockerEventContext context =
+                eventTestUtil.setUpLockerEventForRegistration(
+                        List.of(5, 10), Role.USER, EventStatus.READY, true);
+
+        accessToken = context.accessToken();
+
+        Event event = context.event();
         RegisterForEventRequest request = createRequestForAvailableLocker(event);
 
         // when
@@ -273,7 +334,13 @@ class RegistrationControllerIntegrationTest {
     @Test
     void 이벤트가_종료된_경우_신청할_수_없다() {
         // given
-        Event event = createEventWithLockers(EventStatus.CLOSED, true);
+        LockerEventContext context =
+                eventTestUtil.setUpLockerEventForRegistration(
+                        List.of(5, 10), Role.USER, EventStatus.CLOSED, true);
+
+        accessToken = context.accessToken();
+
+        Event event = context.event();
         RegisterForEventRequest request = createRequestForAvailableLocker(event);
 
         // when
@@ -290,7 +357,13 @@ class RegistrationControllerIntegrationTest {
     @Test
     void USER는_publish_false인_이벤트를_신청할_수_없다() {
         // given
-        Event event = createEventWithLockers(EventStatus.OPEN, false);
+        LockerEventContext context =
+                eventTestUtil.setUpLockerEventForRegistration(
+                        List.of(5, 10), Role.USER, EventStatus.OPEN, false);
+
+        accessToken = context.accessToken();
+
+        Event event = context.event();
         RegisterForEventRequest request = createRequestForAvailableLocker(event);
 
         // when
@@ -305,20 +378,42 @@ class RegistrationControllerIntegrationTest {
     }
 
     @Test
-    void MANAGER는_publish_false인_이벤트도_신청할_수_있다() {
+    void 소속학과가_아닌_사용자는_신청할_수_없다() {
         // given
-        accessToken = authTestUtil.generateAccessToken(Role.MANAGER);
-        Event event = createEventWithLockers(EventStatus.OPEN, false);
+        LockerEventContext context =
+                eventTestUtil.setupLockerEventWithParticipatingDepartment(
+                        List.of(5, 10), Role.USER, EventStatus.OPEN, true, List.of());
+
+        accessToken = context.accessToken();
+
+        Event event = context.event();
         RegisterForEventRequest request = createRequestForAvailableLocker(event);
 
-        // when, then
-        registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
+        // when
+        ErrorResponse errorResponse =
+                registerForEvent(event.getId(), request)
+                        .statusCode(
+                                EventErrorCode.ONLY_PARTICIPATION_DEPARTMENT_CAN_REGISTER
+                                        .getHttpStatus()
+                                        .value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(EventErrorCode.ONLY_PARTICIPATION_DEPARTMENT_CAN_REGISTER.getMessage());
     }
 
     @Test
     void 신청한_사물함을_취소할_수_있다() {
         // given
-        Event event = createEventWithLockers(EventStatus.OPEN, true);
+        LockerEventContext context =
+                eventTestUtil.setUpLockerEventForRegistration(
+                        List.of(5, 10), Role.USER, EventStatus.OPEN, true);
+
+        accessToken = context.accessToken();
+
+        Event event = context.event();
         RegisterForEventRequest request = createRequestForAvailableLocker(event);
 
         registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
@@ -343,7 +438,13 @@ class RegistrationControllerIntegrationTest {
     @Test
     void 취소한_사물함을_다시_신청할_수_있다() {
         // given
-        Event event = createEventWithLockers(EventStatus.OPEN, true);
+        LockerEventContext context =
+                eventTestUtil.setUpLockerEventForRegistration(
+                        List.of(5, 10), Role.USER, EventStatus.OPEN, true);
+
+        accessToken = context.accessToken();
+
+        Event event = context.event();
         RegisterForEventRequest request = createRequestForAvailableLocker(event);
 
         registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
@@ -356,7 +457,13 @@ class RegistrationControllerIntegrationTest {
     @Test
     void 존재하지_않는_이벤트의_사물함_신청을_취소할_수_없다() {
         // given
-        Event event = createEventWithLockers(EventStatus.OPEN, true);
+        LockerEventContext context =
+                eventTestUtil.setUpLockerEventForRegistration(
+                        List.of(5, 10), Role.USER, EventStatus.OPEN, true);
+
+        accessToken = context.accessToken();
+
+        Event event = context.event();
         RegisterForEventRequest request = createRequestForAvailableLocker(event);
 
         registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
@@ -374,17 +481,18 @@ class RegistrationControllerIntegrationTest {
     @Test
     void 신청한_이벤트는_잔여여석이_1개_줄어든다() {
         // given
-        Department department = organizationUtil.createCouncilDepartment();
-        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
+        LockerEventContext context =
+                eventTestUtil.setUpLockerEventForRegistration(
+                        List.of(5, 10), Role.USER, EventStatus.OPEN, true);
 
-        Event event =
-                eventTestUtil.createEventWithParticipationDepartment(
-                        List.of(5, 10), department, EventStatus.OPEN, true);
+        accessToken = context.accessToken();
+
+        Event event = context.event();
         RegisterForEventRequest request = createRequestForAvailableLocker(event);
 
         // 신청 전 조회
         List<MyEventResponse> myEventsBeforeRegistration =
-                getMyEvents(authTestUtil.generateAccessTokenWithMember(member))
+                getMyEvents(accessToken)
                         .statusCode(HttpStatus.OK.value())
                         .extract()
                         .jsonPath()
@@ -393,10 +501,10 @@ class RegistrationControllerIntegrationTest {
         Integer availableLockerCountBefore =
                 myEventsBeforeRegistration.getFirst().availableLockerCount();
 
+        // 신청
         registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
 
         // when
-        accessToken = authTestUtil.generateAccessTokenWithMember(member);
         List<MyEventResponse> myEventsAfterRegistration =
                 getMyEvents(accessToken)
                         .statusCode(HttpStatus.OK.value())
@@ -433,17 +541,6 @@ class RegistrationControllerIntegrationTest {
     private ValidatableResponse registerForEvent(Long eventId, RegisterForEventRequest request) {
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
-                .body(request)
-                .when()
-                .post(REGISTRATION_URL, eventId)
-                .then()
-                .log()
-                .ifError();
-    }
-
-    private ValidatableResponse registerForEventWithoutLoggedUser(
-            Long eventId, RegisterForEventRequest request) {
-        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
                 .post(REGISTRATION_URL, eventId)
