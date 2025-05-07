@@ -154,6 +154,9 @@ public class TokenProvider {
     }
 
     public void deleteRefreshTokenById(Long memberId) {
+        if (!tokenRepository.existsById(memberId)) {
+            return;
+        }
         tokenRepository.deleteById(memberId);
     }
 }
