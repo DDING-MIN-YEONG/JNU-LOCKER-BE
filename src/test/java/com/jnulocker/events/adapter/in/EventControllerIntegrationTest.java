@@ -380,8 +380,10 @@ public class EventControllerIntegrationTest {
         Department department = organizationUtil.createCouncilDepartment();
         Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
 
-        // 이벤트 생성
-        createEventWithDepartment(member.getDepartment());
+        // 이벤트 생성: 짝수번 사물함은 사용 가능, 홀수번 사물함은 사용 불가능
+        // 15개 중 가능한 사물함 수는 2, 4, 6, 8, 10, 12, 14 (총 7개)
+        eventTestUtil.createEventWithParticipationDepartment(
+                List.of(5, 10), department, EventStatus.OPEN, true);
 
         // when
         accessToken = authTestUtil.generateAccessTokenWithMember(member);
@@ -396,7 +398,31 @@ public class EventControllerIntegrationTest {
 
         // then
         assertThat(myEvents).hasSize(1);
-        assertThat(myEventResponse.availableLockerCount()).isEqualTo(20);
+        assertThat(myEventResponse.availableLockerCount()).isEqualTo(7);
+    }
+
+    @Test
+    void publish되지_않은_이벤트는_조회할_수_없다() {
+        // given
+        Department department = organizationUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
+
+        // 이벤트 생성: 짝수번 사물함은 사용 가능, 홀수번 사물함은 사용 불가능
+        // 15개 중 가능한 사물함 수는 2, 4, 6, 8, 10, 12, 14 (총 7개)
+        eventTestUtil.createEventWithParticipationDepartment(
+                List.of(5, 10), department, EventStatus.OPEN, false);
+
+        // when
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+        List<MyEventResponse> myEvents =
+                getMyEvents(accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .jsonPath()
+                        .getList(".", MyEventResponse.class);
+
+        // then
+        assertThat(myEvents).isEmpty();
     }
 
     public static ValidatableResponse getMyEvents(String accessToken) {
