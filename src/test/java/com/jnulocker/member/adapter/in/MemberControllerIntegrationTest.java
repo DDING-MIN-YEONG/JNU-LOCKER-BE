@@ -57,9 +57,7 @@ public class MemberControllerIntegrationTest {
     void USER_회원_정보를_조회할_수_있다() {
         // given
         Member expectedMember = memberTestUtil.createUser();
-        String accessToken =
-                authTestUtil.generateAccessTokenFromMemberId(
-                        expectedMember.getId(), expectedMember.getRole());
+        String accessToken = authTestUtil.generateAccessTokenWithMember(expectedMember);
 
         // when
         MemberInfoResponse memberInfoResponse =
@@ -85,9 +83,7 @@ public class MemberControllerIntegrationTest {
         Department council = organizationUtil.createCouncilDepartment();
         Member expectedMember =
                 memberTestUtil.createMemberFromRoleWithDepartment(Role.MANAGER, council);
-        String accessToken =
-                authTestUtil.generateAccessTokenFromMemberId(
-                        expectedMember.getId(), expectedMember.getRole());
+        String accessToken = authTestUtil.generateAccessTokenWithMember(expectedMember);
 
         // when
         MemberInfoResponse memberInfoResponse =

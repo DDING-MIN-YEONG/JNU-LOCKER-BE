@@ -10,10 +10,12 @@ import com.jnulocker.events.application.port.in.request.CreateEventRequest;
 import com.jnulocker.events.application.port.in.request.PublishEventRequest;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
+import com.jnulocker.events.application.port.in.response.MyEventResponse;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.exception.EventErrorCode;
 import com.jnulocker.events.utils.EventTestUtil;
+import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.utils.MemberTestUtil;
 import com.jnulocker.organization.domain.Department;
@@ -104,29 +106,6 @@ public class EventControllerIntegrationTest {
         assertThat(eventCustomPage.last()).isEqualTo(expectedLast);
     }
 
-    private int calculateExpectedSize(int totalCount, int pageSize, int page) {
-        int startIndex = page * pageSize;
-        if (startIndex >= totalCount) {
-            return 0; // 페이지가 범위를 벗어나면 빈 리스트
-        }
-        int remainingItems = totalCount - startIndex;
-        return Math.min(remainingItems, pageSize);
-    }
-
-    public static ValidatableResponse getEvents(int page, int size, String accessToken) {
-        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
-                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
-                .queryParam("page", page)
-                .queryParam("size", size)
-                .queryParam("direction", "DESC")
-                .queryParam("sort", "createdAt")
-                .when()
-                .get(EVENT_URL)
-                .then()
-                .log()
-                .all();
-    }
-
     @ParameterizedTest(name = "층별 사물함 수: {0}")
     @MethodSource("provideLockersPerFloor")
     void 이벤트에_해당하는_층과_사물함_목록을_조회할_수_있다(List<Integer> lockersPerFloor) {
@@ -155,14 +134,6 @@ public class EventControllerIntegrationTest {
                 .containsExactlyElementsOf(lockersPerFloor);
     }
 
-    // 파라미터 제공 메서드
-    private static Stream<Arguments> provideLockersPerFloor() {
-        return Stream.of(
-                Arguments.of(List.of(2, 2)), // 첫 번째 테스트 케이스: 층별 2개 사물함
-                Arguments.of(List.of(3, 5)) // 두 번째 테스트 케이스: 1층 3개, 2층 5개
-                );
-    }
-
     @Test
     void 존재하지_않는_이벤트_ID로_조회하면_Event_Not_Found_에러_응답을_받는다() {
         // given
@@ -177,16 +148,6 @@ public class EventControllerIntegrationTest {
 
         // then
         assertThat(errorResponse.message()).isEqualTo(EventErrorCode.EVENT_NOT_FOUND.getMessage());
-    }
-
-    public static ValidatableResponse getEventLockers(Long eventId, String accessToken) {
-        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
-                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
-                .when()
-                .get(EVENT_URL + "/{event-id}/lockers", eventId)
-                .then()
-                .log()
-                .all();
     }
 
     @Test
@@ -204,23 +165,6 @@ public class EventControllerIntegrationTest {
 
         // 생성된 이벤트가 목록에 포함되어 있는지 확인
         assertThat(eventCustomPage.content()).hasSize(1);
-    }
-
-    private void createEvent() {
-        Department department = organizationUtil.createCouncilDepartment();
-
-        CreateEventRequest request =
-                createEventRequestBuilder()
-                        .withParticipationDepartmentIds(List.of(department.getId()))
-                        .build();
-
-        given().contentType(MediaType.APPLICATION_JSON_VALUE)
-                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
-                .body(request)
-                .when()
-                .post(EVENT_URL)
-                .then()
-                .statusCode(HttpStatus.CREATED.value());
     }
 
     @Test
@@ -243,26 +187,6 @@ public class EventControllerIntegrationTest {
                         .as(ErrorResponse.class);
 
         assertThat(errorResponse.message()).isEqualTo(EventErrorCode.EVENT_NOT_FOUND.getMessage());
-    }
-
-    private Long getLastEventId() {
-        return getEvents(0, 10, accessToken)
-                .statusCode(HttpStatus.OK.value())
-                .extract()
-                .as(EventCustomPage.class)
-                .content()
-                .getLast()
-                .id();
-    }
-
-    private ValidatableResponse deleteEvent(Long eventId) {
-        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
-                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
-                .when()
-                .delete(EVENT_URL + "/{event-id}", eventId)
-                .then()
-                .log()
-                .all();
     }
 
     @Test
@@ -356,6 +280,152 @@ public class EventControllerIntegrationTest {
 
         // then
         assertThat(errorResponse.message()).isEqualTo(EventErrorCode.EVENT_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void 자신이_속한_학과가_참여하는_이벤트를_조회할_수_있다() {
+        // given
+        Department department = organizationUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
+
+        // 이벤트 생성: 짝수번 사물함은 사용 가능, 홀수번 사물함은 사용 불가능
+        // 15개 중 가능한 사물함 수는 2, 4, 6, 8, 10, 12, 14 (총 7개)
+        eventTestUtil.createEventWithParticipationDepartment(
+                List.of(5, 10), department, EventStatus.OPEN, true);
+
+        // when
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+        List<MyEventResponse> myEvents =
+                getMyEvents(accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .jsonPath()
+                        .getList(".", MyEventResponse.class);
+
+        MyEventResponse myEventResponse = myEvents.getFirst();
+
+        // then
+        assertThat(myEvents).hasSize(1);
+        assertThat(myEventResponse.availableLockerCount()).isEqualTo(7);
+    }
+
+    @Test
+    void publish되지_않은_이벤트는_조회할_수_없다() {
+        // given
+        Department department = organizationUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
+
+        // 이벤트 생성: 짝수번 사물함은 사용 가능, 홀수번 사물함은 사용 불가능
+        // 15개 중 가능한 사물함 수는 2, 4, 6, 8, 10, 12, 14 (총 7개)
+        eventTestUtil.createEventWithParticipationDepartment(
+                List.of(5, 10), department, EventStatus.OPEN, false);
+
+        // when
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+        List<MyEventResponse> myEvents =
+                getMyEvents(accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .jsonPath()
+                        .getList(".", MyEventResponse.class);
+
+        // then
+        assertThat(myEvents).isEmpty();
+    }
+
+    // 파라미터 제공 메서드
+    private static Stream<Arguments> provideLockersPerFloor() {
+        return Stream.of(
+                Arguments.of(List.of(2, 2)), // 첫 번째 테스트 케이스: 층별 2개 사물함
+                Arguments.of(List.of(3, 5)) // 두 번째 테스트 케이스: 1층 3개, 2층 5개
+                );
+    }
+
+    // 이벤트 검색 메서드들
+    public static ValidatableResponse getEventLockers(Long eventId, String accessToken) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .when()
+                .get(EVENT_URL + "/{event-id}/lockers", eventId)
+                .then()
+                .log()
+                .all();
+    }
+
+    public static ValidatableResponse getEvents(int page, int size, String accessToken) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .queryParam("page", page)
+                .queryParam("size", size)
+                .queryParam("direction", "DESC")
+                .queryParam("sort", "createdAt")
+                .when()
+                .get(EVENT_URL)
+                .then()
+                .log()
+                .all();
+    }
+
+    public static ValidatableResponse getMyEvents(String accessToken) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .when()
+                .get(EVENT_URL + "/me")
+                .then()
+                .log()
+                .all();
+    }
+
+    // 이벤트 생성 메서드들
+    private void createEvent() {
+        Department department = organizationUtil.createCouncilDepartment();
+        createEventWithDepartment(department);
+    }
+
+    private void createEventWithDepartment(Department department) {
+        CreateEventRequest request =
+                createEventRequestBuilder()
+                        .withParticipationDepartmentIds(List.of(department.getId()))
+                        .build();
+
+        given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .body(request)
+                .when()
+                .post(EVENT_URL)
+                .then()
+                .statusCode(HttpStatus.CREATED.value());
+    }
+
+    // 유틸 메서드들
+    private int calculateExpectedSize(int totalCount, int pageSize, int page) {
+        int startIndex = page * pageSize;
+        if (startIndex >= totalCount) {
+            return 0; // 페이지가 범위를 벗어나면 빈 리스트
+        }
+        int remainingItems = totalCount - startIndex;
+        return Math.min(remainingItems, pageSize);
+    }
+
+    private Long getLastEventId() {
+        return getEvents(0, 10, accessToken)
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .as(EventCustomPage.class)
+                .content()
+                .getLast()
+                .id();
+    }
+
+    // 이벤트 수정 메서드들
+    private ValidatableResponse deleteEvent(Long eventId) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .when()
+                .delete(EVENT_URL + "/{event-id}", eventId)
+                .then()
+                .log()
+                .all();
     }
 
     private ValidatableResponse publishEvent(Long eventId, PublishEventRequest request) {

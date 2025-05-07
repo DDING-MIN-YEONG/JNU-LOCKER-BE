@@ -1,6 +1,7 @@
 package com.jnulocker.registration.adapter.in;
 
 import static com.jnulocker.events.adapter.in.EventControllerIntegrationTest.getEventLockers;
+import static com.jnulocker.events.adapter.in.EventControllerIntegrationTest.getMyEvents;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -8,12 +9,16 @@ import com.jnulocker.auth.jwt.exception.JwtErrorCode;
 import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
+import com.jnulocker.events.application.port.in.response.MyEventResponse;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.exception.EventErrorCode;
 import com.jnulocker.events.utils.EventTestUtil;
+import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.utils.MemberTestUtil;
+import com.jnulocker.organization.domain.Department;
+import com.jnulocker.organization.utils.OrganizationUtil;
 import com.jnulocker.registration.application.port.in.request.RegisterForEventRequest;
 import com.jnulocker.registration.application.port.in.response.RegistrationCustomPage;
 import com.jnulocker.registration.application.port.in.response.RegistrationListItem;
@@ -54,6 +59,8 @@ class RegistrationControllerIntegrationTest {
     @Autowired private MemberTestUtil memberTestUtil;
 
     @Autowired private AuthTestUtil authTestUtil;
+
+    @Autowired private OrganizationUtil organizationUtil;
 
     @Autowired private RegistrationTestUtil registrationTestUtil;
 
@@ -362,6 +369,47 @@ class RegistrationControllerIntegrationTest {
                         .as(ErrorResponse.class);
 
         assertThat(errorResponse.message()).isEqualTo(EventErrorCode.EVENT_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void 신청한_이벤트는_잔여여석이_1개_줄어든다() {
+        // given
+        Department department = organizationUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
+
+        Event event =
+                eventTestUtil.createEventWithParticipationDepartment(
+                        List.of(5, 10), department, EventStatus.OPEN, true);
+        RegisterForEventRequest request = createRequestForAvailableLocker(event);
+
+        // 신청 전 조회
+        List<MyEventResponse> myEventsBeforeRegistration =
+                getMyEvents(authTestUtil.generateAccessTokenWithMember(member))
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .jsonPath()
+                        .getList(".", MyEventResponse.class);
+
+        Integer availableLockerCountBefore =
+                myEventsBeforeRegistration.getFirst().availableLockerCount();
+
+        registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
+
+        // when
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+        List<MyEventResponse> myEventsAfterRegistration =
+                getMyEvents(accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .jsonPath()
+                        .getList(".", MyEventResponse.class);
+
+        MyEventResponse myEventResponse = myEventsAfterRegistration.getFirst();
+
+        // then
+        assertThat(myEventsAfterRegistration).hasSize(1);
+        assertThat(myEventResponse.availableLockerCount())
+                .isEqualTo(availableLockerCountBefore - 1);
     }
 
     private ValidatableResponse getRegistrations(Long eventId) {

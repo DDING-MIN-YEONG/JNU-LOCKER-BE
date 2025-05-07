@@ -9,6 +9,7 @@ import com.jnulocker.events.adapter.out.EventRepository;
 import com.jnulocker.events.adapter.out.FloorRepository;
 import com.jnulocker.events.adapter.out.LockerRepository;
 import com.jnulocker.events.domain.Event;
+import com.jnulocker.events.domain.EventParticipation;
 import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.domain.Floor;
 import com.jnulocker.events.domain.Locker;
@@ -36,6 +37,35 @@ public class EventTestUtil {
 
     @Autowired private LockerRepository lockerRepository;
 
+    public Event createEventWithParticipationDepartment(
+            List<Integer> lockersPerFloor,
+            Department department,
+            EventStatus eventStatus,
+            boolean publish) {
+
+        // 이벤트 생성 및 저장
+        Event savedEvent = createAndSaveEvent(department, eventStatus, publish);
+
+        // 이벤트 참여 학과 정보 생성 및 저장
+        EventParticipation eventParticipation = EventParticipation.create(savedEvent, department);
+        eventParticipationRepository.save(eventParticipation);
+
+        // 층 생성 및 저장
+        createFloorsWithEvent(lockersPerFloor, savedEvent);
+        return savedEvent;
+    }
+
+    private Event createAndSaveEvent(
+            Department department, EventStatus eventStatus, boolean publish) {
+        Event event =
+                eventBuilder()
+                        .withDepartment(department)
+                        .withEventStatus(eventStatus)
+                        .withPublish(publish)
+                        .build();
+        return eventRepository.save(event);
+    }
+
     public Event createEventWithFloorAndLockers(
             List<Integer> lockersPerFloor, EventStatus eventStatus, boolean publish) {
         // 조직 생성 및 저장
@@ -47,13 +77,7 @@ public class EventTestUtil {
         Department savedDepartment = departmentRepository.save(department);
 
         // 이벤트 생성 및 저장
-        Event event =
-                eventBuilder()
-                        .withDepartment(savedDepartment)
-                        .withEventStatus(eventStatus)
-                        .withPublish(publish)
-                        .build();
-        Event savedEvent = eventRepository.save(event);
+        Event savedEvent = createAndSaveEvent(savedDepartment, eventStatus, publish);
 
         // 층 생성 및 저장
         createFloorsWithEvent(lockersPerFloor, savedEvent);

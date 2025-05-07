@@ -15,6 +15,10 @@ public class AuthTestUtil {
 
     @Autowired private TokenProvider tokenProvider;
 
+    public String generateAccessTokenWithMember(Member member) {
+        return tokenProvider.generateAccessToken(member.getId(), member.getRole());
+    }
+
     public String generateAccessToken(Role role) {
         Member member = memberTestUtil.createMemberFromRole(role);
         return tokenProvider.generateAccessToken(member.getId(), member.getRole());
