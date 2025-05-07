@@ -27,7 +27,7 @@ import com.jnulocker.member.exception.MemberErrorCode;
 import com.jnulocker.member.utils.MemberTestUtil;
 import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.exception.DepartmentErrorCode;
-import com.jnulocker.organization.utils.OrganizationUtil;
+import com.jnulocker.organization.utils.OrganizationTestUtil;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import io.restassured.RestAssured;
@@ -69,7 +69,7 @@ class AuthControllerIntegrationTest {
 
     @Autowired private MemberTestUtil memberTestUtil;
 
-    @Autowired private OrganizationUtil organizationUtil;
+    @Autowired private OrganizationTestUtil organizationTestUtil;
 
     @Autowired private RedisUtil redisUtil;
 
@@ -97,7 +97,7 @@ class AuthControllerIntegrationTest {
     @Test
     void USER_회원가입을_할_수_있다() {
         // given
-        Department department = organizationUtil.createCouncilDepartment();
+        Department department = organizationTestUtil.createCouncilDepartment();
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
 
@@ -128,7 +128,7 @@ class AuthControllerIntegrationTest {
     @Test
     void USER_동일메일로_회원가입하면_User_Already_Exist_에러_응답을_받는다() {
         // given
-        Department department = organizationUtil.createCouncilDepartment();
+        Department department = organizationTestUtil.createCouncilDepartment();
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
         signupUser(request).statusCode(HttpStatus.CREATED.value());
@@ -148,7 +148,7 @@ class AuthControllerIntegrationTest {
     @Test
     void USER_회원가입_시_이메일_인증이_완료되지_않았으면_Email_Not_Verified_에러_응답을_받는다() {
         // given
-        Department department = organizationUtil.createCouncilDepartment();
+        Department department = organizationTestUtil.createCouncilDepartment();
         UserSignupRequest request =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
         redisUtil.deleteVerifiedData(request.email());
@@ -168,7 +168,7 @@ class AuthControllerIntegrationTest {
     @Test
     void MANAGER_회원가입을_할_수_있다() {
         // given
-        Department department = organizationUtil.createCouncilDepartment();
+        Department department = organizationTestUtil.createCouncilDepartment();
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
 
@@ -179,7 +179,7 @@ class AuthControllerIntegrationTest {
     @Test
     void MANAGER_학생회_회원가입_시_학번이_null이면_Student_Number_Required_에러_응답을_받는다() {
         // given
-        Department department = organizationUtil.createCouncilDepartment();
+        Department department = organizationTestUtil.createCouncilDepartment();
         ManagerSignupRequest request =
                 managerSignupRequestBuilder()
                         .withDepartmentId(department.getId())
@@ -201,7 +201,7 @@ class AuthControllerIntegrationTest {
     @Test
     void MANAGER_학생회_회원가입_시_학번이_입력되면_정상적으로_회원가입된다() {
         // given
-        Department department = organizationUtil.createCouncilDepartment();
+        Department department = organizationTestUtil.createCouncilDepartment();
         ManagerSignupRequest request =
                 managerSignupRequestBuilder()
                         .withDepartmentId(department.getId())
@@ -218,7 +218,7 @@ class AuthControllerIntegrationTest {
     @Test
     void MANAGER_자치회_회원가입_시_학번이_입력되지_않으면_정상적으로_회원가입된다() {
         // given
-        Department department = organizationUtil.createCommitteeDepartment();
+        Department department = organizationTestUtil.createCommitteeDepartment();
         ManagerSignupRequest request =
                 managerSignupRequestBuilder()
                         .withDepartmentId(department.getId())
@@ -255,7 +255,7 @@ class AuthControllerIntegrationTest {
     @Test
     void MANAGER_동일메일로_회원가입하면_User_Already_Exist_에러_응답을_받는다() {
         // given
-        Department department = organizationUtil.createCouncilDepartment();
+        Department department = organizationTestUtil.createCouncilDepartment();
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
         signupManager(request).statusCode(HttpStatus.CREATED.value());
@@ -275,7 +275,7 @@ class AuthControllerIntegrationTest {
     @Test
     void MANAGER_회원가입_시_이메일_인증이_완료되지_않았으면_Email_Not_Verified_에러_응답을_받는다() {
         // given
-        Department department = organizationUtil.createCouncilDepartment();
+        Department department = organizationTestUtil.createCouncilDepartment();
 
         ManagerSignupRequest request =
                 managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
@@ -296,7 +296,7 @@ class AuthControllerIntegrationTest {
     @Test
     void 로그인_성공시_토큰을_반환한다() {
         // given
-        Department department = organizationUtil.createCouncilDepartment();
+        Department department = organizationTestUtil.createCouncilDepartment();
         UserSignupRequest signupRequest =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
         signupUser(signupRequest);
@@ -320,7 +320,7 @@ class AuthControllerIntegrationTest {
     @Test
     void 토큰_재발급_요청시_새로운_AccessToken을_받는다() {
         // given
-        Department department = organizationUtil.createCouncilDepartment();
+        Department department = organizationTestUtil.createCouncilDepartment();
         UserSignupRequest signupRequest =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
         signupUser(signupRequest);
@@ -423,7 +423,7 @@ class AuthControllerIntegrationTest {
     @Test
     void 올바르지_않은_이메일로_로그인하면_인증에_실패한다() {
         // given
-        Department department = organizationUtil.createCouncilDepartment();
+        Department department = organizationTestUtil.createCouncilDepartment();
         UserSignupRequest signupRequest =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
         signupUser(signupRequest);
@@ -445,7 +445,7 @@ class AuthControllerIntegrationTest {
     @Test
     void 올바르지_않은_비밀번호로_로그인하면_인증에_실패한다() {
         // given
-        Department department = organizationUtil.createCouncilDepartment();
+        Department department = organizationTestUtil.createCouncilDepartment();
         UserSignupRequest signupRequest =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
         signupUser(signupRequest);
@@ -479,7 +479,7 @@ class AuthControllerIntegrationTest {
     @Test
     void 이미_사용중인_이메일로_인증_요청_시_User_Already_Exist_에러_응답을_받는다() {
         // given
-        Department department = organizationUtil.createCouncilDepartment();
+        Department department = organizationTestUtil.createCouncilDepartment();
         UserSignupRequest signupRequest =
                 userSignupRequestBuilder().withDepartmentId(department.getId()).build();
         signupUser(signupRequest).statusCode(HttpStatus.CREATED.value());
@@ -560,7 +560,7 @@ class AuthControllerIntegrationTest {
     @Test
     void MANAGER는_새로_가입한_학생회_회원의_가입을_승인할_수_있다() {
         // given
-        Department department = organizationUtil.createCouncilDepartment();
+        Department department = organizationTestUtil.createCouncilDepartment();
         ManagerSignupRequest signupRequest =
                 managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
         signupManager(signupRequest).statusCode(HttpStatus.CREATED.value());
@@ -579,7 +579,7 @@ class AuthControllerIntegrationTest {
     @Test
     void 이미_MANAGER인_회원은_가입을_승인할_수_없다() {
         // given
-        Department department = organizationUtil.createCouncilDepartment();
+        Department department = organizationTestUtil.createCouncilDepartment();
         ManagerSignupRequest signupRequest =
                 managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
         signupManager(signupRequest).statusCode(HttpStatus.CREATED.value());
@@ -609,8 +609,8 @@ class AuthControllerIntegrationTest {
     @Test
     void MANAGER는_다른_학과의_학생회_회원의_가입을_승인할_수_없다() {
         // given
-        Department department1 = organizationUtil.createCouncilDepartment();
-        Department department2 = organizationUtil.createCouncilDepartment();
+        Department department1 = organizationTestUtil.createCouncilDepartment();
+        Department department2 = organizationTestUtil.createCouncilDepartment();
         ManagerSignupRequest signupRequest =
                 managerSignupRequestBuilder().withDepartmentId(department1.getId()).build();
         signupManager(signupRequest).statusCode(HttpStatus.CREATED.value());

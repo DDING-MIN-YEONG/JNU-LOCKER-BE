@@ -19,7 +19,7 @@ import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.utils.MemberTestUtil;
 import com.jnulocker.organization.domain.Department;
-import com.jnulocker.organization.utils.OrganizationUtil;
+import com.jnulocker.organization.utils.OrganizationTestUtil;
 import io.restassured.RestAssured;
 import io.restassured.http.Cookie;
 import io.restassured.response.ValidatableResponse;
@@ -59,7 +59,7 @@ public class EventControllerIntegrationTest {
 
     @Autowired private AuthTestUtil authTestUtil;
 
-    @Autowired private OrganizationUtil organizationUtil;
+    @Autowired private OrganizationTestUtil organizationTestUtil;
 
     private static String accessToken;
 
@@ -285,7 +285,7 @@ public class EventControllerIntegrationTest {
     @Test
     void 자신이_속한_학과가_참여하는_이벤트를_조회할_수_있다() {
         // given
-        Department department = organizationUtil.createCouncilDepartment();
+        Department department = organizationTestUtil.createCouncilDepartment();
         Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
 
         // 이벤트 생성: 짝수번 사물함은 사용 가능, 홀수번 사물함은 사용 불가능
@@ -312,7 +312,7 @@ public class EventControllerIntegrationTest {
     @Test
     void publish되지_않은_이벤트는_조회할_수_없다() {
         // given
-        Department department = organizationUtil.createCouncilDepartment();
+        Department department = organizationTestUtil.createCouncilDepartment();
         Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
 
         // 이벤트 생성: 짝수번 사물함은 사용 가능, 홀수번 사물함은 사용 불가능
@@ -378,7 +378,7 @@ public class EventControllerIntegrationTest {
 
     // 이벤트 생성 메서드들
     private void createEvent() {
-        Department department = organizationUtil.createCouncilDepartment();
+        Department department = organizationTestUtil.createCouncilDepartment();
         createEventWithDepartment(department);
     }
 

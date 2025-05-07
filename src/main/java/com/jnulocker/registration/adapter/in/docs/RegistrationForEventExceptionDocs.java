@@ -9,6 +9,7 @@ import com.jnulocker.events.exception.EventNotOpenException;
 import com.jnulocker.events.exception.InvalidLockerForEventException;
 import com.jnulocker.events.exception.LockerNotFoundException;
 import com.jnulocker.events.exception.LockerUnavailableException;
+import com.jnulocker.events.exception.OnlyParticipationDepartmentCanRegisterException;
 import com.jnulocker.member.exception.MemberNotFoundException;
 import com.jnulocker.registration.exception.RegistrationAlreadyExistsException;
 import lombok.AccessLevel;
@@ -41,4 +42,8 @@ public class RegistrationForEventExceptionDocs implements SwaggerExceptionDoc {
 
     @ExplainError("사물함이 사용중(available == false)일 때 발생하는 예외입니다.")
     public static final BusinessException 사물함이_사용중일_때 = LockerUnavailableException.EXCEPTION;
+
+    @ExplainError("신청자의 소속학과가 이벤트 대상이 아닐 때 발생하는 예외입니다.")
+    public static final BusinessException 신청자의_소속학과가_이벤트_대상이_아닐_때 =
+            OnlyParticipationDepartmentCanRegisterException.EXCEPTION;
 }
