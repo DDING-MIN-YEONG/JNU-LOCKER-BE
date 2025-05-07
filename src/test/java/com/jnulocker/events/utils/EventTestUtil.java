@@ -4,6 +4,7 @@ import static events.domain.EventTestDataBuilder.*;
 import static organization.domain.DepartmentTestDataBuilder.*;
 import static organization.domain.OrganizationTestDataBuilder.*;
 
+import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.events.adapter.out.EventParticipationRepository;
 import com.jnulocker.events.adapter.out.EventRepository;
 import com.jnulocker.events.adapter.out.FloorRepository;
@@ -13,10 +14,14 @@ import com.jnulocker.events.domain.EventParticipation;
 import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.domain.Floor;
 import com.jnulocker.events.domain.Locker;
+import com.jnulocker.member.domain.Member;
+import com.jnulocker.member.domain.Role;
+import com.jnulocker.member.utils.MemberTestUtil;
 import com.jnulocker.organization.adapter.out.DepartmentRepository;
 import com.jnulocker.organization.adapter.out.OrganizationRepository;
 import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.domain.Organization;
+import com.jnulocker.organization.utils.OrganizationUtil;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +42,62 @@ public class EventTestUtil {
 
     @Autowired private LockerRepository lockerRepository;
 
+    @Autowired private OrganizationUtil organizationUtil; // TODO: OrganizationTestUtil로 변경
+
+    @Autowired private MemberTestUtil memberTestUtil;
+
+    @Autowired private AuthTestUtil authTestUtil;
+
+    public LockerEventContext setUpLockerEventForRegistration(
+            List<Integer> lockersPerFloor, Role role, EventStatus eventStatus, boolean publish) {
+        // Department 생성
+        Department department = organizationUtil.createCouncilDepartment();
+
+        // Member 생성
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(role, department);
+
+        // AccessToken 생성
+        String accessToken = authTestUtil.generateAccessTokenWithMember(member);
+
+        // Event 생성 및 Department를 EventParticipation에 추가
+        Event event =
+                createEventWithParticipationDepartment(
+                        lockersPerFloor, department, eventStatus, publish);
+
+        return new LockerEventContext(department, member, accessToken, event);
+    }
+
+    public LockerEventContext setupLockerEventWithParticipatingDepartment(
+            List<Integer> lockersPerFloor,
+            Role role,
+            EventStatus eventStatus,
+            boolean publish,
+            List<Department> participationDepartments) {
+        // Department 생성 (사용자의 Department)
+        Department userDepartment = organizationUtil.createCouncilDepartment();
+
+        // Member 생성
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(role, userDepartment);
+
+        // AccessToken 생성
+        String accessToken = authTestUtil.generateAccessTokenWithMember(member);
+
+        // Event 생성
+        Event event = createEventWithFloorAndLockers(lockersPerFloor, eventStatus, publish);
+
+        // 지정된 Department들만 EventParticipation에 추가: 사용자의 Department는 제외
+        for (Department dept : participationDepartments) {
+            addParticipationDepartment(event, dept);
+        }
+
+        return new LockerEventContext(userDepartment, member, accessToken, event);
+    }
+
+    private void addParticipationDepartment(Event event, Department department) {
+        EventParticipation participation = EventParticipation.create(event, department);
+        eventParticipationRepository.save(participation);
+    }
+
     public Event createEventWithParticipationDepartment(
             List<Integer> lockersPerFloor,
             Department department,
@@ -53,17 +114,6 @@ public class EventTestUtil {
         // 층 생성 및 저장
         createFloorsWithEvent(lockersPerFloor, savedEvent);
         return savedEvent;
-    }
-
-    private Event createAndSaveEvent(
-            Department department, EventStatus eventStatus, boolean publish) {
-        Event event =
-                eventBuilder()
-                        .withDepartment(department)
-                        .withEventStatus(eventStatus)
-                        .withPublish(publish)
-                        .build();
-        return eventRepository.save(event);
     }
 
     public Event createEventWithFloorAndLockers(
@@ -83,6 +133,17 @@ public class EventTestUtil {
         createFloorsWithEvent(lockersPerFloor, savedEvent);
 
         return savedEvent;
+    }
+
+    private Event createAndSaveEvent(
+            Department department, EventStatus eventStatus, boolean publish) {
+        Event event =
+                eventBuilder()
+                        .withDepartment(department)
+                        .withEventStatus(eventStatus)
+                        .withPublish(publish)
+                        .build();
+        return eventRepository.save(event);
     }
 
     private void createFloorsWithEvent(List<Integer> lockersPerFloor, Event savedEvent) {
