@@ -60,6 +60,7 @@ public class AuthController implements AuthApi {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @Override
     @GetMapping("/managers/pending")
     public ResponseEntity<PendingManagerCustomPage> getPendingManagers(
             @Valid @ParameterObject PendingManagerPageable pendingManagerPageable) {
