@@ -5,6 +5,7 @@ import static com.jnulocker.auth.util.CookieUtil.getCookieValueFromRefreshToken;
 
 import com.jnulocker.auth.adapter.in.docs.AuthApi;
 import com.jnulocker.auth.application.port.in.LoginCommand;
+import com.jnulocker.auth.application.port.in.ManagerQuery;
 import com.jnulocker.auth.application.port.in.ManagerSignupCommand;
 import com.jnulocker.auth.application.port.in.ReissueCommand;
 import com.jnulocker.auth.application.port.in.SendEmailCommand;
@@ -17,12 +18,17 @@ import com.jnulocker.auth.application.port.in.request.SendEmailRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.request.VerifyCodeRequest;
 import com.jnulocker.auth.application.port.in.response.AuthToken;
+import com.jnulocker.auth.application.port.in.response.PendingManagerCustomPage;
+import com.jnulocker.auth.application.port.in.response.PendingManagerPageable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController implements AuthApi {
     private final UserSignupCommand userSignupCommand;
+    private final ManagerQuery managerQuery;
     private final ManagerSignupCommand managerSignupCommand;
     private final LoginCommand loginCommand;
     private final ReissueCommand reissueCommand;
@@ -51,6 +58,13 @@ public class AuthController implements AuthApi {
     public ResponseEntity<Void> signupManager(@Valid @RequestBody ManagerSignupRequest request) {
         managerSignupCommand.signupManager(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping("/managers/pending")
+    public ResponseEntity<PendingManagerCustomPage> getPendingManagers(
+            @Valid @ParameterObject PendingManagerPageable pendingManagerPageable) {
+        Pageable pageable = pendingManagerPageable.toPageable();
+        return ResponseEntity.ok(managerQuery.getPendingManagers(pageable));
     }
 
     @Override
