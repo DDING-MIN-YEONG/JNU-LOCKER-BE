@@ -19,7 +19,6 @@ import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.domain.Organization;
 import java.util.ArrayList;
 import java.util.List;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -56,7 +55,8 @@ public class EventTestUtil {
         return savedEvent;
     }
 
-    private Event createAndSaveEvent(Department department, EventStatus eventStatus, boolean publish) {
+    private Event createAndSaveEvent(
+            Department department, EventStatus eventStatus, boolean publish) {
         Event event =
                 eventBuilder()
                         .withDepartment(department)
