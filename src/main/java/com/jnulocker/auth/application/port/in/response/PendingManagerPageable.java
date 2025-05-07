@@ -9,10 +9,10 @@ public class PendingManagerPageable extends AbstractPageable {
     public static final String DEFAULT_SORT = "createdAt";
 
     public static final String VALID_SORT_MESSAGE =
-            "정렬 기준은 다음 중 하나여야 합니다: [id, name, email, studentNumber].";
+            "정렬 기준은 다음 중 하나여야 합니다: [id, name, email, studentNumber, createdAt].";
 
     public static final Set<String> VALID_SORT_FIELDS =
-            Set.of("id", "name", "email", "studentNumber");
+            Set.of("id", "name", "email", "studentNumber", "createdAt");
 
     public PendingManagerPageable(Integer page, Integer size, String direction, String sort) {
         super(page, size, direction, sort);
