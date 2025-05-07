@@ -21,7 +21,7 @@ import com.jnulocker.organization.adapter.out.DepartmentRepository;
 import com.jnulocker.organization.adapter.out.OrganizationRepository;
 import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.domain.Organization;
-import com.jnulocker.organization.utils.OrganizationUtil;
+import com.jnulocker.organization.utils.OrganizationTestUtil;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +42,7 @@ public class EventTestUtil {
 
     @Autowired private LockerRepository lockerRepository;
 
-    @Autowired private OrganizationUtil organizationUtil; // TODO: OrganizationTestUtil로 변경
+    @Autowired private OrganizationTestUtil organizationTestUtil;
 
     @Autowired private MemberTestUtil memberTestUtil;
 
@@ -51,7 +51,7 @@ public class EventTestUtil {
     public LockerEventContext setUpLockerEventForRegistration(
             List<Integer> lockersPerFloor, Role role, EventStatus eventStatus, boolean publish) {
         // Department 생성
-        Department department = organizationUtil.createCouncilDepartment();
+        Department department = organizationTestUtil.createCouncilDepartment();
 
         // Member 생성
         Member member = memberTestUtil.createMemberFromRoleWithDepartment(role, department);
@@ -74,7 +74,7 @@ public class EventTestUtil {
             boolean publish,
             List<Department> participationDepartments) {
         // Department 생성 (사용자의 Department)
-        Department userDepartment = organizationUtil.createCouncilDepartment();
+        Department userDepartment = organizationTestUtil.createCouncilDepartment();
 
         // Member 생성
         Member member = memberTestUtil.createMemberFromRoleWithDepartment(role, userDepartment);

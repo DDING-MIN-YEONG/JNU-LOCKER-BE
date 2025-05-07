@@ -9,7 +9,7 @@ import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.utils.MemberTestUtil;
 import com.jnulocker.organization.domain.Department;
-import com.jnulocker.organization.utils.OrganizationUtil;
+import com.jnulocker.organization.utils.OrganizationTestUtil;
 import io.restassured.RestAssured;
 import io.restassured.http.Cookie;
 import io.restassured.response.ValidatableResponse;
@@ -41,7 +41,7 @@ public class MemberControllerIntegrationTest {
 
     @Autowired private AuthTestUtil authTestUtil;
 
-    @Autowired private OrganizationUtil organizationUtil;
+    @Autowired private OrganizationTestUtil organizationTestUtil;
 
     @BeforeEach
     void setUp() {
@@ -80,7 +80,7 @@ public class MemberControllerIntegrationTest {
     @Test
     void MANAGER_COUNCIL_회원_정보를_조회할_수_있다() {
         // given
-        Department council = organizationUtil.createCouncilDepartment();
+        Department council = organizationTestUtil.createCouncilDepartment();
         Member expectedMember =
                 memberTestUtil.createMemberFromRoleWithDepartment(Role.MANAGER, council);
         String accessToken = authTestUtil.generateAccessTokenWithMember(expectedMember);
@@ -106,7 +106,7 @@ public class MemberControllerIntegrationTest {
     @Test
     void MANAGER_COMMITTEE_회원_정보를_조회할_수_있다() {
         // given
-        Department committee = organizationUtil.createCommitteeDepartment();
+        Department committee = organizationTestUtil.createCommitteeDepartment();
         Member expectedMember =
                 memberTestUtil.createMemberFromRoleWithDepartment(Role.MANAGER, committee);
         String accessToken =
@@ -124,7 +124,7 @@ public class MemberControllerIntegrationTest {
         assertThat(memberInfoResponse).isNotNull();
         assertThat(memberInfoResponse.memberId()).isEqualTo(expectedMember.getId());
         assertThat(memberInfoResponse.name()).isEqualTo(expectedMember.getName());
-        assertThat(memberInfoResponse.studentNumber()).isEqualTo(null);
+        assertThat(memberInfoResponse.studentNumber()).isNull();
         assertThat(memberInfoResponse.affiliation())
                 .isEqualTo(expectedMember.getDepartment().getNickname());
         assertThat(memberInfoResponse.phoneNumber()).isEqualTo(expectedMember.getPhoneNumber());

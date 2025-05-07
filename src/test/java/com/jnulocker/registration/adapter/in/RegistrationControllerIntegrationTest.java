@@ -17,7 +17,7 @@ import com.jnulocker.events.utils.EventTestUtil;
 import com.jnulocker.events.utils.LockerEventContext;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.utils.MemberTestUtil;
-import com.jnulocker.organization.utils.OrganizationUtil;
+import com.jnulocker.organization.utils.OrganizationTestUtil;
 import com.jnulocker.registration.application.port.in.request.RegisterForEventRequest;
 import com.jnulocker.registration.application.port.in.response.RegistrationCustomPage;
 import com.jnulocker.registration.application.port.in.response.RegistrationListItem;
@@ -59,7 +59,7 @@ class RegistrationControllerIntegrationTest {
 
     @Autowired private AuthTestUtil authTestUtil;
 
-    @Autowired private OrganizationUtil organizationUtil;
+    @Autowired private OrganizationTestUtil organizationTestUtil;
 
     @Autowired private RegistrationTestUtil registrationTestUtil;
 
