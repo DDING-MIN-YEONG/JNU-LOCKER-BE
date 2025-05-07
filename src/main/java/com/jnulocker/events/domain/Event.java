@@ -3,8 +3,8 @@ package com.jnulocker.events.domain;
 import com.jnulocker.common.persistence.BaseEntity;
 import com.jnulocker.events.exception.EventNotOpenException;
 import com.jnulocker.events.exception.OnlyManagerCanDeleteException;
+import com.jnulocker.events.exception.OnlyParticipationDepartmentCanRegisterException;
 import com.jnulocker.events.exception.OpenEventCannotBeDeletedException;
-import com.jnulocker.member.domain.Role;
 import com.jnulocker.organization.domain.Department;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -83,13 +83,27 @@ public class Event extends BaseEntity {
                 .build();
     }
 
-    public void validateRegistration(Role role) {
-        validatePublishStatus(role);
+    public void validateRegistration(Department department) {
+        validateParticipationDepartment(department);
+        validatePublishStatus();
         validateEventStatus();
     }
 
-    private void validatePublishStatus(Role role) {
-        if (Boolean.FALSE.equals(publish) && role != Role.MANAGER) {
+    private void validateParticipationDepartment(Department department) {
+        if (!isParticipationDepartment(department)) {
+            throw OnlyParticipationDepartmentCanRegisterException.EXCEPTION;
+        }
+    }
+
+    private boolean isParticipationDepartment(Department department) {
+        return eventParticipations.stream()
+                .anyMatch(
+                        eventParticipation ->
+                                eventParticipation.getDepartment().equals(department));
+    }
+
+    private void validatePublishStatus() {
+        if (Boolean.FALSE.equals(publish)) {
             throw EventNotOpenException.EXCEPTION;
         }
     }
