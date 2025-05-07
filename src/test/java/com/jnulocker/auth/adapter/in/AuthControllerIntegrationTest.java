@@ -6,6 +6,7 @@ import static auth.application.port.in.request.UserSignupRequestTestDataBuilder.
 import static auth.application.port.in.request.VerifyCodeRequestTestDataBuilder.verifyCodeRequestBuilder;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThatList;
 
 import com.jnulocker.auth.adapter.out.TokenRepository;
 import com.jnulocker.auth.application.port.in.request.LoginRequest;
@@ -14,6 +15,7 @@ import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.SendEmailRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.request.VerifyCodeRequest;
+import com.jnulocker.auth.application.port.in.response.PendingManagerCustomPage;
 import com.jnulocker.auth.exception.AuthErrorCode;
 import com.jnulocker.auth.jwt.RefreshToken;
 import com.jnulocker.auth.jwt.exception.JwtErrorCode;
@@ -558,6 +560,55 @@ class AuthControllerIntegrationTest {
     }
 
     @Test
+    void MANAGER는_가입_승인_요청을_조회할_수_있다() {
+        // given
+        Department department = organizationUtil.createCouncilDepartment();
+        ManagerSignupRequest signupRequest =
+                managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
+        signupManager(signupRequest).statusCode(HttpStatus.CREATED.value());
+
+        String accessToken =
+                authTestUtil.generateAccessTokenWithDepartment(Role.MANAGER, department);
+        // when
+        PendingManagerCustomPage pendingManagerCustomPage =
+                getPendingManagerSignups(accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(PendingManagerCustomPage.class);
+
+        // then
+        assertThat(pendingManagerCustomPage).isNotNull();
+        assertThat(pendingManagerCustomPage.totalElements()).isEqualTo(1);
+        assertThat(pendingManagerCustomPage.content().getFirst().email())
+                .isEqualTo(signupRequest.email());
+    }
+
+    @Test
+    void 학과가_다른_회원의_가입_승인_요청은_조회할_수_없다() {
+        // given
+        Department department1 = organizationUtil.createCouncilDepartment();
+        Department department2 = organizationUtil.createCouncilDepartment();
+        ManagerSignupRequest signupRequest =
+                managerSignupRequestBuilder().withDepartmentId(department1.getId()).build();
+        signupManager(signupRequest).statusCode(HttpStatus.CREATED.value());
+
+        String accessToken =
+                authTestUtil.generateAccessTokenWithDepartment(Role.MANAGER, department2);
+        // when
+        PendingManagerCustomPage pendingManagerCustomPage =
+                getPendingManagerSignups(accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(PendingManagerCustomPage.class);
+
+        // then
+        assertThat(pendingManagerCustomPage).isNotNull();
+        assertThat(pendingManagerCustomPage.totalElements()).isZero();
+        assertThat(pendingManagerCustomPage.last()).isTrue();
+        assertThatList(pendingManagerCustomPage.content()).isEmpty();
+    }
+
+    @Test
     void MANAGER는_새로_가입한_학생회_회원의_가입을_승인할_수_있다() {
         // given
         Department department = organizationUtil.createCouncilDepartment();
@@ -735,5 +786,15 @@ class AuthControllerIntegrationTest {
                 .expiration(expiredAt)
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
+    }
+
+    private ValidatableResponse getPendingManagerSignups(String accessToken) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .when()
+                .get(AUTH_URL + "/managers/pending")
+                .then()
+                .log()
+                .all();
     }
 }
