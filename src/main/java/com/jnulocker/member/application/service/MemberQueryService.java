@@ -7,8 +7,11 @@ import com.jnulocker.member.application.port.out.MemberLoadPort;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.exception.MemberNotFoundException;
+import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.domain.OrganizationType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,5 +74,10 @@ public class MemberQueryService implements MemberQuery {
                 affiliation,
                 member.getPhoneNumber(),
                 member.getEmail());
+    }
+
+    public Page<Member> getByRoleAndDepartment(
+            Role role, Department department, Pageable pageable) {
+        return memberLoadPort.getByRoleAndDepartment(role, department, pageable);
     }
 }

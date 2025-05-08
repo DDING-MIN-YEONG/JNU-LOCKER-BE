@@ -19,6 +19,7 @@ public enum AuthErrorCode implements ErrorCode {
     ONLY_MANAGER_CAN_APPROVE("A009", HttpStatus.FORBIDDEN, "관리자만 승인할 수 있습니다."),
     ONLY_SAME_DEPARTMENT_CAN_APPROVE("A010", HttpStatus.FORBIDDEN, "같은 학과의 관리자만 승인할 수 있습니다."),
     ONLY_GUEST_CAN_BE_MANAGER("A011", HttpStatus.FORBIDDEN, "게스트만 매니저로 승인될 수 있습니다"),
+    FAILED_TO_CREATE_CODE("A012", HttpStatus.INTERNAL_SERVER_ERROR, "인증 코드 생성에 실패했습니다."),
     ;
 
     private final String code;

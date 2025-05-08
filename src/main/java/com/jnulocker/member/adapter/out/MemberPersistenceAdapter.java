@@ -4,8 +4,12 @@ import com.jnulocker.auth.application.port.out.MemberRecordPort;
 import com.jnulocker.common.annotation.PersistenceAdapter;
 import com.jnulocker.member.application.port.out.MemberLoadPort;
 import com.jnulocker.member.domain.Member;
+import com.jnulocker.member.domain.Role;
+import com.jnulocker.organization.domain.Department;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @PersistenceAdapter
 @RequiredArgsConstructor
@@ -35,5 +39,11 @@ public class MemberPersistenceAdapter implements MemberLoadPort, MemberRecordPor
     @Override
     public Optional<Member> findByIdWithDepartment(Long memberId) {
         return memberRepository.findByIdWithDepartment(memberId);
+    }
+
+    @Override
+    public Page<Member> getByRoleAndDepartment(
+            Role role, Department department, Pageable pageable) {
+        return memberRepository.findAllByRoleAndDepartment(role, department, pageable);
     }
 }

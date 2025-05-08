@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class AuthService
+public class AuthCommandService
         implements UserSignupCommand, ManagerSignupCommand, LoginCommand, ReissueCommand {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
@@ -95,6 +95,10 @@ public class AuthService
         approver.validateManagerApproval(approvee.getDepartment());
 
         approvee.approveManager();
+
+        // refreshToken 삭제
+        tokenProvider.deleteRefreshTokenById(approvee.getId());
+
         memberCommand.save(approvee);
     }
 

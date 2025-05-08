@@ -6,13 +6,19 @@ import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.SendEmailRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.request.VerifyCodeRequest;
+import com.jnulocker.auth.application.port.in.response.PendingManagerCustomPage;
+import com.jnulocker.auth.application.port.in.response.PendingManagerPageable;
 import com.jnulocker.common.swagger.ApiExceptionExamples;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -28,6 +34,18 @@ public interface AuthApi {
     @Operation(summary = "MANAGER 회원가입", description = "사물함 신청 이벤트 관리자인 MANAGER에 대한 회원가입입니다.")
     @ApiResponse(responseCode = "201", description = "MANAGER 회원가입 성공")
     ResponseEntity<Void> signupManager(@Valid @RequestBody ManagerSignupRequest request);
+
+    @ApiExceptionExamples(GetPendingManagerExceptionDocs.class)
+    @Operation(summary = "가입 승인 대기중인 MANAGER 목록 조회", description = "가입 승인 대기중인 MANAGER 목록을 조회합니다.")
+    @ApiResponse(
+            responseCode = "200",
+            description = "가입 승인 대기중인 MANAGER 목록 조회 성공",
+            content =
+                    @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PendingManagerCustomPage.class)))
+    ResponseEntity<PendingManagerCustomPage> getPendingManagers(
+            @Valid @ParameterObject PendingManagerPageable pendingManagerPageable);
 
     @ApiExceptionExamples(ApproveManagerExceptionDocs.class)
     @Operation(summary = "MANAGER 가입 승인", description = "MANAGER 가입을 승인합니다.")

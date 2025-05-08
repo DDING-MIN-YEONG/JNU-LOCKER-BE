@@ -47,9 +47,9 @@ public class TokenProvider {
     }
 
     public AuthToken createAuthTokenByAuthentication(Authentication authentication, Role role) {
-        Long userId = Long.valueOf(authentication.getName());
-        String accessToken = generateAccessToken(userId, role);
-        String refreshToken = generateRefreshToken(userId);
+        Long memberId = Long.valueOf(authentication.getName());
+        String accessToken = generateAccessToken(memberId, role);
+        String refreshToken = generateRefreshToken(memberId);
 
         return AuthToken.of(
                 accessToken,
@@ -70,10 +70,10 @@ public class TokenProvider {
                 refreshTokenExpireTime);
     }
 
-    public String generateAccessToken(Long userId, Role role) {
+    public String generateAccessToken(Long memberId, Role role) {
         Date now = new Date();
         return Jwts.builder()
-                .claim("id", userId)
+                .claim("id", memberId)
                 .claim("role", role.getRole())
                 .issuedAt(now)
                 .expiration(
@@ -84,11 +84,11 @@ public class TokenProvider {
                 .compact();
     }
 
-    public String generateRefreshToken(Long userId) {
+    public String generateRefreshToken(Long memberId) {
         Date now = new Date();
         String refreshToken =
                 Jwts.builder()
-                        .claim("id", userId)
+                        .claim("id", memberId)
                         .issuedAt(now)
                         .expiration(
                                 new Date(
@@ -98,7 +98,7 @@ public class TokenProvider {
                         .signWith(refreshSecretKey)
                         .compact();
 
-        RefreshToken token = new RefreshToken(userId, refreshToken, refreshTokenExpireTime);
+        RefreshToken token = new RefreshToken(memberId, refreshToken, refreshTokenExpireTime);
         tokenRepository.save(token);
 
         return refreshToken;
@@ -107,11 +107,11 @@ public class TokenProvider {
     // 토큰 복호화
     public Authentication getAuthentication(String accessToken) {
         Claims claims = parseClaims(accessToken, TokenType.ACCESS);
-        String userId = claims.get("id").toString();
+        String memberId = claims.get("id").toString();
         String role = claims.get("role").toString();
         Set<SimpleGrantedAuthority> authorities =
                 Collections.singleton(new SimpleGrantedAuthority(role));
-        UserDetails principal = new User(userId, "", authorities);
+        UserDetails principal = new User(memberId, "", authorities);
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 
@@ -151,5 +151,12 @@ public class TokenProvider {
             }
             throw InvalidRefreshTokenException.EXCEPTION;
         }
+    }
+
+    public void deleteRefreshTokenById(Long memberId) {
+        if (!tokenRepository.existsById(memberId)) {
+            return;
+        }
+        tokenRepository.deleteById(memberId);
     }
 }
