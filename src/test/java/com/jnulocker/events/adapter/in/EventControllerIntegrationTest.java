@@ -89,8 +89,13 @@ public class EventControllerIntegrationTest {
     })
     void 이벤트_목록을_조회할_수_있다(int createCount, int pageSize, int page, boolean expectedLast) {
         // given
+        Department department = organizationTestUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.MANAGER, department);
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+
         for (int i = 0; i < createCount; i++) {
-            eventTestUtil.createEventWithFloorAndLockers(List.of(1), EventStatus.OPEN, true);
+            eventTestUtil.createEventWithParticipationDepartment(
+                    List.of(5, 10), department, EventStatus.OPEN, true);
         }
 
         // when
@@ -105,6 +110,28 @@ public class EventControllerIntegrationTest {
         assertThat(eventCustomPage.content()).hasSize(expectedSize);
         assertThat(eventCustomPage.totalElements()).isEqualTo(createCount);
         assertThat(eventCustomPage.last()).isEqualTo(expectedLast);
+    }
+
+    @Test
+    void 자신의_소속학과가_주관하지_않는_이벤트는_조회할_수_없다() {
+        // given
+        Department department = organizationTestUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+
+        // 이벤트 생성: 비참여 학과로 생성
+        eventTestUtil.createEventWithFloorAndLockers(List.of(5, 10), EventStatus.OPEN, true);
+
+        // when
+        List<MyEventResponse> myEvents =
+                getMyEvents(accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .jsonPath()
+                        .getList(".", MyEventResponse.class);
+
+        // then
+        assertThat(myEvents).isEmpty();
     }
 
     @ParameterizedTest(name = "층별 사물함 수: {0}")
