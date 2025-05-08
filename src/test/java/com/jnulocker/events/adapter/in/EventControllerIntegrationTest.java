@@ -24,6 +24,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.Cookie;
 import io.restassured.response.ValidatableResponse;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -137,7 +138,7 @@ public class EventControllerIntegrationTest {
     @Test
     void 존재하지_않는_이벤트_ID로_조회하면_Event_Not_Found_에러_응답을_받는다() {
         // given
-        Long nonExistentEventId = -1L;
+        UUID nonExistentEventId = UUID.randomUUID();
 
         // when
         ErrorResponse errorResponse =
@@ -173,7 +174,7 @@ public class EventControllerIntegrationTest {
         createEvent();
 
         // 생성된 이벤트 조회
-        Long eventId = getLastEventId();
+        UUID eventId = getLastEventId();
 
         // when
         deleteEvent(eventId).statusCode(HttpStatus.NO_CONTENT.value());
@@ -192,7 +193,7 @@ public class EventControllerIntegrationTest {
     @Test
     void 존재하지_않는_이벤트는_삭제할_수_없다() {
         // given
-        Long nonExistentEventId = Long.MAX_VALUE;
+        UUID nonExistentEventId = UUID.randomUUID();
 
         // when
         ErrorResponse errorResponse =
@@ -211,7 +212,7 @@ public class EventControllerIntegrationTest {
         createEvent();
 
         // 생성된 이벤트 조회
-        Long eventId = getLastEventId();
+        UUID eventId = getLastEventId();
 
         // 비조직원으로 로그인
         accessToken = authTestUtil.generateAccessTokenWithAnotherDepartment(Role.MANAGER);
@@ -234,7 +235,7 @@ public class EventControllerIntegrationTest {
         createEvent();
 
         // 생성된 이벤트 조회
-        Long eventId = getLastEventId();
+        UUID eventId = getLastEventId();
 
         PublishEventRequest request = new PublishEventRequest(true);
 
@@ -252,7 +253,7 @@ public class EventControllerIntegrationTest {
         createEvent();
 
         // 생성된 이벤트 조회
-        Long eventId = getLastEventId();
+        UUID eventId = getLastEventId();
 
         PublishEventRequest request = new PublishEventRequest(false);
 
@@ -267,7 +268,7 @@ public class EventControllerIntegrationTest {
     @Test
     void 존재하지_않는_이벤트는_publish_상태로_변경할_수_없다() {
         // given
-        Long nonExistentEventId = Long.MAX_VALUE;
+        UUID nonExistentEventId = UUID.randomUUID();
 
         PublishEventRequest request = new PublishEventRequest(true);
 
@@ -342,7 +343,7 @@ public class EventControllerIntegrationTest {
     }
 
     // 이벤트 검색 메서드들
-    public static ValidatableResponse getEventLockers(Long eventId, String accessToken) {
+    public static ValidatableResponse getEventLockers(UUID eventId, String accessToken) {
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .when()
@@ -407,7 +408,7 @@ public class EventControllerIntegrationTest {
         return Math.min(remainingItems, pageSize);
     }
 
-    private Long getLastEventId() {
+    private UUID getLastEventId() {
         return getEvents(0, 10, accessToken)
                 .statusCode(HttpStatus.OK.value())
                 .extract()
@@ -418,7 +419,7 @@ public class EventControllerIntegrationTest {
     }
 
     // 이벤트 수정 메서드들
-    private ValidatableResponse deleteEvent(Long eventId) {
+    private ValidatableResponse deleteEvent(UUID eventId) {
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .when()
@@ -428,7 +429,7 @@ public class EventControllerIntegrationTest {
                 .all();
     }
 
-    private ValidatableResponse publishEvent(Long eventId, PublishEventRequest request) {
+    private ValidatableResponse publishEvent(UUID eventId, PublishEventRequest request) {
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .body(request)

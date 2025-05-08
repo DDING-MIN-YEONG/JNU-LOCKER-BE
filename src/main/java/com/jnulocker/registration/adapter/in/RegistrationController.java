@@ -8,6 +8,7 @@ import com.jnulocker.registration.application.port.in.response.RegistrationCusto
 import com.jnulocker.registration.application.port.in.response.RegistrationPageable;
 import com.jnulocker.registration.application.port.in.response.RegistrationResponse;
 import jakarta.validation.Valid;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +33,7 @@ public class RegistrationController implements RegistrationApi {
     @Override
     @GetMapping
     public ResponseEntity<RegistrationCustomPage> getRegistrations(
-            @PathVariable("event-id") Long eventId,
+            @PathVariable("event-id") UUID eventId,
             @Valid @ParameterObject RegistrationPageable registrationPageable) {
         Pageable pageable = registrationPageable.toPageable();
         return ResponseEntity.ok(registrationQuery.getRegistrations(eventId, pageable));
@@ -41,14 +42,14 @@ public class RegistrationController implements RegistrationApi {
     @Override
     @GetMapping("/me")
     public ResponseEntity<RegistrationResponse> getMyRegistration(
-            @PathVariable("event-id") Long eventId) {
+            @PathVariable("event-id") UUID eventId) {
         return ResponseEntity.ok(registrationQuery.getMyRegistration(eventId));
     }
 
     @Override
     @PostMapping
     public ResponseEntity<Void> registerForEvent(
-            @PathVariable("event-id") Long eventId,
+            @PathVariable("event-id") UUID eventId,
             @Valid @RequestBody RegisterForEventRequest request) {
         registrationCommand.registerForEvent(eventId, request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -56,7 +57,7 @@ public class RegistrationController implements RegistrationApi {
 
     @Override
     @DeleteMapping("/me")
-    public ResponseEntity<Void> cancelMyRegistration(@PathVariable("event-id") Long eventId) {
+    public ResponseEntity<Void> cancelMyRegistration(@PathVariable("event-id") UUID eventId) {
         registrationCommand.cancelMyRegistration(eventId);
         return ResponseEntity.noContent().build();
     }

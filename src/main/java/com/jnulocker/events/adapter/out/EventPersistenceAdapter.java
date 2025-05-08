@@ -10,6 +10,7 @@ import com.jnulocker.events.domain.Locker;
 import com.jnulocker.organization.domain.Department;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,12 +25,12 @@ public class EventPersistenceAdapter implements EventLoadPort, EventRecordPort {
     private final LockerRepository lockerRepository;
 
     @Override
-    public boolean existsById(Long eventId) {
+    public boolean existsById(UUID eventId) {
         return eventRepository.existsById(eventId);
     }
 
     @Override
-    public Optional<Event> getById(Long eventId) {
+    public Optional<Event> getById(UUID eventId) {
         return eventRepository.findById(eventId);
     }
 

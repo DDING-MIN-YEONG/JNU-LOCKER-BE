@@ -14,6 +14,7 @@ import com.jnulocker.registration.application.port.out.RegistrationRecordPort;
 import com.jnulocker.registration.domain.Registration;
 import com.jnulocker.registration.exception.RegistrationAlreadyExistsException;
 import com.jnulocker.registration.exception.RegistrationNotFoundException;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +30,7 @@ public class RegistrationCommandService implements RegistrationCommand {
 
     @Override
     @Transactional
-    public void registerForEvent(Long eventId, RegisterForEventRequest request) {
+    public void registerForEvent(UUID eventId, RegisterForEventRequest request) {
         Long memberId = SecurityUtils.getCurrentMemberId();
         Member member = memberQuery.findByIdOrThrow(memberId);
 
@@ -51,7 +52,7 @@ public class RegistrationCommandService implements RegistrationCommand {
 
     @Override
     @Transactional
-    public void cancelMyRegistration(Long eventId) {
+    public void cancelMyRegistration(UUID eventId) {
         Long memberId = SecurityUtils.getCurrentMemberId();
         Event event = eventQuery.getByIdOrThrow(eventId);
         Registration registration =

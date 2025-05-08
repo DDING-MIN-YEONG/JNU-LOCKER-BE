@@ -6,11 +6,12 @@ import com.jnulocker.events.application.port.in.response.MyEventResponse;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.Locker;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 
 public interface EventQuery {
 
-    Event getByIdOrThrow(Long eventId);
+    Event getByIdOrThrow(UUID eventId);
 
     List<MyEventResponse> getMyEvents();
 
@@ -18,5 +19,5 @@ public interface EventQuery {
 
     Locker getLockerByIdOrThrow(Long lockerId);
 
-    List<FloorWithLockersResponse> getLockersByEventId(Long eventId);
+    List<FloorWithLockersResponse> getLockersByEventId(UUID eventId);
 }

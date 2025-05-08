@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.UUID;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ public interface RegistrationApi {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = RegistrationCustomPage.class)))
     ResponseEntity<RegistrationCustomPage> getRegistrations(
-            @PathVariable("event-id") Long eventId,
+            @PathVariable("event-id") UUID eventId,
             @Valid @ParameterObject RegistrationPageable registrationPageable);
 
     @ApiExceptionExamples(GetMyRegistrationExceptionDocs.class)
@@ -42,17 +43,17 @@ public interface RegistrationApi {
                     @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = RegistrationResponse.class)))
-    ResponseEntity<RegistrationResponse> getMyRegistration(@PathVariable("event-id") Long eventId);
+    ResponseEntity<RegistrationResponse> getMyRegistration(@PathVariable("event-id") UUID eventId);
 
     @ApiExceptionExamples(RegistrationForEventExceptionDocs.class)
     @Operation(summary = "사물함 신청", description = "이벤트에 신청합니다. 사물함을 선택할 수 있습니다.")
     @ApiResponse(responseCode = "201", description = "사물함 신청 성공")
     ResponseEntity<Void> registerForEvent(
-            @PathVariable("event-id") Long eventId,
+            @PathVariable("event-id") UUID eventId,
             @Valid @RequestBody RegisterForEventRequest request);
 
     @ApiExceptionExamples(CancelMyRegistrationExceptionDocs.class)
     @Operation(summary = "사물함 신청 취소", description = "해당 이벤트에 대한 사물함 신청을 취소합니다.")
     @ApiResponse(responseCode = "204", description = "사물함 신청 취소 성공")
-    ResponseEntity<Void> cancelMyRegistration(@PathVariable("event-id") Long eventId);
+    ResponseEntity<Void> cancelMyRegistration(@PathVariable("event-id") UUID eventId);
 }

@@ -10,6 +10,7 @@ import com.jnulocker.events.quartz.job.EventUnpublishJob;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
@@ -52,7 +53,7 @@ public class LockerEventCreatedEventHandler {
             phase = TransactionPhase.BEFORE_COMMIT)
     public void handle(LockerEventCreatedEvent lockerEventCreatedEvent) throws SchedulerException {
 
-        Long eventId = lockerEventCreatedEvent.getEventId();
+        UUID eventId = lockerEventCreatedEvent.getEventId();
 
         scheduleEventJob( // Event Publish Job 등록: OPEN 2시간 전에 publish를 true로 변경
                 lockerEventCreatedEvent.getStartAt().minusHours(TWO_HOURS),
@@ -87,14 +88,14 @@ public class LockerEventCreatedEventHandler {
             LocalDateTime localDateTime,
             JobBuilder newJob,
             String jobName,
-            Long eventId,
+            UUID eventId,
             String triggerName)
             throws SchedulerException {
         Date startAt = Date.from(localDateTime.atZone(ZoneId.of(ASIA_SEOUL)).toInstant());
 
         JobDetail jobDetail =
                 newJob.withIdentity(jobName + eventId, EVENT_JOB_GROUP)
-                        .usingJobData(EVENT_ID, eventId)
+                        .usingJobData(EVENT_ID, eventId.toString())
                         .build();
 
         Trigger eventOpenTrigger =

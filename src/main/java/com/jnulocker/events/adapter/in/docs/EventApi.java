@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -73,16 +74,16 @@ public interface EventApi {
                                                                     FloorWithLockersResponse
                                                                             .class))))
     ResponseEntity<List<FloorWithLockersResponse>> getLockers(
-            @PathVariable("event-id") Long eventId);
+            @PathVariable("event-id") UUID eventId);
 
     @ApiExceptionExamples(DeleteEventExceptionDocs.class)
     @Operation(summary = "이벤트 삭제", description = "이벤트를 삭제합니다. 이벤트가 진행 중인 경우에는 삭제할 수 없습니다.")
     @ApiResponse(responseCode = "204", description = "이벤트 삭제 성공")
-    ResponseEntity<Void> deleteEvent(@PathVariable("event-id") Long eventId);
+    ResponseEntity<Void> deleteEvent(@PathVariable("event-id") UUID eventId);
 
     @Operation(summary = "이벤트 publish", description = "이벤트를 publish 또는 unpublish합니다.")
     @ApiExceptionExamples(PublishEventExceptionDocs.class)
     ResponseEntity<Void> publishEvent(
-            @PathVariable("event-id") Long eventId,
+            @PathVariable("event-id") UUID eventId,
             @RequestBody @Valid PublishEventRequest request);
 }

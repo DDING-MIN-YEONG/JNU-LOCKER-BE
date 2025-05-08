@@ -11,6 +11,7 @@ import com.jnulocker.events.application.port.in.response.FloorWithLockersRespons
 import com.jnulocker.events.application.port.in.response.MyEventResponse;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -57,13 +58,13 @@ public class EventController implements EventApi {
     @Override
     @GetMapping("/{event-id}/lockers")
     public ResponseEntity<List<FloorWithLockersResponse>> getLockers(
-            @PathVariable("event-id") Long eventId) {
+            @PathVariable("event-id") UUID eventId) {
         return ResponseEntity.ok(eventQuery.getLockersByEventId(eventId));
     }
 
     @Override
     @DeleteMapping("/{event-id}")
-    public ResponseEntity<Void> deleteEvent(@PathVariable("event-id") Long eventId) {
+    public ResponseEntity<Void> deleteEvent(@PathVariable("event-id") UUID eventId) {
         eventCommand.deleteEvent(eventId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -71,7 +72,7 @@ public class EventController implements EventApi {
     @Override
     @PutMapping("/{event-id}/publish")
     public ResponseEntity<Void> publishEvent(
-            @PathVariable("event-id") Long eventId,
+            @PathVariable("event-id") UUID eventId,
             @RequestBody @Valid PublishEventRequest request) {
         eventCommand.publishEvent(eventId, request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

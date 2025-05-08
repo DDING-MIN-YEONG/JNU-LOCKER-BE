@@ -23,6 +23,7 @@ import com.jnulocker.organization.exception.DepartmentNotFoundException;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -45,7 +46,7 @@ public class EventCommandService implements EventCommand {
 
     @Override
     @Transactional
-    public void deleteEvent(Long eventId) {
+    public void deleteEvent(UUID eventId) {
         Long memberId = SecurityUtils.getCurrentMemberId();
         Member member = memberQuery.findByIdOrThrow(memberId);
 
@@ -76,7 +77,7 @@ public class EventCommandService implements EventCommand {
 
     @Override
     @Transactional
-    public void publishEvent(Long eventId, PublishEventRequest request) {
+    public void publishEvent(UUID eventId, PublishEventRequest request) {
         Event event = eventQuery.getByIdOrThrow(eventId);
         event.updatePublishStatus(request.isPublish());
     }

@@ -17,6 +17,7 @@ import com.jnulocker.events.exception.LockerNotFoundException;
 import com.jnulocker.member.application.port.in.MemberQuery;
 import com.jnulocker.member.domain.Member;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +33,7 @@ public class EventQueryService implements EventQuery {
     private final MemberQuery memberQuery;
 
     @Override
-    public Event getByIdOrThrow(Long eventId) {
+    public Event getByIdOrThrow(UUID eventId) {
         return eventLoadPort.getById(eventId).orElseThrow(() -> EventNotFoundException.EXCEPTION);
     }
 
@@ -71,7 +72,7 @@ public class EventQueryService implements EventQuery {
     }
 
     @Override
-    public List<FloorWithLockersResponse> getLockersByEventId(Long eventId) {
+    public List<FloorWithLockersResponse> getLockersByEventId(UUID eventId) {
         if (!eventLoadPort.existsById(eventId)) {
             throw EventNotFoundException.EXCEPTION;
         }
