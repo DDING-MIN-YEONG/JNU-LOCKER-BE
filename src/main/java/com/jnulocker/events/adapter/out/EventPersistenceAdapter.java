@@ -35,8 +35,8 @@ public class EventPersistenceAdapter implements EventLoadPort, EventRecordPort {
     }
 
     @Override
-    public Page<Event> getAllEvents(Pageable pageable) {
-        return eventRepository.findAll(pageable);
+    public Page<Event> getAllEventsByDepartment(Department department, Pageable pageable) {
+        return eventRepository.findAllByDepartment(department, pageable);
     }
 
     @Override
