@@ -24,6 +24,7 @@ import com.jnulocker.organization.domain.Organization;
 import com.jnulocker.organization.utils.OrganizationTestUtil;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -176,7 +177,7 @@ public class EventTestUtil {
         organizationRepository.deleteAll();
     }
 
-    public Event getEventById(Long eventId) {
+    public Event getEventById(UUID eventId) {
         return eventRepository.findById(eventId).orElseThrow();
     }
 }

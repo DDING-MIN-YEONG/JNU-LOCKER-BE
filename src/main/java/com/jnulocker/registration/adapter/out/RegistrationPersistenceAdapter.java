@@ -5,6 +5,7 @@ import com.jnulocker.registration.application.port.out.RegistrationLoadPort;
 import com.jnulocker.registration.application.port.out.RegistrationRecordPort;
 import com.jnulocker.registration.domain.Registration;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,17 +28,17 @@ public class RegistrationPersistenceAdapter
     }
 
     @Override
-    public boolean existsByMemberIdAndEventId(Long memberId, Long eventId) {
+    public boolean existsByMemberIdAndEventId(Long memberId, UUID eventId) {
         return registrationRepository.existsByMemberIdAndLocker_Floor_EventId(memberId, eventId);
     }
 
     @Override
-    public Page<Registration> getRegistrationsByEventId(Long eventId, Pageable pageable) {
+    public Page<Registration> getRegistrationsByEventId(UUID eventId, Pageable pageable) {
         return registrationRepository.findAllByLocker_Floor_EventId(eventId, pageable);
     }
 
     @Override
-    public Optional<Registration> getRegistrationByMemberIdAndEventId(Long memberId, Long eventId) {
+    public Optional<Registration> getRegistrationByMemberIdAndEventId(Long memberId, UUID eventId) {
         return registrationRepository.findByMemberIdAndLocker_Floor_EventId(memberId, eventId);
     }
 }

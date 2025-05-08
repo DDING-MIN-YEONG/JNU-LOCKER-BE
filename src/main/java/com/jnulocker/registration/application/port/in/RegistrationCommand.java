@@ -1,9 +1,10 @@
 package com.jnulocker.registration.application.port.in;
 
 import com.jnulocker.registration.application.port.in.request.RegisterForEventRequest;
+import java.util.UUID;
 
 public interface RegistrationCommand {
-    void registerForEvent(Long eventId, RegisterForEventRequest request);
+    void registerForEvent(UUID eventId, RegisterForEventRequest request);
 
-    void cancelMyRegistration(Long eventId);
+    void cancelMyRegistration(UUID eventId);
 }

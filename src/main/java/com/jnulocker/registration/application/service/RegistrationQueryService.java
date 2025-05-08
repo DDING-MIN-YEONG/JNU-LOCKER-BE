@@ -9,6 +9,7 @@ import com.jnulocker.registration.application.port.in.response.RegistrationRespo
 import com.jnulocker.registration.application.port.out.RegistrationLoadPort;
 import com.jnulocker.registration.domain.Registration;
 import com.jnulocker.registration.exception.RegistrationNotFoundException;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +23,7 @@ public class RegistrationQueryService implements RegistrationQuery {
     private final RegistrationLoadPort registrationLoadPort;
 
     @Override
-    public RegistrationCustomPage getRegistrations(Long eventId, Pageable pageable) {
+    public RegistrationCustomPage getRegistrations(UUID eventId, Pageable pageable) {
         Event event = eventQuery.getByIdOrThrow(eventId);
         Page<Registration> registrations =
                 registrationLoadPort.getRegistrationsByEventId(event.getId(), pageable);
@@ -30,7 +31,7 @@ public class RegistrationQueryService implements RegistrationQuery {
     }
 
     @Override
-    public RegistrationResponse getMyRegistration(Long eventId) {
+    public RegistrationResponse getMyRegistration(UUID eventId) {
         Long memberId = SecurityUtils.getCurrentMemberId();
         Registration registration =
                 registrationLoadPort

@@ -1,5 +1,6 @@
 package com.jnulocker.events.event;
 
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
@@ -24,7 +25,7 @@ public class LockerEventDeletedEventHandler {
             classes = LockerEventDeletedEvent.class,
             phase = TransactionPhase.BEFORE_COMMIT)
     public void handle(LockerEventDeletedEvent lockerEventDeletedEvent) throws SchedulerException {
-        Long eventId = lockerEventDeletedEvent.getEventId();
+        UUID eventId = lockerEventDeletedEvent.getEventId();
 
         // Event Publish Job 삭제
         deleteJob(PUBLISH_JOB_NAME, eventId);
@@ -39,7 +40,7 @@ public class LockerEventDeletedEventHandler {
         deleteJob(UNPUBLISH_JOB_NAME, eventId);
     }
 
-    private void deleteJob(String jobName, Long eventId) throws SchedulerException {
+    private void deleteJob(String jobName, UUID eventId) throws SchedulerException {
         JobKey jobKey = new JobKey(jobName + eventId, EVENT_JOB_GROUP);
         if (scheduler.checkExists(jobKey)) {
             scheduler.deleteJob(jobKey);

@@ -17,7 +17,6 @@ import com.jnulocker.events.utils.EventTestUtil;
 import com.jnulocker.events.utils.LockerEventContext;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.utils.MemberTestUtil;
-import com.jnulocker.organization.utils.OrganizationTestUtil;
 import com.jnulocker.registration.application.port.in.request.RegisterForEventRequest;
 import com.jnulocker.registration.application.port.in.response.RegistrationCustomPage;
 import com.jnulocker.registration.application.port.in.response.RegistrationListItem;
@@ -29,6 +28,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.Cookie;
 import io.restassured.response.ValidatableResponse;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -58,8 +58,6 @@ class RegistrationControllerIntegrationTest {
     @Autowired private MemberTestUtil memberTestUtil;
 
     @Autowired private AuthTestUtil authTestUtil;
-
-    @Autowired private OrganizationTestUtil organizationTestUtil;
 
     @Autowired private RegistrationTestUtil registrationTestUtil;
 
@@ -271,9 +269,11 @@ class RegistrationControllerIntegrationTest {
 
         Event event = context.event();
 
+        UUID nonExistentEventId = UUID.randomUUID();
+
         // when
         ErrorResponse errorResponse =
-                registerForEvent(Long.MAX_VALUE, createRequestForAvailableLocker(event))
+                registerForEvent(nonExistentEventId, createRequestForAvailableLocker(event))
                         .statusCode(EventErrorCode.EVENT_NOT_FOUND.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -468,9 +468,11 @@ class RegistrationControllerIntegrationTest {
 
         registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
 
+        UUID nonExistentEventId = UUID.randomUUID();
+
         // when, then
         ErrorResponse errorResponse =
-                cancelMyRegistration(Long.MAX_VALUE)
+                cancelMyRegistration(nonExistentEventId)
                         .statusCode(EventErrorCode.EVENT_NOT_FOUND.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -520,7 +522,7 @@ class RegistrationControllerIntegrationTest {
                 .isEqualTo(availableLockerCountBefore - 1);
     }
 
-    private ValidatableResponse getRegistrations(Long eventId) {
+    private ValidatableResponse getRegistrations(UUID eventId) {
         return given().cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .when()
                 .get(REGISTRATION_URL, eventId)
@@ -529,7 +531,7 @@ class RegistrationControllerIntegrationTest {
                 .ifError();
     }
 
-    private ValidatableResponse getMyRegistration(Long eventId) {
+    private ValidatableResponse getMyRegistration(UUID eventId) {
         return given().cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .when()
                 .get(REGISTRATION_URL + "/me", eventId)
@@ -538,7 +540,7 @@ class RegistrationControllerIntegrationTest {
                 .ifError();
     }
 
-    private ValidatableResponse registerForEvent(Long eventId, RegisterForEventRequest request) {
+    private ValidatableResponse registerForEvent(UUID eventId, RegisterForEventRequest request) {
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .body(request)
@@ -549,7 +551,7 @@ class RegistrationControllerIntegrationTest {
                 .ifError();
     }
 
-    private ValidatableResponse cancelMyRegistration(Long eventId) {
+    private ValidatableResponse cancelMyRegistration(UUID eventId) {
         return given().cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .when()
                 .delete(REGISTRATION_URL + "/me", eventId)
