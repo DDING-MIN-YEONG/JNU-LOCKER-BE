@@ -39,8 +39,11 @@ public class EventQueryService implements EventQuery {
 
     @Override
     public EventCustomPage getAllEvents(Pageable pageable) {
-        // TODO: MANAGER가 조회하는 경우 자신이 소속된 조직의 이벤트만 조회할 수 있도록 수정
-        Page<Event> events = eventLoadPort.getAllEvents(pageable);
+        Long memberId = SecurityUtils.getCurrentMemberId();
+        Member member = memberQuery.findByIdWithDepartmentOrThrow(memberId);
+
+        Page<Event> events =
+                eventLoadPort.getAllEventsByDepartment(member.getDepartment(), pageable);
         return EventCustomPage.from(events);
     }
 
