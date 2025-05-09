@@ -4,7 +4,9 @@ echo -e "배포 스크립트 시작\n\n"
 # .env 파일 로드
 echo "환경 변수 로드 중..."
 if [ -f ".env" ]; then
-    export $(grep -v '^#' .env | xargs)
+    set -o allexport
+    source .env
+    set +o allexport
     echo ".env 파일 로드 완료"
 else
     echo ".env 파일이 존재하지 않습니다"
