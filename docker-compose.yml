@@ -94,10 +94,10 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./config/grafana.ini:/etc/grafana/grafana.ini
       - grafana-data:/var/lib/grafana
     environment:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_SERVER_ROOT_URL: https://api.dev.jnu-locker.site/grafana
     depends_on:
       prometheus:
         condition: service_healthy
@@ -126,6 +126,8 @@ services:
       - jnu-locker-network
     depends_on:
       was:
+        condition: service_healthy
+      grafana:
         condition: service_healthy
 
 networks:

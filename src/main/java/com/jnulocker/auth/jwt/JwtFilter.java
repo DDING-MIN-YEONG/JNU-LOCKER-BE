@@ -31,7 +31,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
-    @Value(("${management.endpoints.web.base-path}"))
+    @Value("${management.endpoints.web.base-path}")
     private String actuatorBasePath;
 
     private final TokenProvider tokenProvider;

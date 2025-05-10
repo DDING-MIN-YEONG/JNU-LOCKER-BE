@@ -12,6 +12,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class LockerEventCreatedEventHandler {
@@ -51,7 +53,7 @@ public class LockerEventCreatedEventHandler {
     @TransactionalEventListener(
             classes = LockerEventCreatedEvent.class,
             phase = TransactionPhase.AFTER_COMMIT)
-    public void handle(LockerEventCreatedEvent lockerEventCreatedEvent) throws SchedulerException {
+    public void handle(LockerEventCreatedEvent lockerEventCreatedEvent) {
 
         UUID eventId = lockerEventCreatedEvent.getEventId();
 
@@ -89,8 +91,7 @@ public class LockerEventCreatedEventHandler {
             JobBuilder newJob,
             String jobName,
             UUID eventId,
-            String triggerName)
-            throws SchedulerException {
+            String triggerName) {
         Date startAt = Date.from(localDateTime.atZone(ZoneId.of(ASIA_SEOUL)).toInstant());
 
         JobDetail jobDetail =
@@ -105,6 +106,10 @@ public class LockerEventCreatedEventHandler {
                         .startAt(startAt)
                         .build();
 
-        scheduler.scheduleJob(jobDetail, eventOpenTrigger);
+        try {
+            scheduler.scheduleJob(jobDetail, eventOpenTrigger);
+        } catch (SchedulerException e) {
+            log.error("스케줄링 작업 생성 실패: jobName={}, eventId={}", jobName, eventId, e);
+        }
     }
 }
