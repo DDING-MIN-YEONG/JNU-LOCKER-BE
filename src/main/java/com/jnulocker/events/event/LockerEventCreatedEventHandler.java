@@ -50,7 +50,7 @@ public class LockerEventCreatedEventHandler {
 
     @TransactionalEventListener(
             classes = LockerEventCreatedEvent.class,
-            phase = TransactionPhase.BEFORE_COMMIT)
+            phase = TransactionPhase.AFTER_COMMIT)
     public void handle(LockerEventCreatedEvent lockerEventCreatedEvent) throws SchedulerException {
 
         UUID eventId = lockerEventCreatedEvent.getEventId();
