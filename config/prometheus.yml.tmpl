@@ -1,0 +1,8 @@
+global:
+  scrape_interval: ${SCRAPE_INTERVAL}
+  evaluation_interval: ${EVALUATION_INTERVAL}
+scrape_configs:
+  - job_name: 'prometheus'
+    metrics_path: '${MANAGEMENT_BASE_PATH}/prometheus'
+    static_configs:
+      - targets: ['${WAS_TARGET}:8080']

@@ -24,7 +24,7 @@ services:
       - jnu-locker-network
 
   redis:
-    container_name: redis
+    container_name: redis-jnu-locker
     image: redis:alpine
     ports:
       - "6379:6379"
@@ -62,6 +62,78 @@ services:
     networks:
       - jnu-locker-network
 
+  prometheus:
+    # user: root # 최초 실행시에만 하기 (컨테이너 접속 후 /data 경로 nobody 권한 주는 용도)
+    container_name: prometheus-jnu-locker
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/data
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/data' # 기본값이 /data
+      - '--storage.tsdb.retention.time=1y' # 데이터 보존 기간 설정 (1년: 1y or 365d)
+    depends_on:
+      was:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090/metrics"]
+      start_period: 20s
+      start_interval: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - jnu-locker-network
+
+  grafana:
+    container_name: grafana-jnu-locker
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./config/grafana.ini:/etc/grafana/grafana.ini
+      - grafana-data:/var/lib/grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
+      start_period: 20s
+      start_interval: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - jnu-locker-network
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx-jnu-locker
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/log:/home/jnu-locker/log
+    environment:
+      TZ: Asia/Seoul
+    networks:
+      - jnu-locker-network
+    depends_on:
+      was:
+        condition: service_healthy
+
 networks:
   jnu-locker-network:
     driver: bridge
+
+volumes:
+  grafana-data:
+    external: true
+  prometheus-data:
+    external: true
