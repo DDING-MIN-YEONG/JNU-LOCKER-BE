@@ -5,6 +5,7 @@ import com.jnulocker.announce.application.port.in.response.AnnounceCustomPage;
 import com.jnulocker.announce.application.port.in.response.MyAnnounceResponse;
 import com.jnulocker.announce.application.port.out.AnnounceLoadPort;
 import com.jnulocker.announce.domain.Announce;
+import com.jnulocker.announce.exception.AnnounceNotFoundException;
 import com.jnulocker.auth.security.SecurityUtils;
 import com.jnulocker.member.application.port.in.MemberQuery;
 import com.jnulocker.member.domain.Member;
@@ -41,5 +42,12 @@ public class AnnounceQueryService implements AnnounceQuery {
                 announceLoadPort.getAnnouncesByParticipationDepartment(member.getDepartment());
 
         return announces.stream().map(MyAnnounceResponse::from).toList();
+    }
+
+    @Override
+    public Announce getByIdOrThrow(Long announceId) {
+        return announceLoadPort
+                .getById(announceId)
+                .orElseThrow(() -> AnnounceNotFoundException.EXCEPTION);
     }
 }

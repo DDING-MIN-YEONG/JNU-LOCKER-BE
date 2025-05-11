@@ -7,6 +7,7 @@ import com.jnulocker.announce.domain.AnnounceParticipation;
 import com.jnulocker.common.annotation.PersistenceAdapter;
 import com.jnulocker.organization.domain.Department;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,5 +36,16 @@ public class AnnouncePersistenceAdapter implements AnnounceRecordPort, AnnounceL
     @Override
     public List<Announce> getAnnouncesByParticipationDepartment(Department department) {
         return announceRepository.findAllByAnnounceParticipations_Department(department);
+    }
+
+    @Override
+    public Optional<Announce> getById(Long announceId) {
+        return announceRepository.findById(announceId);
+    }
+
+    @Override
+    public void deleteAnnounce(Announce announce) {
+        announceParticipationRepository.deleteAllByAnnounce(announce);
+        announceRepository.delete(announce);
     }
 }

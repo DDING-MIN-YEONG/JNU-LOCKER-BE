@@ -8,4 +8,6 @@ public interface AnnounceRecordPort {
     Announce saveAnnounce(Announce announce);
 
     void saveAnnounceParticipations(List<AnnounceParticipation> announceParticipations);
+
+    void deleteAnnounce(Announce announce);
 }
