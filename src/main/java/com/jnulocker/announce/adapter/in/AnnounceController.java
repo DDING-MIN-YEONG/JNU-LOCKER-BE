@@ -43,6 +43,7 @@ public class AnnounceController implements AnnounceApi {
         return ResponseEntity.ok(announceQuery.getAllAnnounces(pageable));
     }
 
+    @Override
     @GetMapping("/me")
     public ResponseEntity<List<MyAnnounceResponse>> getMyAnnounces() {
         return ResponseEntity.ok(announceQuery.getMyAnnounces());
