@@ -60,6 +60,7 @@ public class AnnounceController implements AnnounceApi {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    @Override
     @PutMapping("/{announce-id}")
     public ResponseEntity<Void> updateAnnounce(
             @PathVariable("announce-id") Long announceId,
