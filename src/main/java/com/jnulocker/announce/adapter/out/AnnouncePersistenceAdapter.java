@@ -48,4 +48,9 @@ public class AnnouncePersistenceAdapter implements AnnounceRecordPort, AnnounceL
         announceParticipationRepository.deleteAllByAnnounce(announce);
         announceRepository.delete(announce);
     }
+
+    @Override
+    public void deleteAnnounceParticipationsByAnnounce(Announce announce) {
+        announceParticipationRepository.deleteAllByAnnounce(announce);
+    }
 }

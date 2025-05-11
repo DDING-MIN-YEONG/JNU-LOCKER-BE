@@ -3,6 +3,7 @@ package com.jnulocker.announce.application.service;
 import com.jnulocker.announce.application.port.in.AnnounceCommand;
 import com.jnulocker.announce.application.port.in.AnnounceQuery;
 import com.jnulocker.announce.application.port.in.request.CreateAnnounceRequest;
+import com.jnulocker.announce.application.port.in.request.UpdateAnnounceRequest;
 import com.jnulocker.announce.application.port.out.AnnounceRecordPort;
 import com.jnulocker.announce.domain.Announce;
 import com.jnulocker.announce.domain.AnnounceParticipation;
@@ -46,6 +47,22 @@ public class AnnounceCommandService implements AnnounceCommand {
         announce.validateDeletable(member.getDepartment());
 
         announceRecordPort.deleteAnnounce(announce);
+    }
+
+    @Override
+    @Transactional
+    public void updateAnnounce(Long announceId, UpdateAnnounceRequest request) {
+        Long memberId = SecurityUtils.getCurrentMemberId();
+        Member member = memberQuery.findByIdOrThrow(memberId);
+
+        Announce announce = announceQuery.getByIdOrThrow(announceId);
+        announce.validateUpdatable(member.getDepartment());
+
+        announce.update(request.title(), request.content());
+
+        // 기존 참여 기록 제거
+        announceRecordPort.deleteAnnounceParticipationsByAnnounce(announce);
+        setupAnnounceParticipations(announce, request.participationDepartmentIds());
     }
 
     private Announce createAndSaveAnnounce(CreateAnnounceRequest request) {
