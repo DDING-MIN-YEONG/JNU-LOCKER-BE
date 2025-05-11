@@ -2,6 +2,7 @@ package com.jnulocker.announce.domain;
 
 import com.jnulocker.common.persistence.BaseEntity;
 import com.jnulocker.organization.domain.Department;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,6 +11,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,6 +40,9 @@ public class Announce extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
     private Department department;
+
+    @OneToMany(mappedBy = "announce", orphanRemoval = true, cascade = CascadeType.ALL)
+    private final List<AnnounceParticipation> announceParticipations = new ArrayList<>();
 
     public static Announce create(
             String title, String content, String writer, Department department) {
