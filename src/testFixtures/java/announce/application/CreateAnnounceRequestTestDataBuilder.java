@@ -3,28 +3,28 @@ package announce.application;
 import com.jnulocker.announce.application.port.in.request.CreateAnnounceRequest;
 import java.util.List;
 
-public class CreateAnnounceReqeustTestDataBuilder {
+public class CreateAnnounceRequestTestDataBuilder {
     private String title = "백도 사물함 신청 안내";
     private String content = "공지사항 내용입니다.";
     private List<Long> participationDepartmentIds = List.of(1L, 2L, 3L);
 
-    private CreateAnnounceReqeustTestDataBuilder() {}
+    private CreateAnnounceRequestTestDataBuilder() {}
 
-    public static CreateAnnounceReqeustTestDataBuilder createAnnounceReqeustBuilder() {
-        return new CreateAnnounceReqeustTestDataBuilder();
+    public static CreateAnnounceRequestTestDataBuilder createAnnounceRequestBuilder() {
+        return new CreateAnnounceRequestTestDataBuilder();
     }
 
-    public CreateAnnounceReqeustTestDataBuilder withTitle(String title) {
+    public CreateAnnounceRequestTestDataBuilder withTitle(String title) {
         this.title = title;
         return this;
     }
 
-    public CreateAnnounceReqeustTestDataBuilder withContent(String content) {
+    public CreateAnnounceRequestTestDataBuilder withContent(String content) {
         this.content = content;
         return this;
     }
 
-    public CreateAnnounceReqeustTestDataBuilder withParticipationDepartmentIds(
+    public CreateAnnounceRequestTestDataBuilder withParticipationDepartmentIds(
             List<Long> participationDepartmentIds) {
         this.participationDepartmentIds = participationDepartmentIds;
         return this;

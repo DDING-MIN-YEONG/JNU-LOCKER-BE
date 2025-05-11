@@ -1,6 +1,6 @@
 package com.jnulocker.announce.adapter.in;
 
-import static announce.application.CreateAnnounceReqeustTestDataBuilder.createAnnounceReqeustBuilder;
+import static announce.application.CreateAnnounceRequestTestDataBuilder.createAnnounceRequestBuilder;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -171,7 +171,7 @@ public class AnnounceControllerIntegrationTest {
 
     private void createAnnounceWithDepartment(Department department) {
         CreateAnnounceRequest request =
-                createAnnounceReqeustBuilder()
+                createAnnounceRequestBuilder()
                         .withParticipationDepartmentIds(List.of(department.getId()))
                         .build();
 

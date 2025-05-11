@@ -1,6 +1,6 @@
 package com.jnulocker.announce.application.port.in.request;
 
-import static announce.application.CreateAnnounceReqeustTestDataBuilder.createAnnounceReqeustBuilder;
+import static announce.application.CreateAnnounceRequestTestDataBuilder.createAnnounceRequestBuilder;
 import static jakarta.validation.Validation.buildDefaultValidatorFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,7 +26,7 @@ public class CreateAnnounceRequestTest {
 
     @Test
     void 유효한_요청은_검증을_통과한다() {
-        CreateAnnounceRequest request = createAnnounceReqeustBuilder().build();
+        CreateAnnounceRequest request = createAnnounceRequestBuilder().build();
 
         Set<ConstraintViolation<CreateAnnounceRequest>> violations = validator.validate(request);
         assertThat(violations).isEmpty();
@@ -34,7 +34,7 @@ public class CreateAnnounceRequestTest {
 
     @Test
     void 제목이_빈_문자열이면_검증에_실패한다() {
-        CreateAnnounceRequest request = createAnnounceReqeustBuilder().withTitle("").build();
+        CreateAnnounceRequest request = createAnnounceRequestBuilder().withTitle("").build();
 
         Set<ConstraintViolation<CreateAnnounceRequest>> violations = validator.validate(request);
         assertThat(violations).hasSize(1);
@@ -43,7 +43,7 @@ public class CreateAnnounceRequestTest {
 
     @Test
     void 제목이_null이면_검증에_실패한다() {
-        CreateAnnounceRequest request = createAnnounceReqeustBuilder().withTitle(null).build();
+        CreateAnnounceRequest request = createAnnounceRequestBuilder().withTitle(null).build();
 
         Set<ConstraintViolation<CreateAnnounceRequest>> violations = validator.validate(request);
         assertThat(violations).hasSize(1);
@@ -53,7 +53,7 @@ public class CreateAnnounceRequestTest {
     @Test
     void 제목이_50자를_초과하면_검증에_실패한다() {
         String longTitle = "a".repeat(51);
-        CreateAnnounceRequest request = createAnnounceReqeustBuilder().withTitle(longTitle).build();
+        CreateAnnounceRequest request = createAnnounceRequestBuilder().withTitle(longTitle).build();
 
         Set<ConstraintViolation<CreateAnnounceRequest>> violations = validator.validate(request);
         assertThat(violations).hasSize(1);
@@ -63,7 +63,7 @@ public class CreateAnnounceRequestTest {
 
     @Test
     void 내용이_빈_문자열이면_검증에_실패한다() {
-        CreateAnnounceRequest request = createAnnounceReqeustBuilder().withContent("").build();
+        CreateAnnounceRequest request = createAnnounceRequestBuilder().withContent("").build();
 
         Set<ConstraintViolation<CreateAnnounceRequest>> violations = validator.validate(request);
         assertThat(violations).hasSize(1);
@@ -72,7 +72,7 @@ public class CreateAnnounceRequestTest {
 
     @Test
     void 내용이_null이면_검증에_실패한다() {
-        CreateAnnounceRequest request = createAnnounceReqeustBuilder().withContent(null).build();
+        CreateAnnounceRequest request = createAnnounceRequestBuilder().withContent(null).build();
 
         Set<ConstraintViolation<CreateAnnounceRequest>> violations = validator.validate(request);
         assertThat(violations).hasSize(1);
@@ -83,7 +83,7 @@ public class CreateAnnounceRequestTest {
     void 내용이_1500자를_초과하면_검증에_실패한다() {
         String longContent = "a".repeat(1501);
         CreateAnnounceRequest request =
-                createAnnounceReqeustBuilder().withContent(longContent).build();
+                createAnnounceRequestBuilder().withContent(longContent).build();
 
         Set<ConstraintViolation<CreateAnnounceRequest>> violations = validator.validate(request);
         assertThat(violations).hasSize(1);
@@ -94,7 +94,7 @@ public class CreateAnnounceRequestTest {
     @Test
     void 참여_학과_목록이_비어있으면_검증에_실패한다() {
         CreateAnnounceRequest request =
-                createAnnounceReqeustBuilder()
+                createAnnounceRequestBuilder()
                         .withParticipationDepartmentIds(Collections.emptyList())
                         .build();
 
