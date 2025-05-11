@@ -1,12 +1,14 @@
 package com.jnulocker.announce.application.service;
 
 import com.jnulocker.announce.application.port.in.AnnounceCommand;
+import com.jnulocker.announce.application.port.in.AnnounceQuery;
 import com.jnulocker.announce.application.port.in.request.CreateAnnounceRequest;
 import com.jnulocker.announce.application.port.out.AnnounceRecordPort;
 import com.jnulocker.announce.domain.Announce;
 import com.jnulocker.announce.domain.AnnounceParticipation;
 import com.jnulocker.auth.security.SecurityUtils;
 import com.jnulocker.member.application.port.in.MemberQuery;
+import com.jnulocker.member.domain.Member;
 import com.jnulocker.organization.application.port.in.DepartmentQuery;
 import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.exception.DepartmentNotFoundException;
@@ -22,6 +24,7 @@ public class AnnounceCommandService implements AnnounceCommand {
     private final AnnounceRecordPort announceRecordPort;
     private final MemberQuery memberQuery;
     private final DepartmentQuery departmentQuery;
+    private final AnnounceQuery announceQuery;
 
     @Override
     @Transactional
@@ -31,6 +34,18 @@ public class AnnounceCommandService implements AnnounceCommand {
 
         // 공지사항 참여 학과 정보 생성 및 저장
         setupAnnounceParticipations(savedAnnounce, request.participationDepartmentIds());
+    }
+
+    @Override
+    @Transactional
+    public void deleteAnnounce(Long announceId) {
+        Long memberId = SecurityUtils.getCurrentMemberId();
+        Member member = memberQuery.findByIdOrThrow(memberId);
+
+        Announce announce = announceQuery.getByIdOrThrow(announceId);
+        announce.validateDeletable(member.getDepartment());
+
+        announceRecordPort.deleteAnnounce(announce);
     }
 
     private Announce createAndSaveAnnounce(CreateAnnounceRequest request) {

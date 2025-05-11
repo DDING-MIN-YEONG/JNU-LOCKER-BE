@@ -7,8 +7,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.jnulocker.announce.application.port.in.request.CreateAnnounceRequest;
 import com.jnulocker.announce.application.port.in.response.AnnounceCustomPage;
 import com.jnulocker.announce.application.port.in.response.MyAnnounceResponse;
+import com.jnulocker.announce.exception.AnnounceErrorCode;
 import com.jnulocker.announce.utils.AnnounceTestUtil;
 import com.jnulocker.auth.utils.AuthTestUtil;
+import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.utils.MemberTestUtil;
@@ -164,6 +166,72 @@ public class AnnounceControllerIntegrationTest {
         assertThat(myAnnounces).isEmpty();
     }
 
+    @Test
+    void 공지사항을_삭제할_수_있다() {
+        // given
+        createAnnounce();
+
+        // 생성된 공지사항 조회
+        Long announceId = getLastAnnounceId();
+
+        // when
+        deleteAnnounce(announceId).statusCode(HttpStatus.NO_CONTENT.value());
+
+        // then
+        // 삭제된 공지사항이 더 이상 조회되지 않는지 확인
+        AnnounceCustomPage announceCustomPage =
+                getAnnounces(0, 10, accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(AnnounceCustomPage.class);
+
+        assertThat(announceCustomPage.content())
+                .noneMatch(announce -> announce.id().equals(announceId));
+    }
+
+    @Test
+    void 존재하지_않는_공지사항은_삭제할_수_없다() {
+        // given
+        Long nonExistentAnnounceId = System.currentTimeMillis();
+
+        // when
+        ErrorResponse errorResponse =
+                deleteAnnounce(nonExistentAnnounceId)
+                        .statusCode(AnnounceErrorCode.ANNOUNCE_NOT_FOUND.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(AnnounceErrorCode.ANNOUNCE_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void 권한이_없는_사용자는_공지사항을_삭제할_수_없다() {
+        // given
+        createAnnounce();
+
+        // 생성된 공지사항 조회
+        Long announceId = getLastAnnounceId();
+
+        // 비조직원으로 로그인
+        accessToken = authTestUtil.generateAccessTokenWithAnotherDepartment(Role.MANAGER);
+
+        // when
+        ErrorResponse errorResponse =
+                deleteAnnounce(announceId)
+                        .statusCode(
+                                AnnounceErrorCode.ONLY_MANAGER_CAN_DELETE_ANNOUNCE
+                                        .getHttpStatus()
+                                        .value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(AnnounceErrorCode.ONLY_MANAGER_CAN_DELETE_ANNOUNCE.getMessage());
+    }
+
     private void createAnnounce() {
         Department department = organizationTestUtil.createCouncilDepartment();
         createAnnounceWithDepartment(department);
@@ -213,6 +281,26 @@ public class AnnounceControllerIntegrationTest {
                 .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .when()
                 .get(ANNOUNCE_URL + "/me")
+                .then()
+                .log()
+                .all();
+    }
+
+    private Long getLastAnnounceId() {
+        return getAnnounces(0, 10, accessToken)
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .as(AnnounceCustomPage.class)
+                .content()
+                .getLast()
+                .id();
+    }
+
+    private ValidatableResponse deleteAnnounce(Long announceId) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .when()
+                .delete(ANNOUNCE_URL + "/{announce-id}", announceId)
                 .then()
                 .log()
                 .all();

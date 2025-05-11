@@ -14,7 +14,9 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,5 +49,12 @@ public class AnnounceController implements AnnounceApi {
     @GetMapping("/me")
     public ResponseEntity<List<MyAnnounceResponse>> getMyAnnounces() {
         return ResponseEntity.ok(announceQuery.getMyAnnounces());
+    }
+
+    @Override
+    @DeleteMapping("/{announce-id}")
+    public ResponseEntity<Void> deleteAnnounce(@PathVariable("announce-id") Long announceId) {
+        announceCommand.deleteAnnounce(announceId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
