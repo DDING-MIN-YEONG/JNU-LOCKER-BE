@@ -247,13 +247,16 @@ public class EventControllerIntegrationTest {
         // when
         ErrorResponse errorResponse =
                 deleteEvent(eventId)
-                        .statusCode(EventErrorCode.ONLY_MANAGER_CAN_DELETE.getHttpStatus().value())
+                        .statusCode(
+                                EventErrorCode.ONLY_MANAGER_CAN_DELETE_EVENT
+                                        .getHttpStatus()
+                                        .value())
                         .extract()
                         .as(ErrorResponse.class);
 
         // then
         assertThat(errorResponse.message())
-                .isEqualTo(EventErrorCode.ONLY_MANAGER_CAN_DELETE.getMessage());
+                .isEqualTo(EventErrorCode.ONLY_MANAGER_CAN_DELETE_EVENT.getMessage());
     }
 
     @Test

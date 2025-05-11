@@ -11,7 +11,6 @@ import com.jnulocker.announce.exception.AnnounceErrorCode;
 import com.jnulocker.announce.utils.AnnounceTestUtil;
 import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.common.exception.ErrorResponse;
-import com.jnulocker.events.exception.EventErrorCode;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.utils.MemberTestUtil;
@@ -221,13 +220,16 @@ public class AnnounceControllerIntegrationTest {
         // when
         ErrorResponse errorResponse =
                 deleteAnnounce(announceId)
-                        .statusCode(EventErrorCode.ONLY_MANAGER_CAN_DELETE.getHttpStatus().value())
+                        .statusCode(
+                                AnnounceErrorCode.ONLY_MANAGER_CAN_DELETE_ANNOUNCE
+                                        .getHttpStatus()
+                                        .value())
                         .extract()
                         .as(ErrorResponse.class);
 
         // then
         assertThat(errorResponse.message())
-                .isEqualTo(EventErrorCode.ONLY_MANAGER_CAN_DELETE.getMessage());
+                .isEqualTo(AnnounceErrorCode.ONLY_MANAGER_CAN_DELETE_ANNOUNCE.getMessage());
     }
 
     private void createAnnounce() {
