@@ -43,7 +43,7 @@ public class AnnounceCommandService implements AnnounceCommand {
         Member member = memberQuery.findByIdOrThrow(memberId);
 
         Announce announce = announceQuery.getByIdOrThrow(announceId);
-        announce.validDeletable(member.getDepartment());
+        announce.validateDeletable(member.getDepartment());
 
         announceRecordPort.deleteAnnounce(announce);
     }

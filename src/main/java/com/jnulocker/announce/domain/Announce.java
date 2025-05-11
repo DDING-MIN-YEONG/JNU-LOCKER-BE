@@ -55,7 +55,7 @@ public class Announce extends BaseEntity {
                 .build();
     }
 
-    public void validDeletable(Department department) {
+    public void validateDeletable(Department department) {
         if (!this.department.equals(department)) {
             throw OnlyManagerCanDeleteException.EXCEPTION;
         }
