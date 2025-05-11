@@ -1,4 +1,4 @@
-package announce.application;
+package announce.application.port.in.request;
 
 import com.jnulocker.announce.application.port.in.request.CreateAnnounceRequest;
 import java.util.List;

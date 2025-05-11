@@ -1,6 +1,6 @@
 package com.jnulocker.announce.adapter.in;
 
-import static announce.application.CreateAnnounceRequestTestDataBuilder.createAnnounceRequestBuilder;
+import static announce.application.port.in.request.CreateAnnounceRequestTestDataBuilder.createAnnounceRequestBuilder;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 

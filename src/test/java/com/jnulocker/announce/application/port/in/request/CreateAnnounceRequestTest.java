@@ -1,6 +1,6 @@
 package com.jnulocker.announce.application.port.in.request;
 
-import static announce.application.CreateAnnounceRequestTestDataBuilder.createAnnounceRequestBuilder;
+import static announce.application.port.in.request.CreateAnnounceRequestTestDataBuilder.createAnnounceRequestBuilder;
 import static jakarta.validation.Validation.buildDefaultValidatorFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
