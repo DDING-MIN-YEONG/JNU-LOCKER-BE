@@ -20,6 +20,7 @@ public class DeleteAnnounceExceptionDocs implements SwaggerExceptionDoc {
     @ExplainError("공지사항이 존재하지 않을 때 발생하는 예외입니다")
     public static final BusinessException 공지사항이_존재하지_않을_때 = AnnounceNotFoundException.EXCEPTION;
 
-    @ExplainError("이벤트 주최 학과가 아닐 때 발생하는 예외입니다")
-    public static final BusinessException 이벤트_주최_학과가_아닐_때 = OnlyManagerCanDeleteException.EXCEPTION;
+    @ExplainError("공지사항 주최 학과가 아닐 때 발생하는 예외입니다")
+    public static final BusinessException 공지사항_주최_학과가_아닐_때 =
+            OnlyManagerCanDeleteException.EXCEPTION;
 }
