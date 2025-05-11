@@ -51,6 +51,7 @@ public class AnnounceController implements AnnounceApi {
         return ResponseEntity.ok(announceQuery.getMyAnnounces());
     }
 
+    @Override
     @DeleteMapping("/{announce-id}")
     public ResponseEntity<Void> deleteAnnounce(@PathVariable("announce-id") Long announceId) {
         announceCommand.deleteAnnounce(announceId);

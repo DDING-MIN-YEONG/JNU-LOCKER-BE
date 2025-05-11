@@ -16,6 +16,7 @@ import java.util.List;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "공지사항", description = "공지사항 관련 API")
@@ -52,4 +53,9 @@ public interface AnnounceApi {
                                                             implementation =
                                                                     MyAnnounceResponse.class))))
     ResponseEntity<List<MyAnnounceResponse>> getMyAnnounces();
+
+    @ApiExceptionExamples(DeleteAnnounceExceptionDocs.class)
+    @Operation(summary = "공지사항 삭제", description = "공지사항을 삭제합니다.")
+    @ApiResponse(responseCode = "204", description = "공지사항 삭제 성공")
+    ResponseEntity<Void> deleteAnnounce(@PathVariable("announce-id") Long announceId);
 }
