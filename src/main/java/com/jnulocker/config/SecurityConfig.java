@@ -87,6 +87,12 @@ public class SecurityConfig {
                                 .hasAuthority(Role.MANAGER.getRole())
                                 .requestMatchers(HttpMethod.PUT, "/v1/events/*/publish")
                                 .hasAuthority(Role.MANAGER.getRole())
+                                .requestMatchers(HttpMethod.POST, "/v1/announces")
+                                .hasAuthority(Role.MANAGER.getRole())
+                                .requestMatchers(HttpMethod.GET, "/v1/announces")
+                                .hasAuthority(Role.MANAGER.getRole())
+                                .requestMatchers(HttpMethod.GET, "/v1/announces/me")
+                                .hasAuthority(Role.USER.getRole())
                                 // 토큰의 role과 db의 role과 다른 문제 고려
                                 .anyRequest()
                                 .authenticated());
