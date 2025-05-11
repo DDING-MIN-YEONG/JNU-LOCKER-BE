@@ -6,7 +6,9 @@ import com.jnulocker.announce.application.port.in.AnnounceQuery;
 import com.jnulocker.announce.application.port.in.request.CreateAnnounceRequest;
 import com.jnulocker.announce.application.port.in.response.AnnounceCustomPage;
 import com.jnulocker.announce.application.port.in.response.AnnouncePageable;
+import com.jnulocker.announce.application.port.in.response.MyAnnounceResponse;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -39,5 +41,10 @@ public class AnnounceController implements AnnounceApi {
             @Valid @ParameterObject AnnouncePageable announcePageable) {
         Pageable pageable = announcePageable.toPageable();
         return ResponseEntity.ok(announceQuery.getAllAnnounces(pageable));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<List<MyAnnounceResponse>> getMyAnnounces() {
+        return ResponseEntity.ok(announceQuery.getMyAnnounces());
     }
 }
