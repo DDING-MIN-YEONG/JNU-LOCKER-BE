@@ -121,7 +121,7 @@ public class AnnounceControllerIntegrationTest {
     }
 
     @Test
-    void 자신이_속한_학과가_참여하는_이벤트를_조회할_수_있다() {
+    void 자신이_속한_학과가_참여하는_공지사항을_조회할_수_있다() {
         // given
         Department department = organizationTestUtil.createCouncilDepartment();
         Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
@@ -137,8 +137,6 @@ public class AnnounceControllerIntegrationTest {
                         .extract()
                         .jsonPath()
                         .getList(".", MyAnnounceResponse.class);
-
-        MyAnnounceResponse myAnnounceResponse = myAnnounces.getFirst();
 
         // then
         assertThat(myAnnounces).hasSize(1);
