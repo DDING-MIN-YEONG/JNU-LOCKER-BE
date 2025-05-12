@@ -1,6 +1,7 @@
 package com.jnulocker.announce.application.port.out;
 
 import com.jnulocker.announce.domain.Announce;
+import com.jnulocker.announce.domain.AnnounceParticipation;
 import com.jnulocker.organization.domain.Department;
 import java.util.List;
 import java.util.Optional;
@@ -14,4 +15,9 @@ public interface AnnounceLoadPort {
     List<Announce> getAnnouncesByParticipationDepartment(Department department);
 
     Optional<Announce> getById(Long announceId);
+
+    Optional<Announce> getByIdAndDepartment(Long announceId, Department department);
+
+    Optional<AnnounceParticipation> getByAnnounceIdAndDepartment(
+            Long announceId, Department department);
 }

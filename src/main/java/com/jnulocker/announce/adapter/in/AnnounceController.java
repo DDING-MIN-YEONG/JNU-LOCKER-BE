@@ -6,7 +6,9 @@ import com.jnulocker.announce.application.port.in.AnnounceQuery;
 import com.jnulocker.announce.application.port.in.request.CreateAnnounceRequest;
 import com.jnulocker.announce.application.port.in.request.UpdateAnnounceRequest;
 import com.jnulocker.announce.application.port.in.response.AnnounceCustomPage;
+import com.jnulocker.announce.application.port.in.response.AnnounceDetailResponse;
 import com.jnulocker.announce.application.port.in.response.AnnouncePageable;
+import com.jnulocker.announce.application.port.in.response.MyAnnounceDetailResponse;
 import com.jnulocker.announce.application.port.in.response.MyAnnounceResponse;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -47,10 +49,22 @@ public class AnnounceController implements AnnounceApi {
         return ResponseEntity.ok(announceQuery.getAllAnnounces(pageable));
     }
 
+    @GetMapping("/{announce-id}")
+    public ResponseEntity<AnnounceDetailResponse> getAnnounce(
+            @PathVariable("announce-id") Long announceId) {
+        return ResponseEntity.ok(announceQuery.getAnnounce(announceId));
+    }
+
     @Override
     @GetMapping("/me")
     public ResponseEntity<List<MyAnnounceResponse>> getMyAnnounces() {
         return ResponseEntity.ok(announceQuery.getMyAnnounces());
+    }
+
+    @GetMapping("/me/{announce-id}")
+    public ResponseEntity<MyAnnounceDetailResponse> getMyAnnounce(
+            @PathVariable("announce-id") Long announceId) {
+        return ResponseEntity.ok(announceQuery.getMyAnnounce(announceId));
     }
 
     @Override

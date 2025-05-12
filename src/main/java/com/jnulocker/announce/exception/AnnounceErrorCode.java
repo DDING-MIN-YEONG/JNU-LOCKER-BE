@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 public enum AnnounceErrorCode implements ErrorCode {
     ANNOUNCE_NOT_FOUND("AN001", HttpStatus.NOT_FOUND, "공지사항이 존재하지 않습니다."),
     ONLY_MANAGER_CAN_DELETE_ANNOUNCE("AN002", HttpStatus.FORBIDDEN, "공지사항 관리자만 삭제할 수 있습니다."),
+    ANNOUNCE_PARTICIPATION_NOT_FOUND("AN002", HttpStatus.NOT_FOUND, "공지사항 참여 정보가 존재하지 않습니다."),
     ONLY_MANAGER_CAN_UPDATE_ANNOUNCE("AN003", HttpStatus.FORBIDDEN, "공지사항 관리자만 수정할 수 있습니다."),
     ;
 

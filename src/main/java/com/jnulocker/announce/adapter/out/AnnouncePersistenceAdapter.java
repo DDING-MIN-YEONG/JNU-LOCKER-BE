@@ -50,6 +50,18 @@ public class AnnouncePersistenceAdapter implements AnnounceRecordPort, AnnounceL
     }
 
     @Override
+    public Optional<Announce> getByIdAndDepartment(Long announceId, Department department) {
+        return announceRepository.findByIdAndDepartment(announceId, department);
+    }
+
+    @Override
+    public Optional<AnnounceParticipation> getByAnnounceIdAndDepartment(
+            Long announceId, Department department) {
+        return announceParticipationRepository.findByAnnounceIdAndDepartment(
+                announceId, department);
+    }
+
+    @Override
     public void deleteAnnounceParticipationsByAnnounce(Announce announce) {
         announceParticipationRepository.deleteAllByAnnounce(announce);
     }

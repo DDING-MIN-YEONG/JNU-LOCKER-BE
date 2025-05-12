@@ -89,9 +89,10 @@ public class SecurityConfig {
                                 .hasAuthority(Role.MANAGER.getRole())
                                 .requestMatchers(HttpMethod.POST, "/v1/announces")
                                 .hasAuthority(Role.MANAGER.getRole())
-                                .requestMatchers(HttpMethod.GET, "/v1/announces")
+                                .requestMatchers(HttpMethod.GET, "/v1/announces", "/v1/announces/*")
                                 .hasAuthority(Role.MANAGER.getRole())
-                                .requestMatchers(HttpMethod.GET, "/v1/announces/me")
+                                .requestMatchers(
+                                        HttpMethod.GET, "/v1/announces/me", "/v1/announces/me/*")
                                 .hasAuthority(Role.USER.getRole())
                                 .requestMatchers(HttpMethod.DELETE, "/v1/announces/*")
                                 .hasAuthority(Role.MANAGER.getRole())
