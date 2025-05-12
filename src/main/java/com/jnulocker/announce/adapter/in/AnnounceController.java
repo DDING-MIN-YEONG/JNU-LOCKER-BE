@@ -66,6 +66,6 @@ public class AnnounceController implements AnnounceApi {
             @PathVariable("announce-id") Long announceId,
             @Valid @RequestBody UpdateAnnounceRequest request) {
         announceCommand.updateAnnounce(announceId, request);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
