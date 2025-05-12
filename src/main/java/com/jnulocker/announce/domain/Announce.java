@@ -68,8 +68,8 @@ public class Announce extends BaseEntity {
         }
     }
 
-    public void update(String tilte, String content) {
-        this.title = tilte;
+    public void update(String title, String content) {
+        this.title = title;
         this.content = content;
     }
 }
