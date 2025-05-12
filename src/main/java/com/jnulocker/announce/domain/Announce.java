@@ -1,6 +1,7 @@
 package com.jnulocker.announce.domain;
 
 import com.jnulocker.announce.exception.OnlyManagerCanDeleteAnnounceException;
+import com.jnulocker.announce.exception.OnlyManagerCanUpdateAnnounceException;
 import com.jnulocker.common.persistence.BaseEntity;
 import com.jnulocker.organization.domain.Department;
 import jakarta.persistence.CascadeType;
@@ -59,5 +60,16 @@ public class Announce extends BaseEntity {
         if (!this.department.equals(department)) {
             throw OnlyManagerCanDeleteAnnounceException.EXCEPTION;
         }
+    }
+
+    public void validateUpdatable(Department department) {
+        if (!this.department.equals(department)) {
+            throw OnlyManagerCanUpdateAnnounceException.EXCEPTION;
+        }
+    }
+
+    public void update(String title, String content) {
+        this.title = title;
+        this.content = content;
     }
 }

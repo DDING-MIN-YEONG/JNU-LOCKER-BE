@@ -4,6 +4,7 @@ import com.jnulocker.announce.adapter.in.docs.AnnounceApi;
 import com.jnulocker.announce.application.port.in.AnnounceCommand;
 import com.jnulocker.announce.application.port.in.AnnounceQuery;
 import com.jnulocker.announce.application.port.in.request.CreateAnnounceRequest;
+import com.jnulocker.announce.application.port.in.request.UpdateAnnounceRequest;
 import com.jnulocker.announce.application.port.in.response.AnnounceCustomPage;
 import com.jnulocker.announce.application.port.in.response.AnnouncePageable;
 import com.jnulocker.announce.application.port.in.response.MyAnnounceResponse;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -55,6 +57,15 @@ public class AnnounceController implements AnnounceApi {
     @DeleteMapping("/{announce-id}")
     public ResponseEntity<Void> deleteAnnounce(@PathVariable("announce-id") Long announceId) {
         announceCommand.deleteAnnounce(announceId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @Override
+    @PutMapping("/{announce-id}")
+    public ResponseEntity<Void> updateAnnounce(
+            @PathVariable("announce-id") Long announceId,
+            @Valid @RequestBody UpdateAnnounceRequest request) {
+        announceCommand.updateAnnounce(announceId, request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

@@ -1,6 +1,7 @@
 package com.jnulocker.announce.adapter.in.docs;
 
 import com.jnulocker.announce.application.port.in.request.CreateAnnounceRequest;
+import com.jnulocker.announce.application.port.in.request.UpdateAnnounceRequest;
 import com.jnulocker.announce.application.port.in.response.AnnounceCustomPage;
 import com.jnulocker.announce.application.port.in.response.AnnouncePageable;
 import com.jnulocker.announce.application.port.in.response.MyAnnounceResponse;
@@ -58,4 +59,11 @@ public interface AnnounceApi {
     @Operation(summary = "공지사항 삭제", description = "공지사항을 삭제합니다.")
     @ApiResponse(responseCode = "204", description = "공지사항 삭제 성공")
     ResponseEntity<Void> deleteAnnounce(@PathVariable("announce-id") Long announceId);
+
+    @ApiExceptionExamples(UpdateAnnounceExceptionDocs.class)
+    @Operation(summary = "공지사항 수정", description = "공지사항을 수정합니다.")
+    @ApiResponse(responseCode = "200", description = "공지사항 수정 성공")
+    ResponseEntity<Void> updateAnnounce(
+            @PathVariable("announce-id") Long announceId,
+            @RequestBody UpdateAnnounceRequest request);
 }

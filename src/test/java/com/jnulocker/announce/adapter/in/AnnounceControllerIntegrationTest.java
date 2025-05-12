@@ -1,10 +1,12 @@
 package com.jnulocker.announce.adapter.in;
 
 import static announce.application.port.in.request.CreateAnnounceRequestTestDataBuilder.createAnnounceRequestBuilder;
+import static announce.application.port.in.request.UpdateAnnounceRequestTestDataBuilder.updateAnnounceRequestBuilder;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.jnulocker.announce.application.port.in.request.CreateAnnounceRequest;
+import com.jnulocker.announce.application.port.in.request.UpdateAnnounceRequest;
 import com.jnulocker.announce.application.port.in.response.AnnounceCustomPage;
 import com.jnulocker.announce.application.port.in.response.MyAnnounceResponse;
 import com.jnulocker.announce.exception.AnnounceErrorCode;
@@ -121,7 +123,7 @@ public class AnnounceControllerIntegrationTest {
     }
 
     @Test
-    void 자신이_속한_학과가_참여하는_이벤트를_조회할_수_있다() {
+    void 자신이_속한_학과가_참여하는_공지사항을_조회할_수_있다() {
         // given
         Department department = organizationTestUtil.createCouncilDepartment();
         Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
@@ -137,8 +139,6 @@ public class AnnounceControllerIntegrationTest {
                         .extract()
                         .jsonPath()
                         .getList(".", MyAnnounceResponse.class);
-
-        MyAnnounceResponse myAnnounceResponse = myAnnounces.getFirst();
 
         // then
         assertThat(myAnnounces).hasSize(1);
@@ -232,6 +232,85 @@ public class AnnounceControllerIntegrationTest {
                 .isEqualTo(AnnounceErrorCode.ONLY_MANAGER_CAN_DELETE_ANNOUNCE.getMessage());
     }
 
+    @Test
+    void 공지사항을_수정할_수_있다() {
+        // given
+        Department department = organizationTestUtil.createCouncilDepartment();
+        createAnnounceWithDepartment(department);
+
+        // 생성된 공지사항 ID 조회
+        Long announceId = getLastAnnounceId();
+
+        UpdateAnnounceRequest request =
+                updateAnnounceRequestBuilder()
+                        .withTitle("수정된 공지사항 제목")
+                        .withContent("수정된 공지사항 내용")
+                        .withParticipationDepartmentIds(List.of(department.getId()))
+                        .build();
+
+        // when
+        updateAnnounce(announceId, request).statusCode(HttpStatus.OK.value());
+
+        // then
+        // 수정된 공지사항 조회
+        AnnounceCustomPage announceCustomPage =
+                getAnnounces(0, 10, accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(AnnounceCustomPage.class);
+
+        assertThat(announceCustomPage.content()).hasSize(1);
+        assertThat(announceCustomPage.content().getFirst().title()).isEqualTo("수정된 공지사항 제목");
+        assertThat(announceCustomPage.content().getFirst().content()).isEqualTo("수정된 공지사항 내용");
+    }
+
+    @Test
+    void 존재하지_않는_공지사항은_수정할_수_없다() {
+        // given
+        Long nonExistentAnnounceId = System.currentTimeMillis();
+        UpdateAnnounceRequest request = updateAnnounceRequestBuilder().build();
+
+        // when
+        ErrorResponse errorResponse =
+                updateAnnounce(nonExistentAnnounceId, request)
+                        .statusCode(AnnounceErrorCode.ANNOUNCE_NOT_FOUND.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(AnnounceErrorCode.ANNOUNCE_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void 권한이_없는_사용자는_공지사항을_수정할_수_없다() {
+        // given
+        Department department = organizationTestUtil.createCouncilDepartment();
+        createAnnounceWithDepartment(department);
+
+        // 생성된 공지사항 ID 조회
+        Long announceId = getLastAnnounceId();
+
+        // 비조직원으로 로그인
+        accessToken = authTestUtil.generateAccessTokenWithAnotherDepartment(Role.MANAGER);
+
+        UpdateAnnounceRequest request = updateAnnounceRequestBuilder().build();
+
+        // when
+        ErrorResponse errorResponse =
+                updateAnnounce(announceId, request)
+                        .statusCode(
+                                AnnounceErrorCode.ONLY_MANAGER_CAN_UPDATE_ANNOUNCE
+                                        .getHttpStatus()
+                                        .value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(AnnounceErrorCode.ONLY_MANAGER_CAN_UPDATE_ANNOUNCE.getMessage());
+    }
+
     private void createAnnounce() {
         Department department = organizationTestUtil.createCouncilDepartment();
         createAnnounceWithDepartment(department);
@@ -301,6 +380,17 @@ public class AnnounceControllerIntegrationTest {
                 .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .when()
                 .delete(ANNOUNCE_URL + "/{announce-id}", announceId)
+                .then()
+                .log()
+                .all();
+    }
+
+    private ValidatableResponse updateAnnounce(Long announceId, UpdateAnnounceRequest request) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .body(request)
+                .when()
+                .put(ANNOUNCE_URL + "/{announce-id}", announceId)
                 .then()
                 .log()
                 .all();
