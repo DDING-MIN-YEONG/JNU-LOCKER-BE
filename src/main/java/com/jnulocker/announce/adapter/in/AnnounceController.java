@@ -64,7 +64,7 @@ public class AnnounceController implements AnnounceApi {
     @PutMapping("/{announce-id}")
     public ResponseEntity<Void> updateAnnounce(
             @PathVariable("announce-id") Long announceId,
-            @RequestBody UpdateAnnounceRequest request) {
+            @Valid @RequestBody UpdateAnnounceRequest request) {
         announceCommand.updateAnnounce(announceId, request);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
