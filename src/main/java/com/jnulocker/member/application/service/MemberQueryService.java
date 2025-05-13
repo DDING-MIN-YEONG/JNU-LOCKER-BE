@@ -8,7 +8,6 @@ import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.exception.MemberNotFoundException;
 import com.jnulocker.organization.domain.Department;
-import com.jnulocker.organization.domain.OrganizationType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -51,19 +50,12 @@ public class MemberQueryService implements MemberQuery {
         Long memberId = SecurityUtils.getCurrentMemberId();
         Member member = findByIdOrThrow(memberId);
 
-        String studentNumber = null;
-        String affiliation = null;
+        String studentNumber = member.getStudentNumber();
+        String affiliation = member.getDepartment().getName();
 
         Role role = member.getRole();
-        OrganizationType orgType = member.getDepartment().getOrganization().getType();
 
-        if (role == Role.USER) {
-            studentNumber = member.getStudentNumber();
-            affiliation = member.getDepartment().getName();
-        } else if (role == Role.MANAGER) {
-            if (orgType == OrganizationType.COUNCIL) {
-                studentNumber = member.getStudentNumber();
-            }
+        if (role == Role.MANAGER) {
             affiliation = member.getDepartment().getNickname();
         }
 
@@ -73,7 +65,8 @@ public class MemberQueryService implements MemberQuery {
                 studentNumber,
                 affiliation,
                 member.getPhoneNumber(),
-                member.getEmail());
+                member.getEmail(),
+                member.getRole());
     }
 
     public Page<Member> getByRoleAndDepartment(
