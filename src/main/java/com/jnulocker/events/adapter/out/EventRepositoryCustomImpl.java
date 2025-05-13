@@ -36,6 +36,10 @@ public class EventRepositoryCustomImpl implements EventRepositoryCustom {
                         .where(eventParticipation.department.eq(department), event.publish.isTrue())
                         .fetchOne();
 
+        if (totalElements == null) {
+            totalElements = 0L;
+        }
+
         List<MyEventListItem> content =
                 queryFactory
                         .select(
