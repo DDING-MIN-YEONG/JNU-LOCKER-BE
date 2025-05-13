@@ -14,6 +14,7 @@ import com.jnulocker.auth.security.SecurityUtils;
 import com.jnulocker.member.application.port.in.MemberQuery;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.organization.domain.Department;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -80,7 +81,12 @@ public class AnnounceQueryService implements AnnounceQuery {
 
         // Member가 주관하는 공지사항 조회
         Announce announce = getByIdAndDepartmentOrThrow(announceId, member.getDepartment());
-        return AnnounceDetailResponse.from(announce);
+
+        // 공지사항에 참여하는 소속학과 조회
+        List<Department> participatingDepartments =
+                announceLoadPort.getParticipationDepartments(announce);
+
+        return AnnounceDetailResponse.from(announce, participatingDepartments);
     }
 
     @Override
