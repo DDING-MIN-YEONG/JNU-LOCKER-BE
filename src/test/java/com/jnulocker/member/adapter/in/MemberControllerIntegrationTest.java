@@ -124,11 +124,11 @@ public class MemberControllerIntegrationTest {
         assertThat(memberInfoResponse).isNotNull();
         assertThat(memberInfoResponse.memberId()).isEqualTo(expectedMember.getId());
         assertThat(memberInfoResponse.name()).isEqualTo(expectedMember.getName());
-        assertThat(memberInfoResponse.studentNumber()).isNull();
         assertThat(memberInfoResponse.affiliation())
                 .isEqualTo(expectedMember.getDepartment().getNickname());
         assertThat(memberInfoResponse.phoneNumber()).isEqualTo(expectedMember.getPhoneNumber());
         assertThat(memberInfoResponse.email()).isEqualTo(expectedMember.getEmail());
+        assertThat(memberInfoResponse.role()).isEqualTo(expectedMember.getRole());
     }
 
     public static ValidatableResponse getMemberInfo(String accessToken) {
