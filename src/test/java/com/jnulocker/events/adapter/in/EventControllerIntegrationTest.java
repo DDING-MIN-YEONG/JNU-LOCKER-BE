@@ -9,8 +9,9 @@ import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.events.application.port.in.request.CreateEventRequest;
 import com.jnulocker.events.application.port.in.request.PublishEventRequest;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
+import com.jnulocker.events.application.port.in.response.EventPageable;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
-import com.jnulocker.events.application.port.in.response.MyEventResponse;
+import com.jnulocker.events.application.port.in.response.MyEventCustomPage;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.exception.EventErrorCode;
@@ -51,6 +52,8 @@ public class EventControllerIntegrationTest {
 
     private static final String EVENT_URL = "/v1/events";
     private static final String ACCESS_TOKEN = "access_token";
+    private static final String DIRECTION = "DESC";
+    private static final String SORT = "createdAt";
 
     @LocalServerPort private int port;
 
@@ -123,15 +126,17 @@ public class EventControllerIntegrationTest {
         eventTestUtil.createEventWithFloorAndLockers(List.of(5, 10), EventStatus.OPEN, true);
 
         // when
-        List<MyEventResponse> myEvents =
-                getMyEvents(accessToken)
+        accessToken = authTestUtil.generateAccessToken(Role.MANAGER);
+        EventCustomPage events =
+                getEvents(0, 10, accessToken)
                         .statusCode(HttpStatus.OK.value())
                         .extract()
-                        .jsonPath()
-                        .getList(".", MyEventResponse.class);
+                        .as(EventCustomPage.class);
 
         // then
-        assertThat(myEvents).isEmpty();
+        assertThat(events.content()).isEmpty();
+        assertThat(events.totalElements()).isZero();
+        assertThat(events.last()).isTrue();
     }
 
     @ParameterizedTest(name = "층별 사물함 수: {0}")
@@ -326,18 +331,19 @@ public class EventControllerIntegrationTest {
 
         // when
         accessToken = authTestUtil.generateAccessTokenWithMember(member);
-        List<MyEventResponse> myEvents =
-                getMyEvents(accessToken)
+        EventPageable eventPageable = new EventPageable(0, 10, DIRECTION, SORT);
+        MyEventCustomPage myEvents =
+                getMyEventsWithPageable(accessToken, eventPageable)
                         .statusCode(HttpStatus.OK.value())
                         .extract()
-                        .jsonPath()
-                        .getList(".", MyEventResponse.class);
-
-        MyEventResponse myEventResponse = myEvents.getFirst();
+                        .as(MyEventCustomPage.class);
 
         // then
-        assertThat(myEvents).hasSize(1);
-        assertThat(myEventResponse.availableLockerCount()).isEqualTo(7);
+        // 자신의 소속 학과가 참여하는 이벤트가 조회되었는지 확인
+        assertThat(myEvents.content()).hasSize(1);
+        assertThat(myEvents.totalElements()).isEqualTo(1);
+        assertThat(myEvents.last()).isTrue();
+        assertThat(myEvents.content().getFirst().availableLockerCount()).isEqualTo(7);
     }
 
     @Test
@@ -353,15 +359,17 @@ public class EventControllerIntegrationTest {
 
         // when
         accessToken = authTestUtil.generateAccessTokenWithMember(member);
-        List<MyEventResponse> myEvents =
-                getMyEvents(accessToken)
+        EventPageable eventPageable = new EventPageable(0, 10, DIRECTION, SORT);
+        MyEventCustomPage myEvents =
+                getMyEventsWithPageable(accessToken, eventPageable)
                         .statusCode(HttpStatus.OK.value())
                         .extract()
-                        .jsonPath()
-                        .getList(".", MyEventResponse.class);
+                        .as(MyEventCustomPage.class);
 
         // then
-        assertThat(myEvents).isEmpty();
+        assertThat(myEvents.content()).isEmpty();
+        assertThat(myEvents.totalElements()).isZero();
+        assertThat(myEvents.last()).isTrue();
     }
 
     // 파라미터 제공 메서드
@@ -388,8 +396,8 @@ public class EventControllerIntegrationTest {
                 .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .queryParam("page", page)
                 .queryParam("size", size)
-                .queryParam("direction", "DESC")
-                .queryParam("sort", "createdAt")
+                .queryParam("direction", DIRECTION)
+                .queryParam("sort", SORT)
                 .when()
                 .get(EVENT_URL)
                 .then()
@@ -397,14 +405,19 @@ public class EventControllerIntegrationTest {
                 .all();
     }
 
-    public static ValidatableResponse getMyEvents(String accessToken) {
+    public static ValidatableResponse getMyEventsWithPageable(
+            String accessToken, EventPageable eventPageable) {
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .queryParam("page", eventPageable.getPage())
+                .queryParam("size", eventPageable.getSize())
+                .queryParam("direction", eventPageable.getDirection())
+                .queryParam("sort", eventPageable.getSort())
                 .when()
                 .get(EVENT_URL + "/me")
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 
     // 이벤트 생성 메서드들
