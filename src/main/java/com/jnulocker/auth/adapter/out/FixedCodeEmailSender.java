@@ -17,16 +17,16 @@ public class FixedCodeEmailSender implements EmailSender {
     private final RedisUtil redisUtil;
 
     @Value("${custom.email-verification.code}")
-    private int fixedCode;
+    private String fixedCode;
 
     @Override
-    public void sendVerificationEmail(String email, int code) {
+    public void sendVerificationEmail(String email, String code) {
         log.info("Fixed 환경 - 이메일 전송 생략: 코드: {} \t 이메일: {}", code, email);
         redisUtil.setEmailVerificationCode(email, code);
     }
 
     @Override
-    public int generateVerificationCode() {
+    public String generateVerificationCode() {
         log.info("Fixed 환경 - 고정된 코드 생성: {}", fixedCode);
         return fixedCode;
     }

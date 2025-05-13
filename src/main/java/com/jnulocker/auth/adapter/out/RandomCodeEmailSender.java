@@ -27,7 +27,7 @@ public class RandomCodeEmailSender implements EmailSender {
     private final TemplateEngine templateEngine;
 
     @Override
-    public void sendVerificationEmail(String email, int code) {
+    public void sendVerificationEmail(String email, String code) {
         try {
             MimeMessage message = setupEmailForm(email, code);
             javaMailSender.send(message);
@@ -37,7 +37,7 @@ public class RandomCodeEmailSender implements EmailSender {
         }
     }
 
-    private MimeMessage setupEmailForm(String email, int code) throws MessagingException {
+    private MimeMessage setupEmailForm(String email, String code) throws MessagingException {
         String form = generateEmailForm(code);
 
         MimeMessage message = javaMailSender.createMimeMessage();
@@ -49,17 +49,18 @@ public class RandomCodeEmailSender implements EmailSender {
         return message;
     }
 
-    private String generateEmailForm(int code) {
+    private String generateEmailForm(String code) {
         Context context = new Context();
         context.setVariable("code", code);
         return templateEngine.process("email-verification", context);
     }
 
     @Override
-    public int generateVerificationCode() {
+    public String generateVerificationCode() {
         try {
             SecureRandom random = SecureRandom.getInstanceStrong();
-            return 100000 + random.nextInt(900000);
+            int integerCode = 100000 + random.nextInt(900000);
+            return String.valueOf(integerCode);
         } catch (Exception e) {
             log.error("Error generating verification code", e);
             throw FailedToCreateCodeException.EXCEPTION;

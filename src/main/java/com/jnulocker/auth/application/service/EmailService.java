@@ -29,7 +29,7 @@ public class EmailService implements SendEmailCommand, VerifyCodeCommand {
             redisUtil.deleteVerifiedData(request.email());
         }
 
-        int code = emailSender.generateVerificationCode();
+        String code = emailSender.generateVerificationCode();
         emailSender.sendVerificationEmail(request.email(), code);
     }
 

@@ -508,7 +508,7 @@ class AuthControllerIntegrationTest {
         String code = "123456";
         VerifyCodeRequest request =
                 verifyCodeRequestBuilder().withEmail(email).withCode(code).build();
-        redisUtil.setEmailVerificationCode(request.email(), Integer.parseInt(code));
+        redisUtil.setEmailVerificationCode(request.email(), code);
 
         // when
         ValidatableResponse response = verify(request);
@@ -522,7 +522,7 @@ class AuthControllerIntegrationTest {
         // given
         String email = "test@example.com";
         String incorrectCode = "12347";
-        redisUtil.setEmailVerificationCode(email, Integer.parseInt(incorrectCode));
+        redisUtil.setEmailVerificationCode(email, incorrectCode);
 
         VerifyCodeRequest request =
                 verifyCodeRequestBuilder().withEmail(email).withCode("123456").build();
