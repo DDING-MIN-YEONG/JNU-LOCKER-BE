@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Tag(name = "이벤트", description = "이벤트 관련 API")
 public interface EventApi {
 
+    @ApiExceptionExamples(GetEventsExceptionDocs.class)
     @Operation(summary = "이벤트 목록 조회", description = "이벤트 목록을 조회합니다. 페이지네이션이 지원됩니다.")
     @ApiResponse(
             responseCode = "200",
