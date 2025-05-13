@@ -6,10 +6,11 @@ import com.jnulocker.announce.application.port.in.AnnounceQuery;
 import com.jnulocker.announce.application.port.in.request.CreateAnnounceRequest;
 import com.jnulocker.announce.application.port.in.request.UpdateAnnounceRequest;
 import com.jnulocker.announce.application.port.in.response.AnnounceCustomPage;
+import com.jnulocker.announce.application.port.in.response.AnnounceDetailResponse;
 import com.jnulocker.announce.application.port.in.response.AnnouncePageable;
-import com.jnulocker.announce.application.port.in.response.MyAnnounceResponse;
+import com.jnulocker.announce.application.port.in.response.MyAnnounceCustomPage;
+import com.jnulocker.announce.application.port.in.response.MyAnnounceDetailResponse;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -44,13 +45,28 @@ public class AnnounceController implements AnnounceApi {
     public ResponseEntity<AnnounceCustomPage> getAnnounces(
             @Valid @ParameterObject AnnouncePageable announcePageable) {
         Pageable pageable = announcePageable.toPageable();
-        return ResponseEntity.ok(announceQuery.getAllAnnounces(pageable));
+        return ResponseEntity.ok(announceQuery.getAnnounces(pageable));
+    }
+
+    @GetMapping("/{announce-id}")
+    public ResponseEntity<AnnounceDetailResponse> getAnnounce(
+            @PathVariable("announce-id") Long announceId) {
+        return ResponseEntity.ok(announceQuery.getAnnounce(announceId));
     }
 
     @Override
     @GetMapping("/me")
-    public ResponseEntity<List<MyAnnounceResponse>> getMyAnnounces() {
-        return ResponseEntity.ok(announceQuery.getMyAnnounces());
+    public ResponseEntity<MyAnnounceCustomPage> getMyAnnounces(
+            @Valid @ParameterObject AnnouncePageable announcePageable) {
+        Pageable pageable = announcePageable.toPageable();
+        return ResponseEntity.ok(announceQuery.getMyAnnounces(pageable));
+    }
+
+    @Override
+    @GetMapping("/me/{announce-id}")
+    public ResponseEntity<MyAnnounceDetailResponse> getMyAnnounce(
+            @PathVariable("announce-id") Long announceId) {
+        return ResponseEntity.ok(announceQuery.getMyAnnounce(announceId));
     }
 
     @Override

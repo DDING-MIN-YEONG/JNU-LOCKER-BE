@@ -29,13 +29,14 @@ public class AnnouncePersistenceAdapter implements AnnounceRecordPort, AnnounceL
     }
 
     @Override
-    public Page<Announce> getAllAnnouncesByDepartment(Department department, Pageable pageable) {
+    public Page<Announce> getAnnouncesByDepartment(Department department, Pageable pageable) {
         return announceRepository.findAllByDepartment(department, pageable);
     }
 
     @Override
-    public List<Announce> getAnnouncesByParticipationDepartment(Department department) {
-        return announceRepository.findAllByAnnounceParticipations_Department(department);
+    public Page<Announce> getAnnouncesByParticipationDepartment(
+            Department department, Pageable pageable) {
+        return announceRepository.findAllByAnnounceParticipations_Department(department, pageable);
     }
 
     @Override
@@ -50,7 +51,26 @@ public class AnnouncePersistenceAdapter implements AnnounceRecordPort, AnnounceL
     }
 
     @Override
+    public Optional<Announce> getByIdAndDepartment(Long announceId, Department department) {
+        return announceRepository.findByIdAndDepartment(announceId, department);
+    }
+
+    @Override
+    public Optional<AnnounceParticipation> getByAnnounceIdAndDepartment(
+            Long announceId, Department department) {
+        return announceParticipationRepository.findByAnnounceIdAndDepartment(
+                announceId, department);
+    }
+
+    @Override
     public void deleteAnnounceParticipationsByAnnounce(Announce announce) {
         announceParticipationRepository.deleteAllByAnnounce(announce);
+    }
+
+    @Override
+    public List<Department> getParticipationDepartments(Announce announce) {
+        return announceParticipationRepository.findAllByAnnounce(announce).stream()
+                .map(AnnounceParticipation::getDepartment)
+                .toList();
     }
 }
