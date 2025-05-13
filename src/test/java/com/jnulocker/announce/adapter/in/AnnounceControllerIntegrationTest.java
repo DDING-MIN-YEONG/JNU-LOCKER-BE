@@ -386,7 +386,7 @@ public class AnnounceControllerIntegrationTest {
         assertThat(response.title()).isEqualTo(request.title());
         assertThat(response.content()).isEqualTo(request.content());
         assertThat(response.createdAt()).isNotNull();
-        assertThat(response.updateAt()).isNotNull();
+        assertThat(response.updatedAt()).isNotNull();
     }
 
     @Test
