@@ -63,6 +63,7 @@ public interface AnnounceApi {
     ResponseEntity<MyAnnounceCustomPage> getMyAnnounces(
             @Valid @ParameterObject AnnouncePageable announcePageable);
 
+    @ApiExceptionExamples(GetMyAnnounceExceptionDocs.class)
     @Operation(summary = "자신의 소속학과 대상 공지사항 상세 조회", description = "자신의 소속학과가 참여한 공지사항 상세 내용을 조회합니다.")
     @ApiResponse(
             responseCode = "200",

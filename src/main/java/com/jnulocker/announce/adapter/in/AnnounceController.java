@@ -62,6 +62,7 @@ public class AnnounceController implements AnnounceApi {
         return ResponseEntity.ok(announceQuery.getMyAnnounces(pageable));
     }
 
+    @Override
     @GetMapping("/me/{announce-id}")
     public ResponseEntity<MyAnnounceDetailResponse> getMyAnnounce(
             @PathVariable("announce-id") Long announceId) {
