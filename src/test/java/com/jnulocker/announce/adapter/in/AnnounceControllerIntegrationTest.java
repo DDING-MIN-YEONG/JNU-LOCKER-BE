@@ -328,7 +328,14 @@ public class AnnounceControllerIntegrationTest {
     @Test
     void 공지사항_상세_내용을_조회할_수_있다() {
         // given
-        createAnnounce();
+        Department department = organizationTestUtil.createCouncilDepartment();
+        CreateAnnounceRequest request =
+                createAnnounceRequestBuilder()
+                        .withTitle("테스트 공지사항")
+                        .withContent("테스트 공지사항 내용")
+                        .withParticipationDepartmentIds(List.of(department.getId()))
+                        .build();
+        createAnnounceRequest(request);
         Long announceId = getLastAnnounceId();
 
         // when
@@ -341,14 +348,25 @@ public class AnnounceControllerIntegrationTest {
         // then
         assertThat(response).isNotNull();
         assertThat(response.id()).isEqualTo(announceId);
-        assertThat(response.title()).isNotEmpty();
-        assertThat(response.content()).isNotEmpty();
+        assertThat(response.title()).isEqualTo(request.title());
+        assertThat(response.content()).isEqualTo(request.content());
+        assertThat(response.departments()).hasSize(1);
+        assertThat(response.createdAt()).isNotNull();
+        assertThat(response.updatedAt()).isNotNull();
     }
 
     @Test
     void 자신이_속한_학과가_참여하는_공지사항_상세_내용을_조회할_수_있다() {
         // given
         Department department = organizationTestUtil.createCouncilDepartment();
+        CreateAnnounceRequest request =
+                createAnnounceRequestBuilder()
+                        .withTitle("테스트 공지사항")
+                        .withContent("테스트 공지사항 내용")
+                        .withParticipationDepartmentIds(List.of(department.getId()))
+                        .build();
+        createAnnounceRequest(request);
+
         Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
         accessToken = authTestUtil.generateAccessTokenWithMember(member);
 
@@ -365,8 +383,10 @@ public class AnnounceControllerIntegrationTest {
         // then
         assertThat(response).isNotNull();
         assertThat(response.id()).isEqualTo(announceId);
-        assertThat(response.title()).isNotEmpty();
-        assertThat(response.content()).isNotEmpty();
+        assertThat(response.title()).isEqualTo(request.title());
+        assertThat(response.content()).isEqualTo(request.content());
+        assertThat(response.createdAt()).isNotNull();
+        assertThat(response.updateAt()).isNotNull();
     }
 
     @Test
@@ -421,6 +441,10 @@ public class AnnounceControllerIntegrationTest {
                         .withParticipationDepartmentIds(List.of(department.getId()))
                         .build();
 
+        createAnnounceRequest(request);
+    }
+
+    private void createAnnounceRequest(CreateAnnounceRequest request) {
         given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .body(request)

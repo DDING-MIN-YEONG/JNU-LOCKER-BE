@@ -18,6 +18,6 @@ public record MyAnnounceDetailResponse(
                 announce.getContent(),
                 announce.getWriter(),
                 announce.getCreatedAt(),
-                announce.getCreatedAt());
+                announce.getUpdatedAt());
     }
 }
