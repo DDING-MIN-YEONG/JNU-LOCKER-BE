@@ -60,8 +60,8 @@ public class RedisUtil {
         return emailVerificationRepository.findById(getVerifiedKey(email)).isPresent();
     }
 
-    public void setEmailVerificationCode(String email, int code) {
-        setData(email, Integer.toString(code), EMAIL_CODE_EXPIRE);
+    public void setEmailVerificationCode(String email, String code) {
+        setData(email, code, EMAIL_CODE_EXPIRE);
     }
 
     public void setEmailVerified(String email) {

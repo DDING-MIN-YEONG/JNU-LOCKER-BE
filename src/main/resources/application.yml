@@ -81,6 +81,9 @@ decorator:
       enable-logging: true
 
 custom:
+  email-verification:
+    fixed: ${EMAIL_VERIFICATION_FIXED:false}
+    code: ${EMAIL_VERIFICATION_CODE:123456}
   jwt:
     access-secret-key: ${JWT_ACCESS_SECRET_KEY:dGVzdC1zZWNyZXQta2V5LXRlc3Qtc2VjcmV0LWtleS10ZXN0LXNlY3JldC1rZXktdGVzdC1zZWNyZXQta2V5}
     refresh-secret-key: ${JWT_REFRESH_SECRET_KEY:dGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNo}
