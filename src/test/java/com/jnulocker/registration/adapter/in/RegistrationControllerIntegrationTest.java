@@ -1,15 +1,17 @@
 package com.jnulocker.registration.adapter.in;
 
 import static com.jnulocker.events.adapter.in.EventControllerIntegrationTest.getEventLockers;
-import static com.jnulocker.events.adapter.in.EventControllerIntegrationTest.getMyEvents;
+import static com.jnulocker.events.adapter.in.EventControllerIntegrationTest.getMyEventsWithPageable;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.jnulocker.auth.jwt.exception.JwtErrorCode;
 import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.common.exception.ErrorResponse;
+import com.jnulocker.events.application.port.in.response.EventPageable;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
-import com.jnulocker.events.application.port.in.response.MyEventResponse;
+import com.jnulocker.events.application.port.in.response.MyEventCustomPage;
+import com.jnulocker.events.application.port.in.response.MyEventListItem;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.exception.EventErrorCode;
@@ -493,32 +495,31 @@ class RegistrationControllerIntegrationTest {
         RegisterForEventRequest request = createRequestForAvailableLocker(event);
 
         // 신청 전 조회
-        List<MyEventResponse> myEventsBeforeRegistration =
-                getMyEvents(accessToken)
+        EventPageable eventPageable = new EventPageable(0, 10, "DESC", "createdAt");
+        MyEventCustomPage myEventsBeforeRegistration =
+                getMyEventsWithPageable(accessToken, eventPageable)
                         .statusCode(HttpStatus.OK.value())
                         .extract()
-                        .jsonPath()
-                        .getList(".", MyEventResponse.class);
+                        .as(MyEventCustomPage.class);
 
-        Integer availableLockerCountBefore =
-                myEventsBeforeRegistration.getFirst().availableLockerCount();
+        Long availableLockerCountBefore =
+                myEventsBeforeRegistration.content().getFirst().availableLockerCount();
 
         // 신청
         registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
 
         // when
-        List<MyEventResponse> myEventsAfterRegistration =
-                getMyEvents(accessToken)
+        MyEventCustomPage myEventsAfterRegistration =
+                getMyEventsWithPageable(accessToken, eventPageable)
                         .statusCode(HttpStatus.OK.value())
                         .extract()
-                        .jsonPath()
-                        .getList(".", MyEventResponse.class);
+                        .as(MyEventCustomPage.class);
 
-        MyEventResponse myEventResponse = myEventsAfterRegistration.getFirst();
+        MyEventListItem eventAfterRegistration = myEventsAfterRegistration.content().getFirst();
 
         // then
-        assertThat(myEventsAfterRegistration).hasSize(1);
-        assertThat(myEventResponse.availableLockerCount())
+        assertThat(myEventsAfterRegistration.content()).hasSize(1);
+        assertThat(eventAfterRegistration.availableLockerCount())
                 .isEqualTo(availableLockerCountBefore - 1);
     }
 

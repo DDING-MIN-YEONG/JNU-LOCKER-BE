@@ -1,8 +1,8 @@
 package com.jnulocker.events.application.port.out;
 
+import com.jnulocker.events.application.port.in.response.MyEventCustomPage;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.organization.domain.Department;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -16,5 +16,5 @@ public interface EventLoadPort {
 
     Page<Event> getAllEventsByDepartment(Department department, Pageable pageable);
 
-    List<Event> getEventsByParticipationDepartment(Department department);
+    MyEventCustomPage getEventsByParticipationDepartment(Department department, Pageable pageable);
 }

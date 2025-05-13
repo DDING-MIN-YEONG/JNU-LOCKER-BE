@@ -1,6 +1,7 @@
 package com.jnulocker.events.adapter.out;
 
 import com.jnulocker.common.annotation.PersistenceAdapter;
+import com.jnulocker.events.application.port.in.response.MyEventCustomPage;
 import com.jnulocker.events.application.port.out.EventLoadPort;
 import com.jnulocker.events.application.port.out.EventRecordPort;
 import com.jnulocker.events.domain.Event;
@@ -40,8 +41,9 @@ public class EventPersistenceAdapter implements EventLoadPort, EventRecordPort {
     }
 
     @Override
-    public List<Event> getEventsByParticipationDepartment(Department department) {
-        return eventRepository.findAllByPublishTrueAndEventParticipations_Department(department);
+    public MyEventCustomPage getEventsByParticipationDepartment(
+            Department department, Pageable pageable) {
+        return eventRepository.findEventsByParticipationDepartment(department, pageable);
     }
 
     @Override

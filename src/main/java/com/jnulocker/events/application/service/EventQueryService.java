@@ -5,7 +5,7 @@ import com.jnulocker.events.application.port.in.EventQuery;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import com.jnulocker.events.application.port.in.response.LockerResponse;
-import com.jnulocker.events.application.port.in.response.MyEventResponse;
+import com.jnulocker.events.application.port.in.response.MyEventCustomPage;
 import com.jnulocker.events.application.port.out.EventLoadPort;
 import com.jnulocker.events.application.port.out.FloorLoadPort;
 import com.jnulocker.events.application.port.out.LockerLoadPort;
@@ -48,23 +48,11 @@ public class EventQueryService implements EventQuery {
     }
 
     @Override
-    public List<MyEventResponse> getMyEvents() {
+    public MyEventCustomPage getMyEvents(Pageable pageable) {
         Long memberId = SecurityUtils.getCurrentMemberId();
         Member member = memberQuery.findByIdOrThrow(memberId);
 
-        // 사용자의 소속학과가 참여하는 이벤트 조회
-        List<Event> events =
-                eventLoadPort.getEventsByParticipationDepartment(member.getDepartment());
-
-        // 각 이벤트에 대해 사용 가능한 사물함 개수 조회
-        return events.stream()
-                .map(
-                        event -> {
-                            Integer availableLockerCount =
-                                    lockerLoadPort.getAvailableLockerCountOfEvent(event);
-                            return MyEventResponse.of(event, availableLockerCount);
-                        })
-                .toList();
+        return eventLoadPort.getEventsByParticipationDepartment(member.getDepartment(), pageable);
     }
 
     @Override
