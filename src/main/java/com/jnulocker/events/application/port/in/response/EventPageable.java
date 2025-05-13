@@ -1,11 +1,9 @@
 package com.jnulocker.events.application.port.in.response;
 
 import com.jnulocker.common.swagger.model.AbstractPageable;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
 import java.util.Set;
 
-@Schema()
 public class EventPageable extends AbstractPageable {
 
     public static final String DEFAULT_SORT = "eventSchedule.startAt";
