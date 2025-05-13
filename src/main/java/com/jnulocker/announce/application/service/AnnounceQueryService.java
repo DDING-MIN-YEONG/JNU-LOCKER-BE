@@ -28,12 +28,12 @@ public class AnnounceQueryService implements AnnounceQuery {
     private final AnnounceLoadPort announceLoadPort;
 
     @Override
-    public AnnounceCustomPage getAllAnnounces(Pageable pageable) {
+    public AnnounceCustomPage getAnnounces(Pageable pageable) {
         Long memberId = SecurityUtils.getCurrentMemberId();
         Member member = memberQuery.findByIdWithDepartmentOrThrow(memberId);
 
         Page<Announce> announces =
-                announceLoadPort.getAllAnnouncesByDepartment(member.getDepartment(), pageable);
+                announceLoadPort.getAnnouncesByDepartment(member.getDepartment(), pageable);
         return AnnounceCustomPage.from(announces);
     }
 

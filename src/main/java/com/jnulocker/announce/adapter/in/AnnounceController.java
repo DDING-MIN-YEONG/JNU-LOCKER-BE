@@ -45,7 +45,7 @@ public class AnnounceController implements AnnounceApi {
     public ResponseEntity<AnnounceCustomPage> getAnnounces(
             @Valid @ParameterObject AnnouncePageable announcePageable) {
         Pageable pageable = announcePageable.toPageable();
-        return ResponseEntity.ok(announceQuery.getAllAnnounces(pageable));
+        return ResponseEntity.ok(announceQuery.getAnnounces(pageable));
     }
 
     @GetMapping("/{announce-id}")

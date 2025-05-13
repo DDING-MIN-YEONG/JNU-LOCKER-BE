@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface AnnounceLoadPort {
 
-    Page<Announce> getAllAnnouncesByDepartment(Department department, Pageable pageable);
+    Page<Announce> getAnnouncesByDepartment(Department department, Pageable pageable);
 
     Page<Announce> getAnnouncesByParticipationDepartment(Department department, Pageable pageable);
 

@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface AnnounceQuery {
 
-    AnnounceCustomPage getAllAnnounces(Pageable pageable);
+    AnnounceCustomPage getAnnounces(Pageable pageable);
 
     MyAnnounceCustomPage getMyAnnounces(Pageable pageable);
 

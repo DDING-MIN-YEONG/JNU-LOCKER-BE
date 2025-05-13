@@ -29,7 +29,7 @@ public class AnnouncePersistenceAdapter implements AnnounceRecordPort, AnnounceL
     }
 
     @Override
-    public Page<Announce> getAllAnnouncesByDepartment(Department department, Pageable pageable) {
+    public Page<Announce> getAnnouncesByDepartment(Department department, Pageable pageable) {
         return announceRepository.findAllByDepartment(department, pageable);
     }
 
