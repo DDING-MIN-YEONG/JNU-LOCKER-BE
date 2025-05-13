@@ -31,6 +31,7 @@ class QueryDslOrderUtilsTest {
 
         StringPath titlePath = mock(StringPath.class);
         StringPath createdAtPath = mock(StringPath.class);
+        defaultPath = mock(StringPath.class);
 
         pathMap.put("title", titlePath);
         pathMap.put("createdAt", createdAtPath);
