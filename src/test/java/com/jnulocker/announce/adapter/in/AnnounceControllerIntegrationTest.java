@@ -249,7 +249,7 @@ public class AnnounceControllerIntegrationTest {
                         .build();
 
         // when
-        updateAnnounce(announceId, request).statusCode(HttpStatus.OK.value());
+        updateAnnounce(announceId, request).statusCode(HttpStatus.NO_CONTENT.value());
 
         // then
         // 수정된 공지사항 조회
