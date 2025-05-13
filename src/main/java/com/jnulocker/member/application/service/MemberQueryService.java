@@ -73,7 +73,8 @@ public class MemberQueryService implements MemberQuery {
                 studentNumber,
                 affiliation,
                 member.getPhoneNumber(),
-                member.getEmail());
+                member.getEmail(),
+                member.getRole());
     }
 
     public Page<Member> getByRoleAndDepartment(
