@@ -8,7 +8,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.jnulocker.announce.application.port.in.request.CreateAnnounceRequest;
 import com.jnulocker.announce.application.port.in.request.UpdateAnnounceRequest;
 import com.jnulocker.announce.application.port.in.response.AnnounceCustomPage;
-import com.jnulocker.announce.application.port.in.response.MyAnnounceResponse;
+import com.jnulocker.announce.application.port.in.response.AnnounceDetailResponse;
+import com.jnulocker.announce.application.port.in.response.MyAnnounceCustomPage;
+import com.jnulocker.announce.application.port.in.response.MyAnnounceDetailResponse;
 import com.jnulocker.announce.exception.AnnounceErrorCode;
 import com.jnulocker.announce.utils.AnnounceTestUtil;
 import com.jnulocker.auth.utils.AuthTestUtil;
@@ -122,31 +124,45 @@ public class AnnounceControllerIntegrationTest {
         assertThat(announceCustomPage.last()).isEqualTo(expectedLast);
     }
 
-    @Test
-    void 자신이_속한_학과가_참여하는_공지사항을_조회할_수_있다() {
+    // 공지사항 목록 조회 테스트
+    @ParameterizedTest(name = "[{index}] 조회[총: {0}, 크기: {1}, 페이지: {2}] -> 마지막: {3}")
+    @CsvSource({
+        "10, 5, 0, false", // 10개 생성, 5개씩, 0페이지(1~5), 마지막 아님
+        "10, 5, 1, true", // 10개 생성, 5개씩, 1페이지(6~10), 마지막
+        "8, 3, 0, false", // 8개 생성, 3개씩, 0페이지(1~3), 마지막 아님
+        "8, 3, 2, true", // 8개 생성, 3개씩, 2페이지(7~8), 마지막
+        "5, 10, 0, true" // 5개 생성, 10개씩, 0페이지(1~5), 마지막
+    })
+    void 자신이_속한_학과가_참여하는_공지사항을_조회할_수_있다(
+            int createCount, int pageSize, int page, boolean expectedLast) {
         // given
         Department department = organizationTestUtil.createCouncilDepartment();
         Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
 
         // 공지사항 생성
-        announceTestUtil.createAnnounceWithParticipationDepartment(department);
-
+        for (int i = 0; i < createCount; i++) {
+            announceTestUtil.createAnnounceWithParticipationDepartment(department);
+        }
         // when
         accessToken = authTestUtil.generateAccessTokenWithMember(member);
-        List<MyAnnounceResponse> myAnnounces =
-                getMyAnnounces(accessToken)
+        MyAnnounceCustomPage myAnnounceCustomPage =
+                getMyAnnounces(page, pageSize, accessToken)
                         .statusCode(HttpStatus.OK.value())
                         .extract()
-                        .jsonPath()
-                        .getList(".", MyAnnounceResponse.class);
+                        .as(MyAnnounceCustomPage.class);
 
         // then
-        assertThat(myAnnounces).hasSize(1);
+        int expectedSize = calculateExpectedSize(createCount, pageSize, page);
+        assertThat(myAnnounceCustomPage.content()).hasSize(expectedSize);
+        assertThat(myAnnounceCustomPage.totalElements()).isEqualTo(createCount);
+        assertThat(myAnnounceCustomPage.last()).isEqualTo(expectedLast);
     }
 
     @Test
     void 자신의_소속학과가_주관하지_않는_공지사항은_조회할_수_없다() {
         // given
+        int pageSize = 10;
+        int page = 0;
         Department department = organizationTestUtil.createCouncilDepartment();
         Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
         accessToken = authTestUtil.generateAccessTokenWithMember(member);
@@ -155,15 +171,14 @@ public class AnnounceControllerIntegrationTest {
         announceTestUtil.createAnnounce();
 
         // when
-        List<MyAnnounceResponse> myAnnounces =
-                getMyAnnounces(accessToken)
+        MyAnnounceCustomPage myAnnounces =
+                getMyAnnounces(page, pageSize, accessToken)
                         .statusCode(HttpStatus.OK.value())
                         .extract()
-                        .jsonPath()
-                        .getList(".", MyAnnounceResponse.class);
+                        .as(MyAnnounceCustomPage.class);
 
         // then
-        assertThat(myAnnounces).isEmpty();
+        assertThat(myAnnounces.content()).isEmpty();
     }
 
     @Test
@@ -178,15 +193,15 @@ public class AnnounceControllerIntegrationTest {
         deleteAnnounce(announceId).statusCode(HttpStatus.NO_CONTENT.value());
 
         // then
-        // 삭제된 공지사항이 더 이상 조회되지 않는지 확인
-        AnnounceCustomPage announceCustomPage =
-                getAnnounces(0, 10, accessToken)
-                        .statusCode(HttpStatus.OK.value())
+        // 삭제된 공지사항 조회 시 예외 발생
+        ErrorResponse errorResponse =
+                getAnnounce(announceId, accessToken)
+                        .statusCode(AnnounceErrorCode.ANNOUNCE_NOT_FOUND.getHttpStatus().value())
                         .extract()
-                        .as(AnnounceCustomPage.class);
+                        .as(ErrorResponse.class);
 
-        assertThat(announceCustomPage.content())
-                .noneMatch(announce -> announce.id().equals(announceId));
+        assertThat(errorResponse.message())
+                .isEqualTo(AnnounceErrorCode.ANNOUNCE_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -249,7 +264,7 @@ public class AnnounceControllerIntegrationTest {
                         .build();
 
         // when
-        updateAnnounce(announceId, request).statusCode(HttpStatus.OK.value());
+        updateAnnounce(announceId, request).statusCode(HttpStatus.NO_CONTENT.value());
 
         // then
         // 수정된 공지사항 조회
@@ -261,7 +276,6 @@ public class AnnounceControllerIntegrationTest {
 
         assertThat(announceCustomPage.content()).hasSize(1);
         assertThat(announceCustomPage.content().getFirst().title()).isEqualTo("수정된 공지사항 제목");
-        assertThat(announceCustomPage.content().getFirst().content()).isEqualTo("수정된 공지사항 내용");
     }
 
     @Test
@@ -311,6 +325,91 @@ public class AnnounceControllerIntegrationTest {
                 .isEqualTo(AnnounceErrorCode.ONLY_MANAGER_CAN_UPDATE_ANNOUNCE.getMessage());
     }
 
+    @Test
+    void 공지사항_상세_내용을_조회할_수_있다() {
+        // given
+        createAnnounce();
+        Long announceId = getLastAnnounceId();
+
+        // when
+        AnnounceDetailResponse response =
+                getAnnounce(announceId, accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(AnnounceDetailResponse.class);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.id()).isEqualTo(announceId);
+        assertThat(response.title()).isNotEmpty();
+        assertThat(response.content()).isNotEmpty();
+    }
+
+    @Test
+    void 자신이_속한_학과가_참여하는_공지사항_상세_내용을_조회할_수_있다() {
+        // given
+        Department department = organizationTestUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+
+        announceTestUtil.createAnnounceWithParticipationDepartment(department);
+        Long announceId = getMyLastAnnounceId();
+
+        // when
+        MyAnnounceDetailResponse response =
+                getMyAnnounce(announceId, accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(MyAnnounceDetailResponse.class);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.id()).isEqualTo(announceId);
+        assertThat(response.title()).isNotEmpty();
+        assertThat(response.content()).isNotEmpty();
+    }
+
+    @Test
+    void 공지사항이_존재하지_않으면_Announce_Not_Found_에러_응답을_받는다() {
+        // given
+        Long announceId = 100L;
+
+        // when
+        ErrorResponse errorResponse =
+                getAnnounce(announceId, accessToken)
+                        .statusCode(AnnounceErrorCode.ANNOUNCE_NOT_FOUND.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(AnnounceErrorCode.ANNOUNCE_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void 공지사항_참여_정보가_존재하지_않으면_Announce_Participation_Not_Found_에러_응답을_받는다() {
+        // given
+        Department department = organizationTestUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+
+        Long announceId = 100L;
+
+        // when
+        ErrorResponse errorResponse =
+                getMyAnnounce(announceId, accessToken)
+                        .statusCode(
+                                AnnounceErrorCode.ANNOUNCE_PARTICIPATION_NOT_FOUND
+                                        .getHttpStatus()
+                                        .value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(AnnounceErrorCode.ANNOUNCE_PARTICIPATION_NOT_FOUND.getMessage());
+    }
+
     private void createAnnounce() {
         Department department = organizationTestUtil.createCouncilDepartment();
         createAnnounceWithDepartment(department);
@@ -355,9 +454,13 @@ public class AnnounceControllerIntegrationTest {
         return Math.min(remainingItems, pageSize);
     }
 
-    public static ValidatableResponse getMyAnnounces(String accessToken) {
+    public static ValidatableResponse getMyAnnounces(int page, int size, String accessToken) {
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .queryParam("page", page)
+                .queryParam("size", size)
+                .queryParam("direction", "DESC")
+                .queryParam("sort", "createdAt")
                 .when()
                 .get(ANNOUNCE_URL + "/me")
                 .then()
@@ -370,6 +473,16 @@ public class AnnounceControllerIntegrationTest {
                 .statusCode(HttpStatus.OK.value())
                 .extract()
                 .as(AnnounceCustomPage.class)
+                .content()
+                .getLast()
+                .id();
+    }
+
+    private Long getMyLastAnnounceId() {
+        return getMyAnnounces(0, 10, accessToken)
+                .statusCode(HttpStatus.OK.value())
+                .extract()
+                .as(MyAnnounceCustomPage.class)
                 .content()
                 .getLast()
                 .id();
@@ -391,6 +504,26 @@ public class AnnounceControllerIntegrationTest {
                 .body(request)
                 .when()
                 .put(ANNOUNCE_URL + "/{announce-id}", announceId)
+                .then()
+                .log()
+                .all();
+    }
+
+    private ValidatableResponse getAnnounce(Long announceId, String accessToken) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .when()
+                .get(ANNOUNCE_URL + "/{announce-id}", announceId)
+                .then()
+                .log()
+                .all();
+    }
+
+    private ValidatableResponse getMyAnnounce(Long announceId, String accessToken) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .when()
+                .get(ANNOUNCE_URL + "/me/{announce-id}", announceId)
                 .then()
                 .log()
                 .all();
