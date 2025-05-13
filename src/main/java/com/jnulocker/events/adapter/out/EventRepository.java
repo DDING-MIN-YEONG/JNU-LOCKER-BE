@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface EventRepository extends JpaRepository<Event, UUID> {
+public interface EventRepository extends JpaRepository<Event, UUID>, EventRepositoryCustom {
 
     @EntityGraph(attributePaths = {"department"})
     List<Event> findAllByPublishTrueAndEventParticipations_Department(Department department);
