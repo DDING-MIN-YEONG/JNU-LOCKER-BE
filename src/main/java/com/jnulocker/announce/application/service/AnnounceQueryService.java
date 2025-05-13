@@ -3,8 +3,8 @@ package com.jnulocker.announce.application.service;
 import com.jnulocker.announce.application.port.in.AnnounceQuery;
 import com.jnulocker.announce.application.port.in.response.AnnounceCustomPage;
 import com.jnulocker.announce.application.port.in.response.AnnounceDetailResponse;
+import com.jnulocker.announce.application.port.in.response.MyAnnounceCustomPage;
 import com.jnulocker.announce.application.port.in.response.MyAnnounceDetailResponse;
-import com.jnulocker.announce.application.port.in.response.MyAnnounceResponse;
 import com.jnulocker.announce.application.port.out.AnnounceLoadPort;
 import com.jnulocker.announce.domain.Announce;
 import com.jnulocker.announce.domain.AnnounceParticipation;
@@ -14,11 +14,11 @@ import com.jnulocker.auth.security.SecurityUtils;
 import com.jnulocker.member.application.port.in.MemberQuery;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.organization.domain.Department;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -38,15 +38,17 @@ public class AnnounceQueryService implements AnnounceQuery {
     }
 
     @Override
-    public List<MyAnnounceResponse> getMyAnnounces() {
+    @Transactional
+    public MyAnnounceCustomPage getMyAnnounces(Pageable pageable) {
         Long memberId = SecurityUtils.getCurrentMemberId();
-        Member member = memberQuery.findByIdOrThrow(memberId);
+        Member member = memberQuery.findByIdWithDepartmentOrThrow(memberId);
 
         // 사용자의 소속학과가 참여하는 공지사항 조회
-        List<Announce> announces =
-                announceLoadPort.getAnnouncesByParticipationDepartment(member.getDepartment());
+        Page<Announce> announces =
+                announceLoadPort.getAnnouncesByParticipationDepartment(
+                        member.getDepartment(), pageable);
 
-        return announces.stream().map(MyAnnounceResponse::from).toList();
+        return MyAnnounceCustomPage.from(announces);
     }
 
     @Override

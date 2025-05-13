@@ -34,8 +34,9 @@ public class AnnouncePersistenceAdapter implements AnnounceRecordPort, AnnounceL
     }
 
     @Override
-    public List<Announce> getAnnouncesByParticipationDepartment(Department department) {
-        return announceRepository.findAllByAnnounceParticipations_Department(department);
+    public Page<Announce> getAnnouncesByParticipationDepartment(
+            Department department, Pageable pageable) {
+        return announceRepository.findAllByAnnounceParticipations_Department(department, pageable);
     }
 
     @Override

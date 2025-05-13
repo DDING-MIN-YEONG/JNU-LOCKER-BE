@@ -8,10 +8,9 @@ import com.jnulocker.announce.application.port.in.request.UpdateAnnounceRequest;
 import com.jnulocker.announce.application.port.in.response.AnnounceCustomPage;
 import com.jnulocker.announce.application.port.in.response.AnnounceDetailResponse;
 import com.jnulocker.announce.application.port.in.response.AnnouncePageable;
+import com.jnulocker.announce.application.port.in.response.MyAnnounceCustomPage;
 import com.jnulocker.announce.application.port.in.response.MyAnnounceDetailResponse;
-import com.jnulocker.announce.application.port.in.response.MyAnnounceResponse;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -57,8 +56,10 @@ public class AnnounceController implements AnnounceApi {
 
     @Override
     @GetMapping("/me")
-    public ResponseEntity<List<MyAnnounceResponse>> getMyAnnounces() {
-        return ResponseEntity.ok(announceQuery.getMyAnnounces());
+    public ResponseEntity<MyAnnounceCustomPage> getMyAnnounces(
+            @Valid @ParameterObject AnnouncePageable announcePageable) {
+        Pageable pageable = announcePageable.toPageable();
+        return ResponseEntity.ok(announceQuery.getMyAnnounces(pageable));
     }
 
     @GetMapping("/me/{announce-id}")

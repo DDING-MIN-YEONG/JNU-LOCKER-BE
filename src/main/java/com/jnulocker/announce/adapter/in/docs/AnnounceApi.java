@@ -5,17 +5,15 @@ import com.jnulocker.announce.application.port.in.request.UpdateAnnounceRequest;
 import com.jnulocker.announce.application.port.in.response.AnnounceCustomPage;
 import com.jnulocker.announce.application.port.in.response.AnnounceDetailResponse;
 import com.jnulocker.announce.application.port.in.response.AnnouncePageable;
+import com.jnulocker.announce.application.port.in.response.MyAnnounceCustomPage;
 import com.jnulocker.announce.application.port.in.response.MyAnnounceDetailResponse;
-import com.jnulocker.announce.application.port.in.response.MyAnnounceResponse;
 import com.jnulocker.common.swagger.ApiExceptionExamples;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -61,13 +59,9 @@ public interface AnnounceApi {
             content =
                     @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array =
-                                    @ArraySchema(
-                                            schema =
-                                                    @Schema(
-                                                            implementation =
-                                                                    MyAnnounceResponse.class))))
-    ResponseEntity<List<MyAnnounceResponse>> getMyAnnounces();
+                            schema = @Schema(implementation = MyAnnounceCustomPage.class)))
+    ResponseEntity<MyAnnounceCustomPage> getMyAnnounces(
+            @Valid @ParameterObject AnnouncePageable announcePageable);
 
     @Operation(summary = "자신의 소속학과 대상 공지사항 상세 조회", description = "자신의 소속학과가 참여한 공지사항 상세 내용을 조회합니다.")
     @ApiResponse(
