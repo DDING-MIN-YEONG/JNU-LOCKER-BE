@@ -89,11 +89,11 @@ public class SecurityConfig {
                                 .hasAuthority(Role.MANAGER.getRole())
                                 .requestMatchers(HttpMethod.POST, "/v1/announces")
                                 .hasAuthority(Role.MANAGER.getRole())
-                                .requestMatchers(HttpMethod.GET, "/v1/announces", "/v1/announces/*")
-                                .hasAuthority(Role.MANAGER.getRole())
                                 .requestMatchers(
                                         HttpMethod.GET, "/v1/announces/me", "/v1/announces/me/*")
                                 .hasAuthority(Role.USER.getRole())
+                                .requestMatchers(HttpMethod.GET, "/v1/announces", "/v1/announces/*")
+                                .hasAuthority(Role.MANAGER.getRole())
                                 .requestMatchers(HttpMethod.DELETE, "/v1/announces/*")
                                 .hasAuthority(Role.MANAGER.getRole())
                                 .requestMatchers(HttpMethod.PUT, "/v1/announces/*")
