@@ -405,6 +405,10 @@ public class EventControllerIntegrationTest {
         // 자신의 소속 학과가 참여하는 이벤트가 조회되었는지 확인
         assertThat(eventResponse.status()).isEqualTo(EventStatus.OPEN);
         assertThat(eventResponse.departmentIds()).containsExactly(department.getId());
+        assertThat(eventResponse.startAt()).isEqualTo(myEvent.startAt());
+        assertThat(eventResponse.endAt()).isEqualTo(myEvent.endAt());
+        assertThat(eventResponse.title()).isEqualTo(myEvent.title());
+        assertThat(eventResponse.publish()).isTrue();
     }
 
     @Test
@@ -430,7 +434,7 @@ public class EventControllerIntegrationTest {
                 .get(EVENT_URL + "/{event-id}", eventId)
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 
     // 파라미터 제공 메서드
