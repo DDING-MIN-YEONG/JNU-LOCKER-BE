@@ -17,12 +17,20 @@ public record EventResponse(
         @Schema(description = "이벤트 게시 여부", example = "true") Boolean publish) {
 
     public static EventResponse from(Event event) {
+
+        List<Long> departmentIds =
+                event.getEventParticipations() == null
+                        ? List.of()
+                        : event.getEventParticipations().stream()
+                                .map(
+                                        eventParticipation ->
+                                                eventParticipation.getDepartment().getId())
+                                .toList();
+
         return new EventResponse(
                 event.getId(),
                 event.getTitle(),
-                event.getEventParticipations().stream()
-                        .map(eventParticipation -> eventParticipation.getDepartment().getId())
-                        .toList(),
+                departmentIds,
                 event.getEventSchedule().getStartAt(),
                 event.getEventSchedule().getEndAt(),
                 event.getEventStatus(),
