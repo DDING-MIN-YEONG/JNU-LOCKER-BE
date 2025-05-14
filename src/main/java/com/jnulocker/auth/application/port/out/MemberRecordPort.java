@@ -4,4 +4,6 @@ import com.jnulocker.member.domain.Member;
 
 public interface MemberRecordPort {
     void save(Member member);
+
+    void delete(Member member);
 }
