@@ -624,7 +624,7 @@ class AuthControllerIntegrationTest {
         ManagerApproveRequest approveRequest = new ManagerApproveRequest(approveeMember.getId());
 
         // when, then
-        approveManagerSignup(accessToken, approveRequest).statusCode(HttpStatus.OK.value());
+        approveManagerSignup(accessToken, approveRequest).statusCode(HttpStatus.NO_CONTENT.value());
     }
 
     @Test
@@ -643,7 +643,7 @@ class AuthControllerIntegrationTest {
         ManagerApproveRequest approveRequest = new ManagerApproveRequest(approveeMember.getId());
 
         // 미리 가입 승인하기
-        approveManagerSignup(accessToken, approveRequest).statusCode(HttpStatus.OK.value());
+        approveManagerSignup(accessToken, approveRequest).statusCode(HttpStatus.NO_CONTENT.value());
 
         // when
         ErrorResponse errorResponse =

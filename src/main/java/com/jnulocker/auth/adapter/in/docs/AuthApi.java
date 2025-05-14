@@ -49,7 +49,7 @@ public interface AuthApi {
 
     @ApiExceptionExamples(ApproveManagerExceptionDocs.class)
     @Operation(summary = "MANAGER 가입 승인", description = "MANAGER 가입을 승인합니다.")
-    @ApiResponse(responseCode = "200", description = "MANAGER 가입 승인 성공")
+    @ApiResponse(responseCode = "204", description = "MANAGER 가입 승인 성공")
     ResponseEntity<Void> approveManager(@Valid @RequestBody ManagerApproveRequest request);
 
     @ApiExceptionExamples(LoginExcepitonDocs.class)
