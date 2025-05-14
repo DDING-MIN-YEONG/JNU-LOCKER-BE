@@ -407,6 +407,22 @@ public class EventControllerIntegrationTest {
         assertThat(eventResponse.departmentIds()).containsExactly(department.getId());
     }
 
+    @Test
+    void 존재하지_않는_이벤트는_상세조회가_불가능하다() {
+        // given
+        UUID nonExistentEventId = UUID.randomUUID();
+
+        // when
+        ErrorResponse errorResponse =
+                getEventDetail(nonExistentEventId, accessToken)
+                        .statusCode(EventErrorCode.EVENT_NOT_FOUND.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message()).isEqualTo(EventErrorCode.EVENT_NOT_FOUND.getMessage());
+    }
+
     private static ValidatableResponse getEventDetail(UUID eventId, String accessToken) {
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
