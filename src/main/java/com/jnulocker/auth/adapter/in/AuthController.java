@@ -77,6 +77,7 @@ public class AuthController implements AuthApi {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    @Override
     @DeleteMapping("/managers/approve")
     public ResponseEntity<Void> rejectManager(@Valid @RequestBody ManagerRejectRequest request) {
         managerSignupCommand.rejectManager(request);
