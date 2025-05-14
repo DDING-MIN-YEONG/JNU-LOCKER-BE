@@ -47,7 +47,7 @@ public class EventPersistenceAdapter implements EventLoadPort, EventRecordPort {
     }
 
     @Override
-    public Optional<Event> getEventsByIdWithEventParticipation(UUID eventId) {
+    public Optional<Event> getEventByIdWithEventParticipation(UUID eventId) {
         return eventRepository.findByIdWithEventParticipations(eventId);
     }
 

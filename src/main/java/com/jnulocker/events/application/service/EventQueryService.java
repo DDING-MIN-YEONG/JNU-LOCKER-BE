@@ -52,7 +52,7 @@ public class EventQueryService implements EventQuery {
     public EventResponse getEvent(UUID eventId) {
         Event event =
                 eventLoadPort
-                        .getEventsByIdWithEventParticipation(eventId)
+                        .getEventByIdWithEventParticipation(eventId)
                         .orElseThrow(() -> EventNotFoundException.EXCEPTION);
         return EventResponse.from(event);
     }

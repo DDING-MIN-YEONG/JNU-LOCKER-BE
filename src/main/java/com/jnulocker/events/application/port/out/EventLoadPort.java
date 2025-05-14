@@ -18,5 +18,5 @@ public interface EventLoadPort {
 
     MyEventCustomPage getEventsByParticipationDepartment(Department department, Pageable pageable);
 
-    Optional<Event> getEventsByIdWithEventParticipation(UUID eventId);
+    Optional<Event> getEventByIdWithEventParticipation(UUID eventId);
 }
