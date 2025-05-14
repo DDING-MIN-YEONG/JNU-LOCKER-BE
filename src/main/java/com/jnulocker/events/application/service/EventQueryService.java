@@ -3,6 +3,7 @@ package com.jnulocker.events.application.service;
 import com.jnulocker.auth.security.SecurityUtils;
 import com.jnulocker.events.application.port.in.EventQuery;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
+import com.jnulocker.events.application.port.in.response.EventResponse;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import com.jnulocker.events.application.port.in.response.LockerResponse;
 import com.jnulocker.events.application.port.in.response.MyEventCustomPage;
@@ -45,6 +46,15 @@ public class EventQueryService implements EventQuery {
         Page<Event> events =
                 eventLoadPort.getAllEventsByDepartment(member.getDepartment(), pageable);
         return EventCustomPage.from(events);
+    }
+
+    @Override
+    public EventResponse getEvent(UUID eventId) {
+        Event event =
+                eventLoadPort
+                        .getEventsByIdWithEventParticipation(eventId)
+                        .orElseThrow(() -> EventNotFoundException.EXCEPTION);
+        return EventResponse.from(event);
     }
 
     @Override
