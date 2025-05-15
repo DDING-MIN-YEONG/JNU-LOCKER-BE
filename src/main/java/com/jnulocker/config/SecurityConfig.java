@@ -72,31 +72,34 @@ public class SecurityConfig {
                                         "/v1/auth/send-email",
                                         "/v1/auth/verify")
                                 .permitAll()
-                                .requestMatchers(HttpMethod.GET, "/v1/events/*/registrations/me")
+                                .requestMatchers(
+                                        HttpMethod.GET,
+                                        "/v1/events/*/registrations/me",
+                                        "/v1/events/me",
+                                        "/v1/announces/me",
+                                        "/v1/announces/me/*")
                                 .hasAuthority(Role.USER.getRole())
                                 .requestMatchers(HttpMethod.POST, "/v1/events/*/registrations")
                                 .hasAuthority(Role.USER.getRole())
-                                .requestMatchers(HttpMethod.GET, "/v1/auth/managers/pending")
-                                .hasAuthority(Role.MANAGER.getRole())
-                                .requestMatchers(HttpMethod.GET, "/v1/events")
+                                .requestMatchers(
+                                        HttpMethod.GET,
+                                        "/v1/auth/managers/pending",
+                                        "/v1/events",
+                                        "/v1/events/*",
+                                        "/v1/announces",
+                                        "/v1/announces/*")
                                 .hasAuthority(Role.MANAGER.getRole())
                                 .requestMatchers(
-                                        HttpMethod.POST, "/v1/events", "/v1/auth/managers/approve")
-                                .hasAuthority(Role.MANAGER.getRole())
-                                .requestMatchers(HttpMethod.DELETE, "/v1/events/*")
-                                .hasAuthority(Role.MANAGER.getRole())
-                                .requestMatchers(HttpMethod.PUT, "/v1/events/*/publish")
-                                .hasAuthority(Role.MANAGER.getRole())
-                                .requestMatchers(HttpMethod.POST, "/v1/announces")
+                                        HttpMethod.POST,
+                                        "/v1/events",
+                                        "/v1/announces",
+                                        "/v1/auth/managers/approve")
                                 .hasAuthority(Role.MANAGER.getRole())
                                 .requestMatchers(
-                                        HttpMethod.GET, "/v1/announces/me", "/v1/announces/me/*")
-                                .hasAuthority(Role.USER.getRole())
-                                .requestMatchers(HttpMethod.GET, "/v1/announces", "/v1/announces/*")
+                                        HttpMethod.DELETE, "/v1/events/*", "/v1/announces/*")
                                 .hasAuthority(Role.MANAGER.getRole())
-                                .requestMatchers(HttpMethod.DELETE, "/v1/announces/*")
-                                .hasAuthority(Role.MANAGER.getRole())
-                                .requestMatchers(HttpMethod.PUT, "/v1/announces/*")
+                                .requestMatchers(
+                                        HttpMethod.PUT, "/v1/events/*/publish", "/v1/announces/*")
                                 .hasAuthority(Role.MANAGER.getRole())
                                 // 토큰의 role과 db의 role과 다른 문제 고려
                                 .anyRequest()
