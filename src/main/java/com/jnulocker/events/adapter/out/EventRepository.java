@@ -14,6 +14,6 @@ public interface EventRepository extends JpaRepository<Event, UUID>, EventReposi
 
     Page<Event> findAllByDepartment(Department department, Pageable pageable);
 
-    @Query("SELECT e FROM Event e LEFT JOIN FETCH e.eventParticipations WHERE e.id = :eventId")
+    @Query("SELECT e FROM Event e JOIN FETCH e.eventParticipations WHERE e.id = :eventId")
     Optional<Event> findByIdWithEventParticipations(@Param("eventId") UUID eventId);
 }
