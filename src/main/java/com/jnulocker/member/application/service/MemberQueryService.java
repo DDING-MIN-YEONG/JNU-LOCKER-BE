@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MemberQueryService implements MemberQuery {
 
     private final MemberLoadPort memberLoadPort;
@@ -45,7 +46,6 @@ public class MemberQueryService implements MemberQuery {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public MemberInfoResponse getMemberInfo() {
         Long memberId = SecurityUtils.getCurrentMemberId();
         Member member = findByIdOrThrow(memberId);

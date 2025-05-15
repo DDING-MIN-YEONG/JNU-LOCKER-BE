@@ -9,7 +9,10 @@ import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.events.application.port.in.request.CreateEventRequest;
 import com.jnulocker.events.application.port.in.request.PublishEventRequest;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
+import com.jnulocker.events.application.port.in.response.EventDepartmentResponse;
+import com.jnulocker.events.application.port.in.response.EventListItem;
 import com.jnulocker.events.application.port.in.response.EventPageable;
+import com.jnulocker.events.application.port.in.response.EventResponse;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import com.jnulocker.events.application.port.in.response.MyEventCustomPage;
 import com.jnulocker.events.domain.Event;
@@ -370,6 +373,70 @@ public class EventControllerIntegrationTest {
         assertThat(myEvents.content()).isEmpty();
         assertThat(myEvents.totalElements()).isZero();
         assertThat(myEvents.last()).isTrue();
+    }
+
+    @Test
+    void 이벤트_상세조회가_가능하다() {
+        // given
+        Department department = organizationTestUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.MANAGER, department);
+
+        // 이벤트 생성: 짝수번 사물함은 사용 가능, 홀수번 사물함은 사용 불가능
+        // 15개 중 가능한 사물함 수는 2, 4, 6, 8, 10, 12, 14 (총 7개)
+        eventTestUtil.createEventWithParticipationDepartment(
+                List.of(5, 10), department, EventStatus.OPEN, true);
+
+        // when
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+        EventCustomPage eventCustomPage =
+                getEvents(0, 10, accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(EventCustomPage.class);
+
+        EventListItem myDepartmentEvent = eventCustomPage.content().getFirst();
+        EventResponse eventResponse =
+                getEventDetail(myDepartmentEvent.id(), accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(EventResponse.class);
+
+        // then
+        // 자신의 소속 학과가 참여하는 이벤트가 조회되었는지 확인
+        assertThat(eventResponse.status()).isEqualTo(EventStatus.OPEN);
+        assertThat(eventResponse.participationDepartments())
+                .containsExactly(
+                        new EventDepartmentResponse(department.getId(), department.getName()));
+        assertThat(eventResponse.startAt()).isEqualTo(myDepartmentEvent.startAt());
+        assertThat(eventResponse.endAt()).isEqualTo(myDepartmentEvent.endAt());
+        assertThat(eventResponse.title()).isEqualTo(myDepartmentEvent.title());
+        assertThat(eventResponse.publish()).isTrue();
+    }
+
+    @Test
+    void 존재하지_않는_이벤트는_상세조회가_불가능하다() {
+        // given
+        UUID nonExistentEventId = UUID.randomUUID();
+
+        // when
+        ErrorResponse errorResponse =
+                getEventDetail(nonExistentEventId, accessToken)
+                        .statusCode(EventErrorCode.EVENT_NOT_FOUND.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message()).isEqualTo(EventErrorCode.EVENT_NOT_FOUND.getMessage());
+    }
+
+    private static ValidatableResponse getEventDetail(UUID eventId, String accessToken) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .when()
+                .get(EVENT_URL + "/{event-id}", eventId)
+                .then()
+                .log()
+                .ifError();
     }
 
     // 파라미터 제공 메서드
