@@ -16,6 +16,8 @@ public enum EventErrorCode implements ErrorCode {
     ONLY_MANAGER_CAN_DELETE_EVENT("E006", HttpStatus.FORBIDDEN, "이벤트 관리자만 삭제할 수 있습니다"),
     OPEN_EVENT_CAN_NOT_BE_DELETED("E007", HttpStatus.BAD_REQUEST, "진행중인 이벤트는 삭제할 수 없습니다"),
     ONLY_PARTICIPATION_DEPARTMENT_CAN_REGISTER("E008", HttpStatus.BAD_REQUEST, "참여학과만 신청할 수 있습니다"),
+    ONLY_DEPARTMENT_MEMBER_CAN_SEE_EVENT(
+            "E009", HttpStatus.FORBIDDEN, "주최 학과의 구성원만 이벤트 상세정보를 볼 수 있습니다"),
     ;
 
     private final String code;
