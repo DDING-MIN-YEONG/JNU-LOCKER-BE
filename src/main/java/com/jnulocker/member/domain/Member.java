@@ -1,8 +1,8 @@
 package com.jnulocker.member.domain;
 
-import com.jnulocker.auth.exception.OnlyGuestCanBeManagerException;
-import com.jnulocker.auth.exception.ManagerAuthorizationRequiredException;
 import com.jnulocker.auth.exception.DepartmentMismatchAuthorizationException;
+import com.jnulocker.auth.exception.ManagerAuthorizationRequiredException;
+import com.jnulocker.auth.exception.OnlyGuestCanBeManagerException;
 import com.jnulocker.auth.exception.StudentNumberRequiredException;
 import com.jnulocker.common.persistence.BaseEntity;
 import com.jnulocker.organization.domain.Department;
