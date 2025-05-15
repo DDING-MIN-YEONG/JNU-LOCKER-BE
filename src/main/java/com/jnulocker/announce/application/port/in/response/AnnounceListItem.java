@@ -13,7 +13,7 @@ public record AnnounceListItem(
         return new AnnounceListItem(
                 announce.getId(),
                 announce.getTitle(),
-                announce.getContent(),
+                announce.getWriter(),
                 announce.getCreatedAt());
     }
 }
