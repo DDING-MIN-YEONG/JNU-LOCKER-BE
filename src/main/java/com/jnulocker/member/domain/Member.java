@@ -1,8 +1,8 @@
 package com.jnulocker.member.domain;
 
 import com.jnulocker.auth.exception.OnlyGuestCanBeManagerException;
-import com.jnulocker.auth.exception.OnlyManagerCanApproveException;
-import com.jnulocker.auth.exception.OnlySameDepartmentCanApproveException;
+import com.jnulocker.auth.exception.ManagerAuthorizationRequiredException;
+import com.jnulocker.auth.exception.DepartmentMismatchAuthorizationException;
 import com.jnulocker.auth.exception.StudentNumberRequiredException;
 import com.jnulocker.common.persistence.BaseEntity;
 import com.jnulocker.organization.domain.Department;
@@ -107,11 +107,11 @@ public class Member extends BaseEntity {
 
     public void validateManagerApproval(Department approveeDepartment) {
         if (role != Role.MANAGER) {
-            throw OnlyManagerCanApproveException.EXCEPTION;
+            throw ManagerAuthorizationRequiredException.EXCEPTION;
         }
 
         if (!department.equals(approveeDepartment)) {
-            throw OnlySameDepartmentCanApproveException.EXCEPTION;
+            throw DepartmentMismatchAuthorizationException.EXCEPTION;
         }
     }
 }
