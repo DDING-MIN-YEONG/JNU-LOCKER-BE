@@ -1,8 +1,8 @@
 package com.jnulocker.auth.adapter.in.docs;
 
+import com.jnulocker.auth.exception.DepartmentMismatchAuthorizationException;
 import com.jnulocker.auth.exception.ManagerAuthorizationRequiredException;
 import com.jnulocker.auth.exception.OnlyGuestCanBeManagerException;
-import com.jnulocker.auth.exception.DepartmentMismatchAuthorizationException;
 import com.jnulocker.common.exception.BusinessException;
 import com.jnulocker.common.swagger.ExceptionDoc;
 import com.jnulocker.common.swagger.ExplainError;

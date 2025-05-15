@@ -679,7 +679,7 @@ class AuthControllerIntegrationTest {
         ErrorResponse errorResponse =
                 approveManagerSignup(accessToken, approveRequest)
                         .statusCode(
-                                AuthErrorCode.ONLY_SAME_DEPARTMENT_CAN_APPROVE
+                                AuthErrorCode.DEPARTMENT_MISMATCH_AUTHORIZATION
                                         .getHttpStatus()
                                         .value())
                         .extract()
@@ -687,7 +687,7 @@ class AuthControllerIntegrationTest {
 
         // then
         assertThat(errorResponse.message())
-                .isEqualTo(AuthErrorCode.ONLY_SAME_DEPARTMENT_CAN_APPROVE.getMessage());
+                .isEqualTo(AuthErrorCode.DEPARTMENT_MISMATCH_AUTHORIZATION.getMessage());
     }
 
     @Test
@@ -729,7 +729,7 @@ class AuthControllerIntegrationTest {
         ErrorResponse errorResponse =
                 rejectManagerSignup(accessToken, rejectRequest)
                         .statusCode(
-                                AuthErrorCode.ONLY_SAME_DEPARTMENT_CAN_APPROVE
+                                AuthErrorCode.DEPARTMENT_MISMATCH_AUTHORIZATION
                                         .getHttpStatus()
                                         .value())
                         .extract()
@@ -737,7 +737,7 @@ class AuthControllerIntegrationTest {
 
         // then
         assertThat(errorResponse.message())
-                .isEqualTo(AuthErrorCode.ONLY_SAME_DEPARTMENT_CAN_APPROVE.getMessage());
+                .isEqualTo(AuthErrorCode.DEPARTMENT_MISMATCH_AUTHORIZATION.getMessage());
     }
 
     private ValidatableResponse rejectManagerSignup(
