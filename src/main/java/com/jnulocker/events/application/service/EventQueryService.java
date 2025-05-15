@@ -15,6 +15,7 @@ import com.jnulocker.events.domain.Floor;
 import com.jnulocker.events.domain.Locker;
 import com.jnulocker.events.exception.EventNotFoundException;
 import com.jnulocker.events.exception.LockerNotFoundException;
+import com.jnulocker.events.exception.OnlyDepartmentMemberCanSeeEventException;
 import com.jnulocker.member.application.port.in.MemberQuery;
 import com.jnulocker.member.domain.Member;
 import java.util.List;
@@ -23,9 +24,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class EventQueryService implements EventQuery {
 
     private final EventLoadPort eventLoadPort;
@@ -50,10 +53,18 @@ public class EventQueryService implements EventQuery {
 
     @Override
     public EventResponse getEvent(UUID eventId) {
+        Long memberId = SecurityUtils.getCurrentMemberId();
+        Member member = memberQuery.findByIdOrThrow(memberId);
+
         Event event =
                 eventLoadPort
                         .getEventByIdWithEventParticipation(eventId)
                         .orElseThrow(() -> EventNotFoundException.EXCEPTION);
+
+        if (!event.isSameDepartment(member.getDepartment())) {
+            throw OnlyDepartmentMemberCanSeeEventException.EXCEPTION;
+        }
+
         return EventResponse.from(event);
     }
 

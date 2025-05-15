@@ -116,13 +116,17 @@ public class Event extends BaseEntity {
     }
 
     public void validateDeletable(Department department) {
-        if (!this.department.equals(department)) {
+        if (!isSameDepartment(department)) {
             throw OnlyManagerCanDeleteEventException.EXCEPTION;
         }
 
         if (eventStatus == EventStatus.OPEN) {
             throw OpenEventCannotBeDeletedException.EXCEPTION;
         }
+    }
+
+    public boolean isSameDepartment(Department department) {
+        return this.department.equals(department);
     }
 
     public void openEvent() {
