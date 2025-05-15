@@ -9,6 +9,7 @@ import com.jnulocker.announce.application.port.in.request.CreateAnnounceRequest;
 import com.jnulocker.announce.application.port.in.request.UpdateAnnounceRequest;
 import com.jnulocker.announce.application.port.in.response.AnnounceCustomPage;
 import com.jnulocker.announce.application.port.in.response.AnnounceDetailResponse;
+import com.jnulocker.announce.application.port.in.response.AnnounceListItem;
 import com.jnulocker.announce.application.port.in.response.MyAnnounceCustomPage;
 import com.jnulocker.announce.application.port.in.response.MyAnnounceDetailResponse;
 import com.jnulocker.announce.exception.AnnounceErrorCode;
@@ -88,7 +89,13 @@ public class AnnounceControllerIntegrationTest {
                         .as(AnnounceCustomPage.class);
 
         // 생성된 공지사항이 목록에 포함되어 있는지 확인
-        assertThat(announceCustomPage.content()).hasSize(1);
+        List<AnnounceListItem> content = announceCustomPage.content();
+        AnnounceListItem announceListItem = content.getFirst();
+
+        assertThat(content).hasSize(1);
+        assertThat(announceCustomPage.totalElements()).isEqualTo(1);
+        assertThat(announceListItem.title()).isEqualTo("백도 사물함 신청 안내");
+        assertThat(announceListItem.writer()).isEqualTo("테스트 학과 학생회 별칭");
     }
 
     // 공지사항 목록 조회 테스트
@@ -153,9 +160,17 @@ public class AnnounceControllerIntegrationTest {
 
         // then
         int expectedSize = calculateExpectedSize(createCount, pageSize, page);
-        assertThat(myAnnounceCustomPage.content()).hasSize(expectedSize);
+        List<AnnounceListItem> content = myAnnounceCustomPage.content();
+
+        AnnounceListItem announceListItem = content.getFirst();
+
+        assertThat(content).hasSize(expectedSize);
         assertThat(myAnnounceCustomPage.totalElements()).isEqualTo(createCount);
         assertThat(myAnnounceCustomPage.last()).isEqualTo(expectedLast);
+
+        // 공지사항 제목과 내용이 일치하는지 확인
+        assertThat(announceListItem.title()).isEqualTo("테스트 공지사항");
+        assertThat(announceListItem.writer()).isEqualTo("테스트 학과 학생회 별칭");
     }
 
     @Test
