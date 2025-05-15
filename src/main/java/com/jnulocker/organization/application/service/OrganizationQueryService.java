@@ -13,9 +13,11 @@ import com.jnulocker.organization.exception.OrganizationNotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class OrganizationQueryService implements OrganizationQuery, DepartmentQuery {
     private final OrganizationLoadPort organizationLoadPort;
     private final DepartmentLoadPort departmentLoadPort;
