@@ -9,6 +9,7 @@ import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.events.application.port.in.request.CreateEventRequest;
 import com.jnulocker.events.application.port.in.request.PublishEventRequest;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
+import com.jnulocker.events.application.port.in.response.EventDepartmentResponse;
 import com.jnulocker.events.application.port.in.response.EventListItem;
 import com.jnulocker.events.application.port.in.response.EventPageable;
 import com.jnulocker.events.application.port.in.response.EventResponse;
@@ -403,7 +404,9 @@ public class EventControllerIntegrationTest {
         // then
         // 자신의 소속 학과가 참여하는 이벤트가 조회되었는지 확인
         assertThat(eventResponse.status()).isEqualTo(EventStatus.OPEN);
-        assertThat(eventResponse.departmentIds()).containsExactly(department.getId());
+        assertThat(eventResponse.participationDepartments())
+                .containsExactly(
+                        new EventDepartmentResponse(department.getId(), department.getName()));
         assertThat(eventResponse.startAt()).isEqualTo(myDepartmentEvent.startAt());
         assertThat(eventResponse.endAt()).isEqualTo(myDepartmentEvent.endAt());
         assertThat(eventResponse.title()).isEqualTo(myDepartmentEvent.title());
