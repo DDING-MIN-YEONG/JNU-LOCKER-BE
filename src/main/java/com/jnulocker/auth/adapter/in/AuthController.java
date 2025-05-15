@@ -13,6 +13,7 @@ import com.jnulocker.auth.application.port.in.UserSignupCommand;
 import com.jnulocker.auth.application.port.in.VerifyCodeCommand;
 import com.jnulocker.auth.application.port.in.request.LoginRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerApproveRequest;
+import com.jnulocker.auth.application.port.in.request.ManagerRejectRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.SendEmailRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
@@ -28,6 +29,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -72,7 +74,14 @@ public class AuthController implements AuthApi {
     @PostMapping("/managers/approve")
     public ResponseEntity<Void> approveManager(@Valid @RequestBody ManagerApproveRequest request) {
         managerSignupCommand.approveManager(request);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @Override
+    @DeleteMapping("/managers/approve")
+    public ResponseEntity<Void> rejectManager(@Valid @RequestBody ManagerRejectRequest request) {
+        managerSignupCommand.rejectManager(request);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @Override

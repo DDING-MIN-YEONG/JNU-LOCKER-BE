@@ -11,6 +11,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThatList;
 import com.jnulocker.auth.adapter.out.TokenRepository;
 import com.jnulocker.auth.application.port.in.request.LoginRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerApproveRequest;
+import com.jnulocker.auth.application.port.in.request.ManagerRejectRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.SendEmailRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
@@ -624,7 +625,7 @@ class AuthControllerIntegrationTest {
         ManagerApproveRequest approveRequest = new ManagerApproveRequest(approveeMember.getId());
 
         // when, then
-        approveManagerSignup(accessToken, approveRequest).statusCode(HttpStatus.OK.value());
+        approveManagerSignup(accessToken, approveRequest).statusCode(HttpStatus.NO_CONTENT.value());
     }
 
     @Test
@@ -643,7 +644,7 @@ class AuthControllerIntegrationTest {
         ManagerApproveRequest approveRequest = new ManagerApproveRequest(approveeMember.getId());
 
         // 미리 가입 승인하기
-        approveManagerSignup(accessToken, approveRequest).statusCode(HttpStatus.OK.value());
+        approveManagerSignup(accessToken, approveRequest).statusCode(HttpStatus.NO_CONTENT.value());
 
         // when
         ErrorResponse errorResponse =
@@ -687,6 +688,70 @@ class AuthControllerIntegrationTest {
         // then
         assertThat(errorResponse.message())
                 .isEqualTo(AuthErrorCode.ONLY_SAME_DEPARTMENT_CAN_APPROVE.getMessage());
+    }
+
+    @Test
+    void MANAGER는_가입_승인_요청을_거절할_수_있다() {
+        // given
+        Department department = organizationTestUtil.createCouncilDepartment();
+        ManagerSignupRequest signupRequest =
+                managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
+        signupManager(signupRequest).statusCode(HttpStatus.CREATED.value());
+
+        // 가입 요청한 학생회 회원의 정보 조회
+        Member approveeMember = memberTestUtil.findMemberByEmail(signupRequest.email());
+        String accessToken =
+                authTestUtil.generateAccessTokenWithDepartment(Role.MANAGER, department);
+
+        ManagerRejectRequest rejectRequest = new ManagerRejectRequest(approveeMember.getId());
+
+        // when, then
+        rejectManagerSignup(accessToken, rejectRequest).statusCode(HttpStatus.NO_CONTENT.value());
+    }
+
+    @Test
+    void MANAGER는_다른_학과의_학생회_회원의_가입을_거절할_수_없다() {
+        // given
+        Department department1 = organizationTestUtil.createCouncilDepartment();
+        Department department2 = organizationTestUtil.createCouncilDepartment();
+        ManagerSignupRequest signupRequest =
+                managerSignupRequestBuilder().withDepartmentId(department1.getId()).build();
+        signupManager(signupRequest).statusCode(HttpStatus.CREATED.value());
+
+        // 가입 요청한 학생회 회원의 정보 조회
+        Member approveeMember = memberTestUtil.findMemberByEmail(signupRequest.email());
+        String accessToken =
+                authTestUtil.generateAccessTokenWithDepartment(Role.MANAGER, department2);
+
+        ManagerRejectRequest rejectRequest = new ManagerRejectRequest(approveeMember.getId());
+
+        // when
+        ErrorResponse errorResponse =
+                rejectManagerSignup(accessToken, rejectRequest)
+                        .statusCode(
+                                AuthErrorCode.ONLY_SAME_DEPARTMENT_CAN_APPROVE
+                                        .getHttpStatus()
+                                        .value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(AuthErrorCode.ONLY_SAME_DEPARTMENT_CAN_APPROVE.getMessage());
+    }
+
+    private ValidatableResponse rejectManagerSignup(
+            String accessToken, ManagerRejectRequest request) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .body(request)
+                .log()
+                .all()
+                .when()
+                .delete(AUTH_URL + "/managers/approve")
+                .then()
+                .log()
+                .all();
     }
 
     private ValidatableResponse approveManagerSignup(

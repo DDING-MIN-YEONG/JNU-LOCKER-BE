@@ -6,6 +6,7 @@ import com.jnulocker.auth.application.port.in.ReissueCommand;
 import com.jnulocker.auth.application.port.in.UserSignupCommand;
 import com.jnulocker.auth.application.port.in.request.LoginRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerApproveRequest;
+import com.jnulocker.auth.application.port.in.request.ManagerRejectRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.response.AuthToken;
@@ -100,6 +101,22 @@ public class AuthCommandService
         tokenProvider.deleteRefreshTokenById(approvee.getId());
 
         memberCommand.save(approvee);
+    }
+
+    @Override
+    @Transactional
+    public void rejectManager(ManagerRejectRequest request) {
+        Long memberId = SecurityUtils.getCurrentMemberId();
+        Member approver = memberQuery.findByIdOrThrow(memberId); // 승인자
+        Member rejectee = memberQuery.findByIdOrThrow(request.memberId()); // 거절 받는 사람
+
+        approver.validateManagerApproval(rejectee.getDepartment());
+
+        // refreshToken 삭제
+        tokenProvider.deleteRefreshTokenById(rejectee.getId());
+
+        // reject는 가입 거부이므로 회원 삭제
+        memberCommand.delete(rejectee);
     }
 
     @Override

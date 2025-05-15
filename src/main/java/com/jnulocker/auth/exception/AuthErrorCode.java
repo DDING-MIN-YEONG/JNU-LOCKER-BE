@@ -16,8 +16,8 @@ public enum AuthErrorCode implements ErrorCode {
     CODE_NOT_CORRECT("A006", HttpStatus.BAD_REQUEST, "인증 코드가 일치하지 않습니다."),
     CODE_NOT_FOUND("A007", HttpStatus.BAD_REQUEST, "인증 요청 정보가 존재하지 않습니다. 재요청 후 5분 이내로 인증해주세요"),
     EMAIL_NOT_VERIFIED("A008", HttpStatus.BAD_REQUEST, "이메일 인증이 완료되지 않았습니다."),
-    ONLY_MANAGER_CAN_APPROVE("A009", HttpStatus.FORBIDDEN, "관리자만 승인할 수 있습니다."),
-    ONLY_SAME_DEPARTMENT_CAN_APPROVE("A010", HttpStatus.FORBIDDEN, "같은 학과의 관리자만 승인할 수 있습니다."),
+    MANAGER_AUTHORIZATION_REQUIRED("A009", HttpStatus.FORBIDDEN, "매니저 권한이 필요합니다."),
+    DEPARTMENT_MISMATCH_AUTHORIZATION("A010", HttpStatus.FORBIDDEN, "동일한 부서의 매니저만 작업을 수행할 수 있습니다."),
     ONLY_GUEST_CAN_BE_MANAGER("A011", HttpStatus.FORBIDDEN, "게스트만 매니저로 승인될 수 있습니다"),
     FAILED_TO_CREATE_CODE("A012", HttpStatus.INTERNAL_SERVER_ERROR, "인증 코드 생성에 실패했습니다."),
     ;

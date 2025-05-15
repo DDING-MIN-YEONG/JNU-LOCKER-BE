@@ -27,6 +27,11 @@ public class MemberPersistenceAdapter implements MemberLoadPort, MemberRecordPor
     }
 
     @Override
+    public void delete(Member member) {
+        memberRepository.delete(member);
+    }
+
+    @Override
     public Optional<Member> findByEmail(String email) {
         return memberRepository.findByEmail(email);
     }

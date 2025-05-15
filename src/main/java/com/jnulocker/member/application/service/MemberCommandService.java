@@ -17,4 +17,10 @@ public class MemberCommandService implements MemberCommand {
     public void save(Member member) {
         memberRecordPort.save(member);
     }
+
+    @Override
+    @Transactional
+    public void delete(Member member) {
+        memberRecordPort.delete(member);
+    }
 }
