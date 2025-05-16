@@ -3,6 +3,7 @@ package com.jnulocker.events.adapter.in.docs;
 import com.jnulocker.common.swagger.ApiExceptionExamples;
 import com.jnulocker.events.application.port.in.request.CreateEventRequest;
 import com.jnulocker.events.application.port.in.request.PublishEventRequest;
+import com.jnulocker.events.application.port.in.request.UpdateEventRequest;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.EventPageable;
 import com.jnulocker.events.application.port.in.response.EventResponse;
@@ -66,6 +67,12 @@ public interface EventApi {
             description = "새로운 이벤트를 생성합니다. 이벤트 상태는 기본적으로 READY, 게시 상태는 false로 설정됩니다.")
     @ApiResponse(responseCode = "201", description = "이벤트 생성 성공")
     ResponseEntity<Void> createEvent(@Valid @RequestBody CreateEventRequest request);
+
+    @ApiExceptionExamples(UpdateEventExceptionDocs.class)
+    @Operation(summary = "이벤트 수정", description = "기존 이벤트를 수정합니다. 이벤트 ID를 통해 수정합니다.")
+    @ApiResponse(responseCode = "204", description = "이벤트 수정 성공")
+    ResponseEntity<Void> updateEvent(
+            @PathVariable("event-id") UUID eventId, @Valid @RequestBody UpdateEventRequest request);
 
     @ApiExceptionExamples(GetLockerExceptionDocs.class)
     @Operation(summary = "사물함 목록 조회", description = "이벤트에 대한 사물함 목록을 조회합니다.")

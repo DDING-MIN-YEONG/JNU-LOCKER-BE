@@ -65,6 +65,7 @@ public class EventController implements EventApi {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @Override
     @PutMapping("/{event-id}")
     public ResponseEntity<Void> updateEvent(
             @PathVariable("event-id") UUID eventId,
