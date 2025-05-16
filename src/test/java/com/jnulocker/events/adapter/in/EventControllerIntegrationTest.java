@@ -1,6 +1,7 @@
 package com.jnulocker.events.adapter.in;
 
 import static events.application.port.in.request.CreateEventRequestTestDataBuilder.createEventRequestBuilder;
+import static events.application.port.in.request.UpdateEventRequestTestDataBuilder.updateEventRequestBuilder;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -8,6 +9,7 @@ import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.events.application.port.in.request.CreateEventRequest;
 import com.jnulocker.events.application.port.in.request.PublishEventRequest;
+import com.jnulocker.events.application.port.in.request.UpdateEventRequest;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.EventDepartmentResponse;
 import com.jnulocker.events.application.port.in.response.EventListItem;
@@ -304,6 +306,122 @@ public class EventControllerIntegrationTest {
     }
 
     @Test
+    void 이벤트를_수정할_수_있다() {
+        // given
+        Department department = organizationTestUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.MANAGER, department);
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+
+        // 이벤트 생성
+        createEventWithDepartment(department);
+
+        UUID eventId = getLastEventId();
+
+        // 수정 요청 데이터 생성
+        String updateTitle = "수정된 이벤트";
+        UpdateEventRequest updateRequest =
+                updateEventRequestBuilder()
+                        .withTitle(updateTitle)
+                        .withParticipationDepartmentIds(List.of(department.getId()))
+                        .build();
+
+        // when
+        updateEvent(eventId, updateRequest).statusCode(HttpStatus.NO_CONTENT.value());
+
+        // then
+        EventResponse eventResponse =
+                getEventDetail(eventId, accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(EventResponse.class);
+
+        assertThat(eventResponse.title()).isEqualTo(updateTitle);
+        assertThat(eventResponse.startAt()).isEqualTo(updateRequest.startAt());
+        assertThat(eventResponse.endAt()).isEqualTo(updateRequest.endAt());
+    }
+
+    @Test
+    void 존재하지_않는_이벤트는_수정할_수_없다() {
+        // given
+        UUID nonExistentEventId = UUID.randomUUID();
+
+        UpdateEventRequest updateRequest = updateEventRequestBuilder().build();
+
+        // when
+        ErrorResponse errorResponse =
+                updateEvent(nonExistentEventId, updateRequest)
+                        .statusCode(EventErrorCode.EVENT_NOT_FOUND.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message()).isEqualTo(EventErrorCode.EVENT_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void 권한이_없는_사용자는_이벤트를_수정할_수_없다() {
+        // given
+        Department department = organizationTestUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.MANAGER, department);
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+
+        // 이벤트 생성
+        createEventWithDepartment(department);
+
+        UUID eventId = getLastEventId();
+
+        // 다른 부서의 사용자로 로그인
+        accessToken = authTestUtil.generateAccessTokenWithAnotherDepartment(Role.MANAGER);
+
+        // 수정 요청 데이터 생성
+        UpdateEventRequest updateRequest = updateEventRequestBuilder().build();
+
+        // when
+        ErrorResponse errorResponse =
+                updateEvent(eventId, updateRequest)
+                        .statusCode(
+                                EventErrorCode.ONLY_MANAGER_CAN_UPDATE_EVENT
+                                        .getHttpStatus()
+                                        .value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(EventErrorCode.ONLY_MANAGER_CAN_UPDATE_EVENT.getMessage());
+    }
+
+    @Test
+    void 종료된_이벤트는_수정할_수_없다() {
+        // given
+        Department department = organizationTestUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.MANAGER, department);
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+
+        // 이벤트 생성 (CLOSED 상태)
+        Event event =
+                eventTestUtil.createEventWithParticipationDepartment(
+                        List.of(5, 10), department, EventStatus.CLOSED, true);
+
+        // 수정 요청 데이터 생성
+        UpdateEventRequest updateRequest = updateEventRequestBuilder().build();
+
+        // when
+        ErrorResponse errorResponse =
+                updateEvent(event.getId(), updateRequest)
+                        .statusCode(
+                                EventErrorCode.CLOSE_EVENT_CAN_NOT_BE_UPDATED
+                                        .getHttpStatus()
+                                        .value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(EventErrorCode.CLOSE_EVENT_CAN_NOT_BE_UPDATED.getMessage());
+    }
+
+    @Test
     void 존재하지_않는_이벤트는_publish_상태로_변경할_수_없다() {
         // given
         UUID nonExistentEventId = UUID.randomUUID();
@@ -545,6 +663,17 @@ public class EventControllerIntegrationTest {
                 .body(request)
                 .when()
                 .put(EVENT_URL + "/{event-id}/publish", eventId)
+                .then()
+                .log()
+                .all();
+    }
+
+    private ValidatableResponse updateEvent(UUID eventId, UpdateEventRequest request) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .body(request)
+                .when()
+                .put(EVENT_URL + "/{event-id}", eventId)
                 .then()
                 .log()
                 .all();
