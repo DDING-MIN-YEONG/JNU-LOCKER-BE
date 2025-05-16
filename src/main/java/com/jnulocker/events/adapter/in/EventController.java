@@ -5,6 +5,7 @@ import com.jnulocker.events.application.port.in.EventCommand;
 import com.jnulocker.events.application.port.in.EventQuery;
 import com.jnulocker.events.application.port.in.request.CreateEventRequest;
 import com.jnulocker.events.application.port.in.request.PublishEventRequest;
+import com.jnulocker.events.application.port.in.request.UpdateEventRequest;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.EventPageable;
 import com.jnulocker.events.application.port.in.response.EventResponse;
@@ -62,6 +63,14 @@ public class EventController implements EventApi {
     public ResponseEntity<Void> createEvent(@Valid @RequestBody CreateEventRequest request) {
         eventCommand.createEvent(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PutMapping("/{event-id}")
+    public ResponseEntity<Void> updateEvent(
+            @PathVariable("event-id") UUID eventId,
+            @Valid @RequestBody UpdateEventRequest request) {
+        eventCommand.updateEvent(eventId, request);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @Override
