@@ -73,9 +73,14 @@ public class EventPersistenceAdapter implements EventLoadPort, EventRecordPort {
 
     @Override
     public void deleteEvent(Event event) {
+        deleteEventRelations(event);
+        eventRepository.delete(event);
+    }
+
+    @Override
+    public void deleteEventRelations(Event event) {
         lockerRepository.deleteAllByFloor_Event(event);
         floorRepository.deleteAllByEvent(event);
         eventParticipationRepository.deleteAllByEvent(event);
-        eventRepository.delete(event);
     }
 }

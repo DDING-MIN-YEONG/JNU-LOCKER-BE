@@ -16,4 +16,6 @@ public interface EventRecordPort {
     void saveLockers(List<Locker> lockers);
 
     void deleteEvent(Event event);
+
+    void deleteEventRelations(Event event);
 }
