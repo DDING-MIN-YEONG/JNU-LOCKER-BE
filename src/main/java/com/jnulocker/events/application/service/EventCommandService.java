@@ -8,6 +8,7 @@ import com.jnulocker.events.application.port.in.request.FloorInfo;
 import com.jnulocker.events.application.port.in.request.LockerRange;
 import com.jnulocker.events.application.port.in.request.PrefixInfo;
 import com.jnulocker.events.application.port.in.request.PublishEventRequest;
+import com.jnulocker.events.application.port.in.request.UpdateEventRequest;
 import com.jnulocker.events.application.port.out.EventRecordPort;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.EventParticipation;
@@ -15,11 +16,13 @@ import com.jnulocker.events.domain.Floor;
 import com.jnulocker.events.domain.Locker;
 import com.jnulocker.events.event.LockerEventCreatedEvent;
 import com.jnulocker.events.event.LockerEventDeletedEvent;
+import com.jnulocker.events.event.LockerEventUpdatedEvent;
 import com.jnulocker.member.application.port.in.MemberQuery;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.organization.application.port.in.DepartmentQuery;
 import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.exception.DepartmentNotFoundException;
+import com.jnulocker.registration.application.port.in.RegistrationCommand;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +40,7 @@ public class EventCommandService implements EventCommand {
     private final DepartmentQuery departmentQuery;
     private final EventQuery eventQuery;
     private final EventRecordPort eventRecordPort;
+    private final RegistrationCommand registrationCommand;
 
     @Override
     @Transactional
@@ -80,6 +84,31 @@ public class EventCommandService implements EventCommand {
     public void publishEvent(UUID eventId, PublishEventRequest request) {
         Event event = eventQuery.getByIdOrThrow(eventId);
         event.updatePublishStatus(request.isPublish());
+    }
+
+    @Override
+    @Transactional
+    public void updateEvent(UUID eventId, UpdateEventRequest request) {
+        // 이벤트 조회 및 권한 검증
+        Long memberId = SecurityUtils.getCurrentMemberId();
+        Member member = memberQuery.findByIdOrThrow(memberId);
+
+        Event event = eventQuery.getByIdOrThrow(eventId);
+        event.validateUpdatable(member.getDepartment());
+
+        // 이벤트 기본 정보 업데이트
+        event.updateInfo(request.title(), request.startAt(), request.endAt());
+
+        // 이벤트와 연관된 참여, 사물함, 층 정보 삭제
+        eventRecordPort.deleteEventRelations(event);
+
+        // 이벤트 참여 학과 정보 업데이트
+        setupEventParticipations(event, request.participationDepartmentIds());
+
+        // 층 및 사물함 정보 업데이트
+        createFloorsAndLockers(event, request.floors());
+
+        publishEventUpdatedEvent(event);
     }
 
     private Event createAndSaveEvent(CreateEventRequest request) {
@@ -146,6 +175,14 @@ public class EventCommandService implements EventCommand {
     private void publishEventCreatedEvent(Event event) {
         eventPublisher.publishEvent(
                 LockerEventCreatedEvent.of(
+                        event.getId(),
+                        event.getEventSchedule().getStartAt(),
+                        event.getEventSchedule().getEndAt()));
+    }
+
+    private void publishEventUpdatedEvent(Event event) {
+        eventPublisher.publishEvent(
+                LockerEventUpdatedEvent.of(
                         event.getId(),
                         event.getEventSchedule().getStartAt(),
                         event.getEventSchedule().getEndAt()));
