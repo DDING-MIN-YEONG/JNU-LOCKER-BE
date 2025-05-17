@@ -86,7 +86,7 @@ public class AnnounceQueryService implements AnnounceQuery {
         List<Department> participatingDepartments =
                 announceLoadPort.getParticipationDepartments(announce);
 
-        return AnnounceDetailResponse.of(announce, participatingDepartments);
+        return AnnounceDetailResponse.from(announce, participatingDepartments);
     }
 
     @Override

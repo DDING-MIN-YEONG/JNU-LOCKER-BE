@@ -14,7 +14,7 @@ public record AnnounceDetailResponse(
         @Schema(description = "등록 일자", example = "2025-08-01T15:00:00") LocalDateTime createdAt,
         @Schema(description = "수정 일자", example = "2025-08-10T15:00:00") LocalDateTime updatedAt,
         @Schema(description = "참여 학과 목록") List<DepartmentResponse> departments) {
-    public static AnnounceDetailResponse of(Announce announce, List<Department> departments) {
+    public static AnnounceDetailResponse from(Announce announce, List<Department> departments) {
         List<DepartmentResponse> departmentResponses =
                 departments.stream().map(DepartmentResponse::from).toList();
         return new AnnounceDetailResponse(
