@@ -1,6 +1,8 @@
 package com.jnulocker.auth.application.service;
 
+import com.jnulocker.auth.adapter.out.TokenRepository;
 import com.jnulocker.auth.application.port.in.LoginCommand;
+import com.jnulocker.auth.application.port.in.LogoutCommand;
 import com.jnulocker.auth.application.port.in.ManagerSignupCommand;
 import com.jnulocker.auth.application.port.in.ReissueCommand;
 import com.jnulocker.auth.application.port.in.UserSignupCommand;
@@ -31,7 +33,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class AuthCommandService
-        implements UserSignupCommand, ManagerSignupCommand, LoginCommand, ReissueCommand {
+        implements UserSignupCommand,
+                ManagerSignupCommand,
+                LoginCommand,
+                ReissueCommand,
+                LogoutCommand {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final MemberQuery memberQuery;
@@ -39,6 +45,7 @@ public class AuthCommandService
     private final DepartmentQuery departmentQuery;
     private final TokenProvider tokenProvider;
     private final RedisUtil redisUtil;
+    private final TokenRepository tokenRepository;
 
     @Override
     @Transactional
@@ -133,7 +140,6 @@ public class AuthCommandService
     }
 
     @Override
-    @Transactional
     public AuthToken reissue(String refreshToken) {
         if (refreshToken == null) {
             throw InvalidRefreshTokenException.EXCEPTION;
@@ -148,6 +154,12 @@ public class AuthCommandService
         Member member = memberQuery.findByIdOrThrow(memberId);
 
         return tokenProvider.createAuthToken(memberId, member.getRole());
+    }
+
+    @Override
+    public void logout() {
+        Long memberId = SecurityUtils.getCurrentMemberId();
+        tokenRepository.deleteById(memberId);
     }
 
     public void validateDuplicateEmail(String email) {

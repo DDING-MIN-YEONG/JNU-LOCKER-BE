@@ -59,4 +59,9 @@ public class CookieUtil {
                 authToken.refreshToken(),
                 Math.toIntExact(authToken.refreshTokenExpiresIn()));
     }
+
+    public static void clearAuthCookies(HttpServletResponse response) {
+        addCookie(response, ACCESS_TOKEN, null, 0);
+        addCookie(response, REFRESH_TOKEN, null, 0);
+    }
 }

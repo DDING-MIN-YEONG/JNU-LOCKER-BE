@@ -45,7 +45,6 @@ public class JwtFilter extends OncePerRequestFilter {
                         "/v1/auth/*/signup",
                         "/v1/auth/login",
                         "/v1/auth/reissue",
-                        "/v1/auth/logout",
                         "/v1/auth/send-email",
                         "/v1/auth/verify",
                         "/swagger-ui/**",
