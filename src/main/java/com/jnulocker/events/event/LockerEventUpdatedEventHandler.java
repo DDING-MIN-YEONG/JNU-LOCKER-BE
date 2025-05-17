@@ -3,24 +3,28 @@ package com.jnulocker.events.event;
 import com.jnulocker.events.quartz.QuartzSchedulerUtil;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.quartz.SchedulerException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
-public class LockerEventCreatedEventHandler {
+public class LockerEventUpdatedEventHandler {
 
     private final QuartzSchedulerUtil quartzSchedulerUtil;
 
     @TransactionalEventListener(
-            classes = LockerEventCreatedEvent.class,
+            classes = LockerEventUpdatedEvent.class,
             phase = TransactionPhase.AFTER_COMMIT)
-    public void handle(LockerEventCreatedEvent lockerEventCreatedEvent) {
-        UUID eventId = lockerEventCreatedEvent.getEventId();
+    public void handle(LockerEventUpdatedEvent lockerEventUpdatedEvent) throws SchedulerException {
+        UUID eventId = lockerEventUpdatedEvent.getEventId();
+
+        // 기존 스케줄링 작업 삭제
+        quartzSchedulerUtil.deleteEventJobs(eventId);
+
+        // 새로운 스케줄링 작업 생성
         quartzSchedulerUtil.scheduleEventJobs(
-                eventId, lockerEventCreatedEvent.getStartAt(), lockerEventCreatedEvent.getEndAt());
+                eventId, lockerEventUpdatedEvent.getStartAt(), lockerEventUpdatedEvent.getEndAt());
     }
 }

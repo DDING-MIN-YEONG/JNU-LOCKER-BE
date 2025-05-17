@@ -9,6 +9,7 @@ import com.jnulocker.events.domain.EventParticipation;
 import com.jnulocker.events.domain.Floor;
 import com.jnulocker.events.domain.Locker;
 import com.jnulocker.organization.domain.Department;
+import com.jnulocker.registration.adapter.out.RegistrationRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,6 +25,7 @@ public class EventPersistenceAdapter implements EventLoadPort, EventRecordPort {
     private final EventParticipationRepository eventParticipationRepository;
     private final FloorRepository floorRepository;
     private final LockerRepository lockerRepository;
+    private final RegistrationRepository registrationRepository;
 
     @Override
     public boolean existsById(UUID eventId) {
@@ -73,9 +75,15 @@ public class EventPersistenceAdapter implements EventLoadPort, EventRecordPort {
 
     @Override
     public void deleteEvent(Event event) {
+        deleteEventRelations(event);
+        eventRepository.delete(event);
+    }
+
+    @Override
+    public void deleteEventRelations(Event event) {
+        registrationRepository.deleteAllByLocker_Floor_Event(event);
         lockerRepository.deleteAllByFloor_Event(event);
         floorRepository.deleteAllByEvent(event);
         eventParticipationRepository.deleteAllByEvent(event);
-        eventRepository.delete(event);
     }
 }

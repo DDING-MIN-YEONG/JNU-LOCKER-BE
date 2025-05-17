@@ -13,7 +13,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     healthcheck:
       test: ["CMD", "mysql", "-u", "$MYSQL_USERNAME", "-p$MYSQL_PASSWORD", "-e", "SELECT 1;"]
-      start_period: 10s
+      start_period: 20s
       start_interval: 3s
       interval: 10s
       timeout: 5s
@@ -32,8 +32,10 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
+      start_period: 10s
+      start_interval: 3s
+      interval: 10s
+      timeout: 5s
       retries: 5
     networks:
       - jnu-locker-network
@@ -47,7 +49,7 @@ services:
       - .env
     healthcheck:
       test: [ "CMD-SHELL", "wget -q --spider http://localhost:8080$MANAGEMENT_BASE_PATH/health || exit 1" ]
-      start_period: 20s
+      start_period: 36s
       start_interval: 5s
       interval: 10s
       timeout: 5s

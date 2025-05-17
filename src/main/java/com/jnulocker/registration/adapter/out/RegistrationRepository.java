@@ -1,5 +1,6 @@
 package com.jnulocker.registration.adapter.out;
 
+import com.jnulocker.events.domain.Event;
 import com.jnulocker.registration.domain.Registration;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,4 +24,6 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
 
     @EntityGraph(attributePaths = {"member", "member.department", "locker", "locker.floor"})
     Optional<Registration> findByMemberIdAndLocker_Floor_EventId(Long memberId, UUID eventId);
+
+    void deleteAllByLocker_Floor_Event(Event event);
 }

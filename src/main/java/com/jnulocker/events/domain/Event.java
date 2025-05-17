@@ -3,7 +3,9 @@ package com.jnulocker.events.domain;
 import com.jnulocker.common.persistence.BaseEntity;
 import com.jnulocker.events.exception.EventNotOpenException;
 import com.jnulocker.events.exception.OnlyManagerCanDeleteEventException;
+import com.jnulocker.events.exception.OnlyManagerCanUpdateEventException;
 import com.jnulocker.events.exception.OnlyParticipationDepartmentCanRegisterException;
+import com.jnulocker.events.exception.OnlyReadyEventCanBeUpdatedException;
 import com.jnulocker.events.exception.OpenEventCannotBeDeletedException;
 import com.jnulocker.organization.domain.Department;
 import jakarta.persistence.CascadeType;
@@ -139,5 +141,20 @@ public class Event extends BaseEntity {
 
     public void updatePublishStatus(Boolean publish) {
         this.publish = publish;
+    }
+
+    public void updateInfo(String title, LocalDateTime startAt, LocalDateTime endAt) {
+        this.title = title;
+        this.eventSchedule = EventSchedule.of(startAt, endAt);
+    }
+
+    public void validateUpdatable(Department department) {
+        if (!isSameDepartment(department)) {
+            throw OnlyManagerCanUpdateEventException.EXCEPTION;
+        }
+
+        if (eventStatus != EventStatus.READY) {
+            throw OnlyReadyEventCanBeUpdatedException.EXCEPTION;
+        }
     }
 }
