@@ -8,6 +8,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.events.application.port.in.request.CreateEventRequest;
+import com.jnulocker.events.application.port.in.request.FloorInfo;
+import com.jnulocker.events.application.port.in.request.LockerRange;
+import com.jnulocker.events.application.port.in.request.PrefixInfo;
 import com.jnulocker.events.application.port.in.request.PublishEventRequest;
 import com.jnulocker.events.application.port.in.request.UpdateEventRequest;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
@@ -29,7 +32,10 @@ import com.jnulocker.organization.utils.OrganizationTestUtil;
 import io.restassured.RestAssured;
 import io.restassured.http.Cookie;
 import io.restassured.response.ValidatableResponse;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -211,7 +217,7 @@ public class EventControllerIntegrationTest {
         createEvent();
 
         // 생성된 이벤트 조회
-        UUID eventId = getLastEventId();
+        UUID eventId = getFirstEventId();
 
         // when
         deleteEvent(eventId).statusCode(HttpStatus.NO_CONTENT.value());
@@ -249,7 +255,7 @@ public class EventControllerIntegrationTest {
         createEvent();
 
         // 생성된 이벤트 조회
-        UUID eventId = getLastEventId();
+        UUID eventId = getFirstEventId();
 
         // 비조직원으로 로그인
         accessToken = authTestUtil.generateAccessTokenWithAnotherDepartment(Role.MANAGER);
@@ -275,7 +281,7 @@ public class EventControllerIntegrationTest {
         createEvent();
 
         // 생성된 이벤트 조회
-        UUID eventId = getLastEventId();
+        UUID eventId = getFirstEventId();
 
         PublishEventRequest request = new PublishEventRequest(true);
 
@@ -293,7 +299,7 @@ public class EventControllerIntegrationTest {
         createEvent();
 
         // 생성된 이벤트 조회
-        UUID eventId = getLastEventId();
+        UUID eventId = getFirstEventId();
 
         PublishEventRequest request = new PublishEventRequest(false);
 
@@ -315,7 +321,7 @@ public class EventControllerIntegrationTest {
         // 이벤트 생성
         createEventWithDepartment(department);
 
-        UUID eventId = getLastEventId();
+        UUID eventId = getFirstEventId();
 
         // 수정 요청 데이터 생성
         String updateTitle = "수정된 이벤트";
@@ -368,7 +374,7 @@ public class EventControllerIntegrationTest {
         // 이벤트 생성
         createEventWithDepartment(department);
 
-        UUID eventId = getLastEventId();
+        UUID eventId = getFirstEventId();
 
         // 다른 부서의 사용자로 로그인
         accessToken = authTestUtil.generateAccessTokenWithAnotherDepartment(Role.MANAGER);
@@ -559,6 +565,44 @@ public class EventControllerIntegrationTest {
         assertThat(eventResponse.endAt()).isEqualTo(myDepartmentEvent.endAt());
         assertThat(eventResponse.title()).isEqualTo(myDepartmentEvent.title());
         assertThat(eventResponse.publish()).isTrue();
+
+        // 층 정보 검증
+        assertThat(eventResponse.floors()).isNotNull();
+        assertThat(eventResponse.floors()).isNotEmpty();
+
+        // 층 내 사물함 정보 검증
+        eventResponse
+                .floors()
+                .forEach(
+                        floor -> {
+                            assertThat(floor.floorNumber()).isNotNull();
+                            assertThat(floor.prefixes()).isNotEmpty();
+
+                            floor.prefixes()
+                                    .forEach(
+                                            prefix -> {
+                                                assertThat(prefix.ranges()).isNotEmpty();
+
+                                                prefix.ranges()
+                                                        .forEach(
+                                                                range -> {
+                                                                    assertThat(
+                                                                                    range
+                                                                                            .lockerStartNumber())
+                                                                            .isNotNull();
+                                                                    assertThat(
+                                                                                    range
+                                                                                            .lockerEndNumber())
+                                                                            .isNotNull();
+                                                                    assertThat(
+                                                                                    range
+                                                                                            .lockerEndNumber())
+                                                                            .isGreaterThanOrEqualTo(
+                                                                                    range
+                                                                                            .lockerStartNumber());
+                                                                });
+                                            });
+                        });
     }
 
     @Test
@@ -577,6 +621,156 @@ public class EventControllerIntegrationTest {
         assertThat(errorResponse.message()).isEqualTo(EventErrorCode.EVENT_NOT_FOUND.getMessage());
     }
 
+    @Test
+    void 다양한_층과_접두사_범위로_생성된_이벤트_상세조회시_정확히_반환된다() {
+        // given
+        Department department = organizationTestUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.MANAGER, department);
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+
+        // 다양한 층과 접두사, 범위를 가진 이벤트 생성 요청 준비
+        CreateEventRequest request = prepareComplexEventRequest(department.getId());
+
+        // 이벤트 생성
+        createCustomEvent(request);
+        UUID eventId = getFirstEventId();
+
+        // when
+        EventResponse eventResponse =
+                getEventDetail(eventId, accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(EventResponse.class);
+
+        // then
+        // 기본 정보 검증
+        assertThat(eventResponse.title()).isEqualTo(request.title());
+
+        // 층 개수가 일치하는지 검증
+        assertThat(eventResponse.floors()).hasSameSizeAs(request.floors());
+
+        // 층 정보 비교를 위한 정렬
+        List<FloorInfo> requestFloors = new ArrayList<>(request.floors());
+        List<FloorInfo> responseFloors = new ArrayList<>(eventResponse.floors());
+        requestFloors.sort(Comparator.comparing(FloorInfo::floorNumber));
+        responseFloors.sort(Comparator.comparing(FloorInfo::floorNumber));
+
+        // 각 층별로 세부 검증
+        for (int i = 0; i < requestFloors.size(); i++) {
+            FloorInfo requestFloor = requestFloors.get(i);
+            FloorInfo responseFloor = responseFloors.get(i);
+            int floorNumber = requestFloor.floorNumber();
+
+            // 2.1 층 번호 일치 검증
+            assertThat(responseFloor.floorNumber()).isEqualTo(floorNumber);
+
+            // 2.2 각 접두사별 검증
+            for (PrefixInfo requestPrefix : requestFloor.prefixes()) {
+                String prefix = requestPrefix.lockerPrefix();
+
+                // 2.2.1 해당 접두사가 응답에 존재하는지 검증
+                assertThat(findMatchingPrefixInfo(responseFloor.prefixes(), prefix)).isPresent();
+
+                // 2.2.2 모든 사물함 번호 범위가 응답에 포함되어 있는지 검증
+                for (LockerRange requestRange : requestPrefix.ranges()) {
+                    int start = requestRange.lockerStartNumber();
+                    int end = requestRange.lockerEndNumber();
+
+                    assertThat(areAllNumbersInRange(responseFloor.prefixes(), prefix, start, end))
+                            .isTrue();
+                }
+            }
+        }
+    }
+
+    /** 특정 접두사와 일치하는 PrefixInfo를 찾습니다. null 접두사는 null과 일치시킵니다. */
+    private Optional<PrefixInfo> findMatchingPrefixInfo(
+            List<PrefixInfo> prefixes, String targetPrefix) {
+        return prefixes.stream()
+                .filter(
+                        p -> {
+                            if (targetPrefix == null) {
+                                return p.lockerPrefix() == null;
+                            } else {
+                                return targetPrefix.equals(p.lockerPrefix());
+                            }
+                        })
+                .findFirst();
+    }
+
+    /** 지정된 접두사와 범위의 모든 번호가 응답에 포함되어 있는지 확인합니다. */
+    private boolean areAllNumbersInRange(
+            List<PrefixInfo> prefixes, String targetPrefix, int start, int end) {
+        for (int num = start; num <= end; num++) {
+            final int lockerNumber = num;
+            boolean found =
+                    prefixes.stream()
+                            .filter(
+                                    p -> {
+                                        if (targetPrefix == null) {
+                                            return p.lockerPrefix() == null;
+                                        } else {
+                                            return targetPrefix.equals(p.lockerPrefix());
+                                        }
+                                    })
+                            .flatMap(p -> p.ranges().stream())
+                            .anyMatch(
+                                    r ->
+                                            r.lockerStartNumber() <= lockerNumber
+                                                    && lockerNumber <= r.lockerEndNumber());
+
+            if (!found) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // 다양한 층과 접두사, 범위를 가진 이벤트 생성 요청 준비
+    private CreateEventRequest prepareComplexEventRequest(Long departmentId) {
+        // 서로 다른 층, 접두사, 연속/불연속 범위를 포함한 복잡한 이벤트 요청 생성
+
+        // 1층: 접두사 "A"와 "B", 각각 연속적인 범위
+        List<LockerRange> rangesA =
+                List.of(
+                        new LockerRange(1, 5), // A-001 ~ A-005
+                        new LockerRange(10, 15) // A-010 ~ A-015
+                        );
+        List<LockerRange> rangesB =
+                List.of(
+                        new LockerRange(1, 3) // B-001 ~ B-003
+                        );
+        List<PrefixInfo> prefixes1 =
+                List.of(new PrefixInfo("A", rangesA), new PrefixInfo("B", rangesB));
+
+        // 2층: 접두사 없음, 불연속적인 범위
+        List<LockerRange> rangesNoPrefix =
+                List.of(
+                        new LockerRange(101, 103), // 101 ~ 103
+                        new LockerRange(201, 205) // 201 ~ 205
+                        );
+        List<PrefixInfo> prefixes2 = List.of(new PrefixInfo(null, rangesNoPrefix));
+
+        // 3층: 접두사 "X", 단일 범위
+        List<LockerRange> rangesX =
+                List.of(
+                        new LockerRange(50, 55) // X-050 ~ X-055
+                        );
+        List<PrefixInfo> prefixes3 = List.of(new PrefixInfo("X", rangesX));
+
+        List<FloorInfo> floors =
+                List.of(
+                        new FloorInfo(1, prefixes1),
+                        new FloorInfo(2, prefixes2),
+                        new FloorInfo(3, prefixes3));
+
+        return createEventRequestBuilder()
+                .withTitle("다양한 층과 접두사를 가진 이벤트")
+                .withParticipationDepartmentIds(List.of(departmentId))
+                .withFloors(floors)
+                .build();
+    }
+
     private static ValidatableResponse getEventDetail(UUID eventId, String accessToken) {
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
@@ -584,7 +778,7 @@ public class EventControllerIntegrationTest {
                 .get(EVENT_URL + "/{event-id}", eventId)
                 .then()
                 .log()
-                .ifError();
+                .all();
     }
 
     // 파라미터 제공 메서드
@@ -603,7 +797,7 @@ public class EventControllerIntegrationTest {
                 .get(EVENT_URL + "/{event-id}/lockers", eventId)
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 
     public static ValidatableResponse getEvents(int page, int size, String accessToken) {
@@ -617,7 +811,7 @@ public class EventControllerIntegrationTest {
                 .get(EVENT_URL)
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 
     public static ValidatableResponse getMyEventsWithPageable(
@@ -639,6 +833,17 @@ public class EventControllerIntegrationTest {
     private void createEvent() {
         Department department = organizationTestUtil.createCouncilDepartment();
         createEventWithDepartment(department);
+    }
+
+    // 커스텀 이벤트 요청으로 이벤트 생성
+    private void createCustomEvent(CreateEventRequest request) {
+        given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .body(request)
+                .when()
+                .post(EVENT_URL)
+                .then()
+                .statusCode(HttpStatus.CREATED.value());
     }
 
     private void createEventWithDepartment(Department department) {
@@ -666,13 +871,13 @@ public class EventControllerIntegrationTest {
         return Math.min(remainingItems, pageSize);
     }
 
-    private UUID getLastEventId() {
+    private UUID getFirstEventId() {
         return getEvents(0, 10, accessToken)
                 .statusCode(HttpStatus.OK.value())
                 .extract()
                 .as(EventCustomPage.class)
                 .content()
-                .getLast()
+                .getFirst()
                 .id();
     }
 
