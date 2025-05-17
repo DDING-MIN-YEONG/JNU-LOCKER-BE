@@ -1,10 +1,12 @@
 package com.jnulocker.auth.adapter.in;
 
 import static com.jnulocker.auth.util.CookieUtil.addCookieFromAuthToken;
+import static com.jnulocker.auth.util.CookieUtil.clearAuthCookies;
 import static com.jnulocker.auth.util.CookieUtil.getCookieValueFromRefreshToken;
 
 import com.jnulocker.auth.adapter.in.docs.AuthApi;
 import com.jnulocker.auth.application.port.in.LoginCommand;
+import com.jnulocker.auth.application.port.in.LogoutCommand;
 import com.jnulocker.auth.application.port.in.ManagerQuery;
 import com.jnulocker.auth.application.port.in.ManagerSignupCommand;
 import com.jnulocker.auth.application.port.in.ReissueCommand;
@@ -47,6 +49,7 @@ public class AuthController implements AuthApi {
     private final ReissueCommand reissueCommand;
     private final SendEmailCommand sendEmailCommand;
     private final VerifyCodeCommand verifyCodeCommand;
+    private final LogoutCommand logoutCommand;
 
     @Override
     @PostMapping("/users/signup")
@@ -114,5 +117,12 @@ public class AuthController implements AuthApi {
     public ResponseEntity<Void> verify(@Valid @RequestBody VerifyCodeRequest request) {
         verifyCodeCommand.verify(request);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+        logoutCommand.logout();
+        clearAuthCookies(response);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
