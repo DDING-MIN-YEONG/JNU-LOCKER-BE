@@ -158,6 +158,7 @@ public class AuthCommandService
     }
 
     @Override
+    @Transactional
     public void logout() {
         Long memberId = SecurityUtils.getCurrentMemberId();
         tokenRepository.deleteById(memberId);
