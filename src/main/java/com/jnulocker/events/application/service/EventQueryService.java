@@ -1,7 +1,10 @@
 package com.jnulocker.events.application.service;
 
+import static com.jnulocker.events.infrastructure.mapper.LockerMapper.*;
+
 import com.jnulocker.auth.security.SecurityUtils;
 import com.jnulocker.events.application.port.in.EventQuery;
+import com.jnulocker.events.application.port.in.request.FloorInfo;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.EventResponse;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
@@ -18,8 +21,7 @@ import com.jnulocker.events.exception.LockerNotFoundException;
 import com.jnulocker.events.exception.OnlyDepartmentMemberCanSeeEventException;
 import com.jnulocker.member.application.port.in.MemberQuery;
 import com.jnulocker.member.domain.Member;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -65,7 +67,13 @@ public class EventQueryService implements EventQuery {
             throw OnlyDepartmentMemberCanSeeEventException.EXCEPTION;
         }
 
-        return EventResponse.from(event);
+        // 이벤트에 속한 층과 사물함 정보 조회
+        List<FloorWithLockersResponse> floorWithLockers = getLockersByEventId(eventId);
+
+        // 층 정보를 FloorInfo 형태로 변환 (LockerMapper 사용)
+        List<FloorInfo> floors = toFloorInfos(floorWithLockers);
+
+        return EventResponse.from(event, floors);
     }
 
     @Override

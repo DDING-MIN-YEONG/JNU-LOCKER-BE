@@ -480,7 +480,7 @@ public class AnnounceControllerIntegrationTest {
                 .get(ANNOUNCE_URL)
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 
     // 유틸 메서드들
@@ -504,7 +504,7 @@ public class AnnounceControllerIntegrationTest {
                 .get(ANNOUNCE_URL + "/me")
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 
     private Long getLastAnnounceId() {
@@ -534,7 +534,7 @@ public class AnnounceControllerIntegrationTest {
                 .delete(ANNOUNCE_URL + "/{announce-id}", announceId)
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 
     private ValidatableResponse updateAnnounce(Long announceId, UpdateAnnounceRequest request) {
@@ -545,7 +545,7 @@ public class AnnounceControllerIntegrationTest {
                 .put(ANNOUNCE_URL + "/{announce-id}", announceId)
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 
     private ValidatableResponse getAnnounce(Long announceId, String accessToken) {
@@ -555,7 +555,7 @@ public class AnnounceControllerIntegrationTest {
                 .get(ANNOUNCE_URL + "/{announce-id}", announceId)
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 
     private ValidatableResponse getMyAnnounce(Long announceId, String accessToken) {
@@ -565,6 +565,6 @@ public class AnnounceControllerIntegrationTest {
                 .get(ANNOUNCE_URL + "/me/{announce-id}", announceId)
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 }
