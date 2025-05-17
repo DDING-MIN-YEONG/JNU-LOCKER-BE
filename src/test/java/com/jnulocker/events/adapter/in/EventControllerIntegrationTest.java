@@ -35,6 +35,7 @@ import io.restassured.response.ValidatableResponse;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -687,43 +688,34 @@ public class EventControllerIntegrationTest {
     private Optional<PrefixInfo> findMatchingPrefixInfo(
             List<PrefixInfo> prefixes, String targetPrefix) {
         return prefixes.stream()
-                .filter(
-                        p -> {
-                            if (targetPrefix == null) {
-                                return p.lockerPrefix() == null;
-                            } else {
-                                return targetPrefix.equals(p.lockerPrefix());
-                            }
-                        })
+                .filter(p -> Objects.equals(targetPrefix, p.lockerPrefix()))
                 .findFirst();
     }
 
     /** 지정된 접두사와 범위의 모든 번호가 응답에 포함되어 있는지 확인합니다. */
-    private boolean areAllNumbersInRange(
-            List<PrefixInfo> prefixes, String targetPrefix, int start, int end) {
-        for (int num = start; num <= end; num++) {
-            final int lockerNumber = num;
-            boolean found =
-                    prefixes.stream()
-                            .filter(
-                                    p -> {
-                                        if (targetPrefix == null) {
-                                            return p.lockerPrefix() == null;
-                                        } else {
-                                            return targetPrefix.equals(p.lockerPrefix());
-                                        }
-                                    })
-                            .flatMap(p -> p.ranges().stream())
-                            .anyMatch(
-                                    r ->
-                                            r.lockerStartNumber() <= lockerNumber
-                                                    && lockerNumber <= r.lockerEndNumber());
+    private boolean areAllNumbersInRange(List<PrefixInfo> prefixes, String targetPrefix, int start, int end) {
+        // 접두사가 일치하는 범위들 수집
+        List<LockerRange> ranges = prefixes.stream()
+                .filter(p -> Objects.equals(p.lockerPrefix(), targetPrefix))
+                .flatMap(p -> p.ranges().stream())
+                .sorted(Comparator.comparing(LockerRange::lockerStartNumber))
+                .toList();
 
-            if (!found) {
-                return false;
+        // 현재까지 검증된 범위의 끝점
+        int covered = start - 1;
+
+        // 모든 범위를 순회하며 간격 없이 end까지 커버되는지 확인
+        for (LockerRange range : ranges) {
+            if (range.lockerStartNumber() > covered + 1) {
+                return false; // 커버되지 않는 간격 발견
+            }
+            covered = Math.max(covered, range.lockerEndNumber());
+            if (covered >= end) {
+                return true; // 목표 범위를 모두 커버함
             }
         }
-        return true;
+
+        return covered >= end; // 마지막 범위까지 확인 후 결과
     }
 
     // 다양한 층과 접두사, 범위를 가진 이벤트 생성 요청 준비
@@ -778,7 +770,7 @@ public class EventControllerIntegrationTest {
                 .get(EVENT_URL + "/{event-id}", eventId)
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 
     // 파라미터 제공 메서드
@@ -889,7 +881,7 @@ public class EventControllerIntegrationTest {
                 .delete(EVENT_URL + "/{event-id}", eventId)
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 
     private ValidatableResponse publishEvent(UUID eventId, PublishEventRequest request) {
@@ -900,7 +892,7 @@ public class EventControllerIntegrationTest {
                 .put(EVENT_URL + "/{event-id}/publish", eventId)
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 
     private ValidatableResponse updateEvent(UUID eventId, UpdateEventRequest request) {
@@ -911,6 +903,6 @@ public class EventControllerIntegrationTest {
                 .put(EVENT_URL + "/{event-id}", eventId)
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 }
