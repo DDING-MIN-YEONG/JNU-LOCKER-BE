@@ -1,5 +1,6 @@
 package com.jnulocker.events.application.port.in.response;
 
+import com.jnulocker.events.application.port.in.request.FloorInfo;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.EventStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,10 +16,10 @@ public record EventResponse(
         @Schema(description = "이벤트 시작 시간", example = "2025-08-01T15:00:00") LocalDateTime startAt,
         @Schema(description = "이벤트 종료 시간", example = "2025-08-01T16:00:00") LocalDateTime endAt,
         @Schema(description = "이벤트 상태", example = "OPEN") EventStatus status,
-        @Schema(description = "이벤트 게시 여부", example = "true") Boolean publish) {
+        @Schema(description = "이벤트 게시 여부", example = "true") Boolean publish,
+        @Schema(description = "층 정보 목록") List<FloorInfo> floors) {
 
-    public static EventResponse from(Event event) {
-
+    public static EventResponse from(Event event, List<FloorInfo> floors) {
         List<EventDepartmentResponse> departmentIds =
                 event.getEventParticipations() == null
                         ? List.of()
@@ -39,6 +40,7 @@ public record EventResponse(
                 event.getEventSchedule().getStartAt(),
                 event.getEventSchedule().getEndAt(),
                 event.getEventStatus(),
-                event.getPublish());
+                event.getPublish(),
+                floors);
     }
 }
