@@ -392,6 +392,36 @@ public class EventControllerIntegrationTest {
     }
 
     @Test
+    void 진행되는_이벤트는_수정할_수_없다() {
+        // given
+        Department department = organizationTestUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.MANAGER, department);
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+
+        // 이벤트 생성 (OPEN 상태)
+        Event event =
+                eventTestUtil.createEventWithParticipationDepartment(
+                        List.of(5, 10), department, EventStatus.OPEN, true);
+
+        // 수정 요청 데이터 생성
+        UpdateEventRequest updateRequest = updateEventRequestBuilder().build();
+
+        // when
+        ErrorResponse errorResponse =
+                updateEvent(event.getId(), updateRequest)
+                        .statusCode(
+                                EventErrorCode.ONLY_READY_EVENT_CAN_BE_UPDATED
+                                        .getHttpStatus()
+                                        .value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(EventErrorCode.ONLY_READY_EVENT_CAN_BE_UPDATED.getMessage());
+    }
+
+    @Test
     void 종료된_이벤트는_수정할_수_없다() {
         // given
         Department department = organizationTestUtil.createCouncilDepartment();
@@ -410,7 +440,7 @@ public class EventControllerIntegrationTest {
         ErrorResponse errorResponse =
                 updateEvent(event.getId(), updateRequest)
                         .statusCode(
-                                EventErrorCode.CLOSE_EVENT_CAN_NOT_BE_UPDATED
+                                EventErrorCode.ONLY_READY_EVENT_CAN_BE_UPDATED
                                         .getHttpStatus()
                                         .value())
                         .extract()
@@ -418,7 +448,7 @@ public class EventControllerIntegrationTest {
 
         // then
         assertThat(errorResponse.message())
-                .isEqualTo(EventErrorCode.CLOSE_EVENT_CAN_NOT_BE_UPDATED.getMessage());
+                .isEqualTo(EventErrorCode.ONLY_READY_EVENT_CAN_BE_UPDATED.getMessage());
     }
 
     @Test
