@@ -12,8 +12,10 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 /** 사물함 정보를 다양한 형태로 변환하는 매퍼 클래스입니다. 주로 사물함 데이터를 API 요청/응답 형식으로 변환하는 기능을 담당합니다. */
+@Slf4j
 @UtilityClass
 public class LockerMapper {
 
@@ -127,6 +129,7 @@ public class LockerMapper {
             return new LockerCodeInfo(null, Integer.parseInt(code));
         } catch (NumberFormatException e) {
             // 숫자로 파싱할 수 없으면 prefix가 있는 것으로 간주하고 처리
+            log.warn("유효하지 않은 사물함 코드 형식: {}", code);
             return new LockerCodeInfo(code, 0);
         }
     }
