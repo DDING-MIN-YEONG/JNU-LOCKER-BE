@@ -119,6 +119,7 @@ public class AuthController implements AuthApi {
         return ResponseEntity.ok().build();
     }
 
+    @Override
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse response) {
         logoutCommand.logout();

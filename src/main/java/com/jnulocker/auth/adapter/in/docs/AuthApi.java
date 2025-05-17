@@ -65,7 +65,7 @@ public interface AuthApi {
 
     @ApiExceptionExamples(ReissueExceptionDocs.class)
     @Operation(summary = "토큰 재발급", description = "refreshToken을 이용하여 토큰을 재발급합니다.")
-    @ApiResponse(responseCode = "200", description = "토큰 재발급 성공")
+    @ApiResponse(responseCode = "204", description = "토큰 재발급 성공")
     ResponseEntity<Void> reissue(HttpServletRequest request, HttpServletResponse response);
 
     @ApiExceptionExamples(MailSendExceptionDocs.class)
@@ -77,4 +77,8 @@ public interface AuthApi {
     @Operation(summary = "인증 코드 검증", description = "메일 전송에 포함된 인증 코드의 일치 여부를 확인합니다.")
     @ApiResponse(responseCode = "200", description = "메일 인증 성공")
     ResponseEntity<Void> verify(@Valid @RequestBody VerifyCodeRequest request);
+
+    @Operation(summary = "로그아웃", description = "로그아웃합니다.")
+    @ApiResponse(responseCode = "204", description = "로그아웃 성공")
+    ResponseEntity<Void> logout(HttpServletResponse response);
 }
