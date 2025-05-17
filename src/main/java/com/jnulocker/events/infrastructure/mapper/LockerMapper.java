@@ -91,7 +91,7 @@ public class LockerMapper {
         }
 
         List<LockerRange> ranges = new ArrayList<>();
-        int start = sortedNumbers.get(0);
+        int start = sortedNumbers.getFirst();
         int prev = start;
 
         for (int i = 1; i < sortedNumbers.size(); i++) {
