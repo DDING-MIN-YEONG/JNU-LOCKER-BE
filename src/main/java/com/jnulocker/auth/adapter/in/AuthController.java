@@ -102,7 +102,7 @@ public class AuthController implements AuthApi {
         String refreshToken = getCookieValueFromRefreshToken(request);
         AuthToken authToken = reissueCommand.reissue(refreshToken);
         addCookieFromAuthToken(response, authToken);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @Override

@@ -336,7 +336,7 @@ class AuthControllerIntegrationTest {
 
         // when
         ExtractableResponse<Response> response =
-                reissueToken(refreshToken).statusCode(HttpStatus.OK.value()).extract();
+                reissueToken(refreshToken).statusCode(HttpStatus.NO_CONTENT.value()).extract();
 
         // then
         String newAccessToken = getCookieValue(response.detailedCookies(), ACCESS_TOKEN);
