@@ -740,6 +740,23 @@ class AuthControllerIntegrationTest {
                 .isEqualTo(AuthErrorCode.DEPARTMENT_MISMATCH_AUTHORIZATION.getMessage());
     }
 
+    @Test
+    void 로그아웃할_수_있다() {
+        // when
+        String accessToken = authTestUtil.generateAccessToken(Role.USER);
+
+        ExtractableResponse<Response> response =
+                logout(accessToken).statusCode(HttpStatus.NO_CONTENT.value()).extract();
+
+        // then
+        Cookies cookies = response.detailedCookies();
+        String accessTokenResponse = getCookieValue(cookies, ACCESS_TOKEN);
+        String refreshTokenResponse = getCookieValue(cookies, REFRESH_TOKEN);
+
+        assertThat(accessTokenResponse).isBlank();
+        assertThat(refreshTokenResponse).isBlank();
+    }
+
     private ValidatableResponse rejectManagerSignup(
             String accessToken, ManagerRejectRequest request) {
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -858,6 +875,16 @@ class AuthControllerIntegrationTest {
                 .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .when()
                 .get(AUTH_URL + "/managers/pending")
+                .then()
+                .log()
+                .all();
+    }
+
+    public static ValidatableResponse logout(String accessToken) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .when()
+                .post(AUTH_URL + "/logout")
                 .then()
                 .log()
                 .all();
