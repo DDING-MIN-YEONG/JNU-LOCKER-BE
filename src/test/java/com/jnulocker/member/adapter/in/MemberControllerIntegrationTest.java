@@ -138,6 +138,6 @@ public class MemberControllerIntegrationTest {
                 .get(MEMBER_URL + "/info")
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 }

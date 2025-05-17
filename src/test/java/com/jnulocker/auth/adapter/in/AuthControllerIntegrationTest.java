@@ -751,7 +751,7 @@ class AuthControllerIntegrationTest {
                 .delete(AUTH_URL + "/managers/approve")
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 
     private ValidatableResponse approveManagerSignup(
@@ -765,7 +765,7 @@ class AuthControllerIntegrationTest {
                 .post(AUTH_URL + "/managers/approve")
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 
     public static ValidatableResponse login(LoginRequest request) {
@@ -775,7 +775,7 @@ class AuthControllerIntegrationTest {
                 .post(AUTH_URL + "/login")
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 
     public static ValidatableResponse reissueToken(String refreshToken) {
@@ -785,7 +785,7 @@ class AuthControllerIntegrationTest {
                 .post(AUTH_URL + "/reissue")
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 
     private String getCookieValue(Cookies cookies, String name) {
@@ -799,7 +799,7 @@ class AuthControllerIntegrationTest {
                 .post(AUTH_URL + path)
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 
     private ValidatableResponse signupUser(UserSignupRequest request) {
@@ -827,7 +827,7 @@ class AuthControllerIntegrationTest {
                 .post(AUTH_URL + "/send-email")
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 
     public static ValidatableResponse verify(VerifyCodeRequest request) {
@@ -837,7 +837,7 @@ class AuthControllerIntegrationTest {
                 .post(AUTH_URL + "/verify")
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 
     public static String createExpiredToken(Long userId, String secretKey) {
@@ -860,6 +860,6 @@ class AuthControllerIntegrationTest {
                 .get(AUTH_URL + "/managers/pending")
                 .then()
                 .log()
-                .all();
+                .ifError();
     }
 }
