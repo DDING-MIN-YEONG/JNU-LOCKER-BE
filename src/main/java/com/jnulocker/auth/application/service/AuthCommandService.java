@@ -140,7 +140,6 @@ public class AuthCommandService
     }
 
     @Override
-    @Transactional
     public AuthToken reissue(String refreshToken) {
         if (refreshToken == null) {
             throw InvalidRefreshTokenException.EXCEPTION;
@@ -158,7 +157,6 @@ public class AuthCommandService
     }
 
     @Override
-    @Transactional
     public void logout() {
         Long memberId = SecurityUtils.getCurrentMemberId();
         tokenRepository.deleteById(memberId);
