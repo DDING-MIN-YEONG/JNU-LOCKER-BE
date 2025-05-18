@@ -7,6 +7,7 @@ import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.SendEmailRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.request.VerifyCodeRequest;
+import com.jnulocker.auth.application.port.in.response.AuthTokenResponse;
 import com.jnulocker.auth.application.port.in.response.PendingManagerCustomPage;
 import com.jnulocker.auth.application.port.in.response.PendingManagerPageable;
 import com.jnulocker.common.swagger.ApiExceptionExamples;
@@ -61,7 +62,8 @@ public interface AuthApi {
     @ApiExceptionExamples(LoginExcepitonDocs.class)
     @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인합니다.")
     @ApiResponse(responseCode = "200", description = "로그인 성공")
-    ResponseEntity<Void> login(@RequestBody LoginRequest request, HttpServletResponse response);
+    ResponseEntity<AuthTokenResponse> login(
+            @RequestBody LoginRequest request, HttpServletResponse response);
 
     @ApiExceptionExamples(ReissueExceptionDocs.class)
     @Operation(summary = "토큰 재발급", description = "refreshToken을 이용하여 토큰을 재발급합니다.")

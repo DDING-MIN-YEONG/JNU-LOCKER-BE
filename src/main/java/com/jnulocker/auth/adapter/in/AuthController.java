@@ -1,8 +1,8 @@
 package com.jnulocker.auth.adapter.in;
 
+import static com.jnulocker.auth.util.AuthUtil.getRefreshToken;
 import static com.jnulocker.auth.util.CookieUtil.addCookieFromAuthToken;
 import static com.jnulocker.auth.util.CookieUtil.clearAuthCookies;
-import static com.jnulocker.auth.util.CookieUtil.getCookieValueFromRefreshToken;
 
 import com.jnulocker.auth.adapter.in.docs.AuthApi;
 import com.jnulocker.auth.application.port.in.LoginCommand;
@@ -21,6 +21,7 @@ import com.jnulocker.auth.application.port.in.request.SendEmailRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.request.VerifyCodeRequest;
 import com.jnulocker.auth.application.port.in.response.AuthToken;
+import com.jnulocker.auth.application.port.in.response.AuthTokenResponse;
 import com.jnulocker.auth.application.port.in.response.PendingManagerCustomPage;
 import com.jnulocker.auth.application.port.in.response.PendingManagerPageable;
 import jakarta.servlet.http.HttpServletRequest;
@@ -89,17 +90,18 @@ public class AuthController implements AuthApi {
 
     @Override
     @PostMapping("/login")
-    public ResponseEntity<Void> login(
+    public ResponseEntity<AuthTokenResponse> login(
             @Valid @RequestBody LoginRequest request, HttpServletResponse response) {
         AuthToken authToken = loginCommand.login(request);
         addCookieFromAuthToken(response, authToken);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(
+                AuthTokenResponse.of(authToken.accessToken(), authToken.refreshToken()));
     }
 
     @Override
     @PostMapping("/reissue")
     public ResponseEntity<Void> reissue(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = getCookieValueFromRefreshToken(request);
+        String refreshToken = getRefreshToken(request);
         AuthToken authToken = reissueCommand.reissue(refreshToken);
         addCookieFromAuthToken(response, authToken);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

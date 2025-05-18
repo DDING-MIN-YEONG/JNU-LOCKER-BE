@@ -19,7 +19,7 @@ public record EventResponse(
         @Schema(description = "이벤트 게시 여부", example = "true") Boolean publish,
         @Schema(description = "층 정보 목록") List<FloorInfo> floors) {
 
-    public static EventResponse from(Event event, List<FloorInfo> floors) {
+    public static EventResponse of(Event event, List<FloorInfo> floors) {
         List<EventDepartmentResponse> departmentIds =
                 event.getEventParticipations() == null
                         ? List.of()
