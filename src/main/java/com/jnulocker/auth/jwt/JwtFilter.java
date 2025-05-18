@@ -97,13 +97,11 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private String getAccessToken(HttpServletRequest request) {
-        // Try to get token from Authorization header first
         String authHeader = request.getHeader(AUTHORIZATION_HEADER);
         if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
             return authHeader.substring(BEARER_PREFIX.length()).trim();
         }
 
-        // Fallback to cookie if header is not present or invalid
         return getCookieValueFromAccessToken(request);
     }
 
