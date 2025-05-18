@@ -21,6 +21,7 @@ import com.jnulocker.auth.application.port.in.request.SendEmailRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.request.VerifyCodeRequest;
 import com.jnulocker.auth.application.port.in.response.AuthToken;
+import com.jnulocker.auth.application.port.in.response.AuthTokenResponse;
 import com.jnulocker.auth.application.port.in.response.PendingManagerCustomPage;
 import com.jnulocker.auth.application.port.in.response.PendingManagerPageable;
 import jakarta.servlet.http.HttpServletRequest;
@@ -89,11 +90,12 @@ public class AuthController implements AuthApi {
 
     @Override
     @PostMapping("/login")
-    public ResponseEntity<Void> login(
+    public ResponseEntity<AuthTokenResponse> login(
             @Valid @RequestBody LoginRequest request, HttpServletResponse response) {
         AuthToken authToken = loginCommand.login(request);
         addCookieFromAuthToken(response, authToken);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(
+                AuthTokenResponse.of(authToken.accessToken(), authToken.refreshToken()));
     }
 
     @Override
