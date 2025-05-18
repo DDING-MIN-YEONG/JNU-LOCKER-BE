@@ -315,9 +315,13 @@ class AuthControllerIntegrationTest {
         Cookies cookies = response.detailedCookies();
         String accessToken = getCookieValue(cookies, ACCESS_TOKEN);
         String refreshToken = getCookieValue(cookies, REFRESH_TOKEN);
+        String accessTokenFromBody = response.jsonPath().getString("accessToken");
+        String refreshTokenFromBody = response.jsonPath().getString("refreshToken");
 
         assertThat(accessToken).isNotBlank();
         assertThat(refreshToken).isNotBlank();
+        assertThat(accessTokenFromBody).isNotBlank();
+        assertThat(refreshTokenFromBody).isNotBlank();
     }
 
     @Test
