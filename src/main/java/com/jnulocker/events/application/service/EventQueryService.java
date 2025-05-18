@@ -73,7 +73,7 @@ public class EventQueryService implements EventQuery {
         // 층 정보를 FloorInfo 형태로 변환 (LockerMapper 사용)
         List<FloorInfo> floors = toFloorInfos(floorWithLockers);
 
-        return EventResponse.from(event, floors);
+        return EventResponse.of(event, floors);
     }
 
     @Override
