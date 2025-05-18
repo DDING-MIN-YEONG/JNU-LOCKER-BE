@@ -59,14 +59,14 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private static final String MEDIA_TYPE = "application/json; charset=UTF-8";
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String BEARER_PREFIX = "Bearer ";
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-
-        return EXCLUDE_URLS.stream()
-                .anyMatch(pattern -> pathMatcher.match(pattern, path)); // AntPathMatcher를 이용한 매칭
+        return EXCLUDE_URLS.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
 
     @Override
@@ -74,7 +74,7 @@ public class JwtFilter extends OncePerRequestFilter {
             HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
-            String accessToken = getCookieValueFromAccessToken(request);
+            String accessToken = getAccessToken(request);
             if (accessToken == null) {
                 throw InvalidAccessTokenException.EXCEPTION;
             }
@@ -94,6 +94,17 @@ public class JwtFilter extends OncePerRequestFilter {
             request.setAttribute("exception", e);
             setErrorResponse(response, AuthErrorCode.FAIL_AUTHENTICATION);
         }
+    }
+
+    private String getAccessToken(HttpServletRequest request) {
+        // Try to get token from Authorization header first
+        String authHeader = request.getHeader(AUTHORIZATION_HEADER);
+        if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
+            return authHeader.substring(BEARER_PREFIX.length()).trim();
+        }
+
+        // Fallback to cookie if header is not present or invalid
+        return getCookieValueFromAccessToken(request);
     }
 
     private void setErrorResponse(HttpServletResponse response, ErrorCode errorCode)
