@@ -693,13 +693,15 @@ public class EventControllerIntegrationTest {
     }
 
     /** 지정된 접두사와 범위의 모든 번호가 응답에 포함되어 있는지 확인합니다. */
-    private boolean areAllNumbersInRange(List<PrefixInfo> prefixes, String targetPrefix, int start, int end) {
+    private boolean areAllNumbersInRange(
+            List<PrefixInfo> prefixes, String targetPrefix, int start, int end) {
         // 접두사가 일치하는 범위들 수집
-        List<LockerRange> ranges = prefixes.stream()
-                .filter(p -> Objects.equals(p.lockerPrefix(), targetPrefix))
-                .flatMap(p -> p.ranges().stream())
-                .sorted(Comparator.comparing(LockerRange::lockerStartNumber))
-                .toList();
+        List<LockerRange> ranges =
+                prefixes.stream()
+                        .filter(p -> Objects.equals(p.lockerPrefix(), targetPrefix))
+                        .flatMap(p -> p.ranges().stream())
+                        .sorted(Comparator.comparing(LockerRange::lockerStartNumber))
+                        .toList();
 
         // 현재까지 검증된 범위의 끝점
         int covered = start - 1;
