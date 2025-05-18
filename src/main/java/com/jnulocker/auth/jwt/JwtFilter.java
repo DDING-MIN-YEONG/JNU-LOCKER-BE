@@ -1,6 +1,6 @@
 package com.jnulocker.auth.jwt;
 
-import static com.jnulocker.auth.util.CookieUtil.getCookieValueFromAccessToken;
+import static com.jnulocker.auth.util.AuthUtil.getAccessToken;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jnulocker.auth.exception.AuthErrorCode;
@@ -94,15 +94,6 @@ public class JwtFilter extends OncePerRequestFilter {
             request.setAttribute("exception", e);
             setErrorResponse(response, AuthErrorCode.FAIL_AUTHENTICATION);
         }
-    }
-
-    private String getAccessToken(HttpServletRequest request) {
-        String authHeader = request.getHeader(AUTHORIZATION_HEADER);
-        if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
-            return authHeader.substring(BEARER_PREFIX.length()).trim();
-        }
-
-        return getCookieValueFromAccessToken(request);
     }
 
     private void setErrorResponse(HttpServletResponse response, ErrorCode errorCode)
