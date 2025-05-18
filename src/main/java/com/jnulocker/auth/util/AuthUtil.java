@@ -1,5 +1,8 @@
 package com.jnulocker.auth.util;
 
+import static com.jnulocker.auth.util.CookieUtil.*;
+import static com.jnulocker.auth.util.CookieUtil.getCookieValueFromAccessToken;
+
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.experimental.UtilityClass;
 
@@ -10,30 +13,24 @@ public class AuthUtil {
     private static final String BEARER_PREFIX = "Bearer ";
 
     public static String getAccessToken(HttpServletRequest request) {
-        String accessToken = CookieUtil.getCookieValueFromAccessToken(request);
-        if (accessToken != null) {
-            return accessToken;
-        }
+        String accessToken = getCookieValueFromAccessToken(request);
 
         String authHeader = request.getHeader(AUTHORIZATION_HEADER);
         if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
-            return authHeader.substring(BEARER_PREFIX.length()).trim();
+            accessToken = authHeader.substring(BEARER_PREFIX.length()).trim();
         }
 
-        return null;
+        return accessToken;
     }
 
     public static String getRefreshToken(HttpServletRequest request) {
-        String refreshToken = CookieUtil.getCookieValueFromRefreshToken(request);
-        if (refreshToken != null) {
-            return refreshToken;
-        }
+        String refreshToken = getCookieValueFromRefreshToken(request);
 
         String authHeader = request.getHeader(AUTHORIZATION_HEADER);
         if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
-            return authHeader.substring(BEARER_PREFIX.length()).trim();
+            refreshToken = authHeader.substring(BEARER_PREFIX.length()).trim();
         }
 
-        return null;
+        return refreshToken;
     }
 }
