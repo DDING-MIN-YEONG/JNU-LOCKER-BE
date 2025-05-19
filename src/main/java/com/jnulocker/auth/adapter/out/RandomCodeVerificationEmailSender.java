@@ -33,6 +33,7 @@ public class RandomCodeVerificationEmailSender implements VerificationEmailSende
             javaMailSender.send(message);
             redisUtil.setEmailVerificationCode(email, code);
         } catch (Exception e) {
+            log.error("Error sending verification email failed", e);
             throw SendEmailException.EXCEPTION;
         }
     }
