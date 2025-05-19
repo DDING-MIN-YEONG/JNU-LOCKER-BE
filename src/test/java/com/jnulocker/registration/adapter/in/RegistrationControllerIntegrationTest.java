@@ -48,7 +48,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 @ActiveProfiles("test")
 @DisplayName("이벤트 신청 컨트롤러 통합 테스트")
-class RegistrationControllerIntegrationTest {
+public class RegistrationControllerIntegrationTest {
 
     private static final String REGISTRATION_URL = "/v1/events/{event-id}/registrations";
     private static final String ACCESS_TOKEN = "access_token";
@@ -87,10 +87,11 @@ class RegistrationControllerIntegrationTest {
         accessToken = context.accessToken();
 
         Event event = context.event();
-        RegisterForEventRequest request = createRequestForAvailableLocker(event);
+        RegisterForEventRequest request = createRequestForAvailableLocker(event, accessToken);
 
         // when, then
-        registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
+        registerForEvent(event.getId(), request, accessToken)
+                .statusCode(HttpStatus.CREATED.value());
     }
 
     @Test
@@ -103,9 +104,10 @@ class RegistrationControllerIntegrationTest {
         accessToken = context.accessToken();
 
         Event event = context.event();
-        RegisterForEventRequest request = createRequestForAvailableLocker(event);
+        RegisterForEventRequest request = createRequestForAvailableLocker(event, accessToken);
 
-        registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
+        registerForEvent(event.getId(), request, accessToken)
+                .statusCode(HttpStatus.CREATED.value());
 
         accessToken = authTestUtil.generateAccessToken(Role.MANAGER);
 
@@ -141,9 +143,10 @@ class RegistrationControllerIntegrationTest {
         accessToken = context.accessToken();
 
         Event event = context.event();
-        RegisterForEventRequest request = createRequestForAvailableLocker(event);
+        RegisterForEventRequest request = createRequestForAvailableLocker(event, accessToken);
 
-        registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
+        registerForEvent(event.getId(), request, accessToken)
+                .statusCode(HttpStatus.CREATED.value());
 
         RegistrationResponse registrationResponse =
                 getMyRegistration(event.getId())
@@ -191,12 +194,12 @@ class RegistrationControllerIntegrationTest {
         accessToken = context.accessToken();
 
         Event event = context.event();
-        RegisterForEventRequest request = createRequestForAvailableLocker(event);
+        RegisterForEventRequest request = createRequestForAvailableLocker(event, accessToken);
 
         // when
         accessToken = null;
         ErrorResponse errorResponse =
-                registerForEvent(event.getId(), request)
+                registerForEvent(event.getId(), request, accessToken)
                         .statusCode(JwtErrorCode.INVALID_ACCESS_TOKEN.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -217,11 +220,11 @@ class RegistrationControllerIntegrationTest {
 
         Event event = context.event();
 
-        RegisterForEventRequest request = createRequestForUnavailableLocker(event);
+        RegisterForEventRequest request = createRequestForUnavailableLocker(event, accessToken);
 
         // when
         ErrorResponse errorResponse =
-                registerForEvent(event.getId(), request)
+                registerForEvent(event.getId(), request, accessToken)
                         .statusCode(EventErrorCode.LOCKER_UNAVAILABLE.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -241,14 +244,15 @@ class RegistrationControllerIntegrationTest {
         accessToken = context.accessToken();
 
         Event event = context.event();
-        RegisterForEventRequest request = createRequestForAvailableLocker(event);
+        RegisterForEventRequest request = createRequestForAvailableLocker(event, accessToken);
 
         // when
-        registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
+        registerForEvent(event.getId(), request, accessToken)
+                .statusCode(HttpStatus.CREATED.value());
 
         // then
         ErrorResponse errorResponse =
-                registerForEvent(event.getId(), request)
+                registerForEvent(event.getId(), request, accessToken)
                         .statusCode(
                                 RegistrationErrorCode.REGISTRATION_ALREADY_EXISTS
                                         .getHttpStatus()
@@ -275,7 +279,10 @@ class RegistrationControllerIntegrationTest {
 
         // when
         ErrorResponse errorResponse =
-                registerForEvent(nonExistentEventId, createRequestForAvailableLocker(event))
+                registerForEvent(
+                                nonExistentEventId,
+                                createRequestForAvailableLocker(event, accessToken),
+                                accessToken)
                         .statusCode(EventErrorCode.EVENT_NOT_FOUND.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -296,11 +303,12 @@ class RegistrationControllerIntegrationTest {
         Event event = context.event();
 
         Event anotherEvent = createEventWithLockers(EventStatus.OPEN, true);
-        RegisterForEventRequest request = createRequestForAvailableLocker(anotherEvent);
+        RegisterForEventRequest request =
+                createRequestForAvailableLocker(anotherEvent, accessToken);
 
         // when
         ErrorResponse errorResponse =
-                registerForEvent(event.getId(), request)
+                registerForEvent(event.getId(), request, accessToken)
                         .statusCode(EventErrorCode.INVALID_LOCKER_FOR_EVENT.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -320,11 +328,11 @@ class RegistrationControllerIntegrationTest {
         accessToken = context.accessToken();
 
         Event event = context.event();
-        RegisterForEventRequest request = createRequestForAvailableLocker(event);
+        RegisterForEventRequest request = createRequestForAvailableLocker(event, accessToken);
 
         // when
         ErrorResponse errorResponse =
-                registerForEvent(event.getId(), request)
+                registerForEvent(event.getId(), request, accessToken)
                         .statusCode(EventErrorCode.EVENT_NOT_OPEN.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -343,11 +351,11 @@ class RegistrationControllerIntegrationTest {
         accessToken = context.accessToken();
 
         Event event = context.event();
-        RegisterForEventRequest request = createRequestForAvailableLocker(event);
+        RegisterForEventRequest request = createRequestForAvailableLocker(event, accessToken);
 
         // when
         ErrorResponse errorResponse =
-                registerForEvent(event.getId(), request)
+                registerForEvent(event.getId(), request, accessToken)
                         .statusCode(EventErrorCode.EVENT_NOT_OPEN.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -366,11 +374,11 @@ class RegistrationControllerIntegrationTest {
         accessToken = context.accessToken();
 
         Event event = context.event();
-        RegisterForEventRequest request = createRequestForAvailableLocker(event);
+        RegisterForEventRequest request = createRequestForAvailableLocker(event, accessToken);
 
         // when
         ErrorResponse errorResponse =
-                registerForEvent(event.getId(), request)
+                registerForEvent(event.getId(), request, accessToken)
                         .statusCode(EventErrorCode.EVENT_NOT_OPEN.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
@@ -389,11 +397,11 @@ class RegistrationControllerIntegrationTest {
         accessToken = context.accessToken();
 
         Event event = context.event();
-        RegisterForEventRequest request = createRequestForAvailableLocker(event);
+        RegisterForEventRequest request = createRequestForAvailableLocker(event, accessToken);
 
         // when
         ErrorResponse errorResponse =
-                registerForEvent(event.getId(), request)
+                registerForEvent(event.getId(), request, accessToken)
                         .statusCode(
                                 EventErrorCode.ONLY_PARTICIPATION_DEPARTMENT_CAN_REGISTER
                                         .getHttpStatus()
@@ -416,9 +424,10 @@ class RegistrationControllerIntegrationTest {
         accessToken = context.accessToken();
 
         Event event = context.event();
-        RegisterForEventRequest request = createRequestForAvailableLocker(event);
+        RegisterForEventRequest request = createRequestForAvailableLocker(event, accessToken);
 
-        registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
+        registerForEvent(event.getId(), request, accessToken)
+                .statusCode(HttpStatus.CREATED.value());
 
         // when, then
         cancelMyRegistration(event.getId()).statusCode(HttpStatus.NO_CONTENT.value());
@@ -447,13 +456,15 @@ class RegistrationControllerIntegrationTest {
         accessToken = context.accessToken();
 
         Event event = context.event();
-        RegisterForEventRequest request = createRequestForAvailableLocker(event);
+        RegisterForEventRequest request = createRequestForAvailableLocker(event, accessToken);
 
-        registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
+        registerForEvent(event.getId(), request, accessToken)
+                .statusCode(HttpStatus.CREATED.value());
         cancelMyRegistration(event.getId()).statusCode(HttpStatus.NO_CONTENT.value());
 
         // when, then
-        registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
+        registerForEvent(event.getId(), request, accessToken)
+                .statusCode(HttpStatus.CREATED.value());
     }
 
     @Test
@@ -466,9 +477,10 @@ class RegistrationControllerIntegrationTest {
         accessToken = context.accessToken();
 
         Event event = context.event();
-        RegisterForEventRequest request = createRequestForAvailableLocker(event);
+        RegisterForEventRequest request = createRequestForAvailableLocker(event, accessToken);
 
-        registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
+        registerForEvent(event.getId(), request, accessToken)
+                .statusCode(HttpStatus.CREATED.value());
 
         UUID nonExistentEventId = UUID.randomUUID();
 
@@ -492,7 +504,7 @@ class RegistrationControllerIntegrationTest {
         accessToken = context.accessToken();
 
         Event event = context.event();
-        RegisterForEventRequest request = createRequestForAvailableLocker(event);
+        RegisterForEventRequest request = createRequestForAvailableLocker(event, accessToken);
 
         // 신청 전 조회
         EventPageable eventPageable = new EventPageable(0, 10, "DESC", "createdAt");
@@ -506,7 +518,8 @@ class RegistrationControllerIntegrationTest {
                 myEventsBeforeRegistration.content().getFirst().availableLockerCount();
 
         // 신청
-        registerForEvent(event.getId(), request).statusCode(HttpStatus.CREATED.value());
+        registerForEvent(event.getId(), request, accessToken)
+                .statusCode(HttpStatus.CREATED.value());
 
         // when
         MyEventCustomPage myEventsAfterRegistration =
@@ -541,7 +554,8 @@ class RegistrationControllerIntegrationTest {
                 .ifError();
     }
 
-    private ValidatableResponse registerForEvent(UUID eventId, RegisterForEventRequest request) {
+    public static ValidatableResponse registerForEvent(
+            UUID eventId, RegisterForEventRequest request, String accessToken) {
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .body(request)
@@ -565,21 +579,23 @@ class RegistrationControllerIntegrationTest {
         return eventTestUtil.createEventWithFloorAndLockers(List.of(5, 10), status, publish);
     }
 
-    private RegisterForEventRequest createRequestForAvailableLocker(Event event) {
-        List<FloorWithLockersResponse> floors = getFloors(event);
+    public static RegisterForEventRequest createRequestForAvailableLocker(
+            Event event, String accessToken) {
+        List<FloorWithLockersResponse> floors = getFloors(event, accessToken);
         // 짝수 번째 인덱스의 사물함은 테스트에서 사용 가능한 상태 (eventTestUtil 참고)
         Long lockerId = floors.getFirst().lockers().get(1).lockerId(); // 짝수 번째 사용 가능
         return new RegisterForEventRequest(lockerId);
     }
 
-    private RegisterForEventRequest createRequestForUnavailableLocker(Event event) {
-        List<FloorWithLockersResponse> floors = getFloors(event);
+    private RegisterForEventRequest createRequestForUnavailableLocker(
+            Event event, String accessToken) {
+        List<FloorWithLockersResponse> floors = getFloors(event, accessToken);
         // 홀수 번째 인덱스의 사물함은 테스트에서 사용 불가능한 상태 (eventTestUtil 참고)
         Long lockerId = floors.getLast().lockers().getFirst().lockerId(); // 홀수 번째 사용 불가
         return new RegisterForEventRequest(lockerId);
     }
 
-    private List<FloorWithLockersResponse> getFloors(Event event) {
+    private static List<FloorWithLockersResponse> getFloors(Event event, String accessToken) {
         return getEventLockers(event.getId(), accessToken)
                 .statusCode(HttpStatus.OK.value())
                 .extract()
