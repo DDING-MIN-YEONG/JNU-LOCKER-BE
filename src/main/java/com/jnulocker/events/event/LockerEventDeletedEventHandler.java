@@ -17,8 +17,8 @@ public class LockerEventDeletedEventHandler {
     @TransactionalEventListener(
             classes = LockerEventDeletedEvent.class,
             phase = TransactionPhase.AFTER_COMMIT)
-    public void handle(LockerEventDeletedEvent lockerEventDeletedEvent) throws SchedulerException {
-        UUID eventId = lockerEventDeletedEvent.getEventId();
+    public void handle(LockerEventDeletedEvent event) throws SchedulerException {
+        UUID eventId = event.getEventId();
         quartzSchedulerUtil.deleteEventJobs(eventId);
     }
 }
