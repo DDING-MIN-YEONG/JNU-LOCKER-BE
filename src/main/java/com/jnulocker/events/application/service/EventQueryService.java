@@ -60,10 +60,7 @@ public class EventQueryService implements EventQuery {
         Long memberId = SecurityUtils.getCurrentMemberId();
         Member member = memberQuery.findByIdOrThrow(memberId);
 
-        Event event =
-                eventLoadPort
-                        .getEventByIdWithEventParticipation(eventId)
-                        .orElseThrow(() -> EventNotFoundException.EXCEPTION);
+        Event event = getByIdWithEventParticipationOrThrow(eventId);
 
         if (!event.isSameDepartment(member.getDepartment())) {
             throw OnlyDepartmentManagerCanSeeEventException.EXCEPTION;
@@ -76,6 +73,12 @@ public class EventQueryService implements EventQuery {
         List<FloorInfo> floors = toFloorInfos(floorWithLockers);
 
         return EventResponse.of(event, floors);
+    }
+
+    private Event getByIdWithEventParticipationOrThrow(UUID eventId) {
+        return eventLoadPort
+                .getEventByIdWithEventParticipation(eventId)
+                .orElseThrow(() -> EventNotFoundException.EXCEPTION);
     }
 
     @Override
@@ -91,10 +94,7 @@ public class EventQueryService implements EventQuery {
         Long memberId = SecurityUtils.getCurrentMemberId();
         Member member = memberQuery.findByIdOrThrow(memberId);
 
-        Event event =
-                eventLoadPort
-                        .getEventByIdWithEventParticipation(eventId)
-                        .orElseThrow(() -> EventNotFoundException.EXCEPTION);
+        Event event = getByIdWithEventParticipationOrThrow(eventId);
 
         if (!event.isParticipationDepartment(member.getDepartment())) {
             throw OnlyParticipationDepartmentCanSeeEventException.EXCEPTION;
