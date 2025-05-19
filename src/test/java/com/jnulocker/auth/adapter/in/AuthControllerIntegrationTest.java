@@ -898,7 +898,6 @@ class AuthControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("여러 사물함 신청 후 회원탈퇴하면 모든 Registration이 삭제되고 Locker들이 사용가능 상태가 된다")
     void 여러_사물함_신청_후_회원탈퇴하면_모든_Registration이_삭제되고_Locker들이_사용가능_상태가_된다() {
         // given
         List<Integer> lockersPerFloor = Arrays.asList(5, 5);
@@ -955,7 +954,6 @@ class AuthControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("인증되지 않은 사용자는 회원탈퇴할 수 없다")
     void 인증되지_않은_사용자는_회원탈퇴할_수_없다() {
         // given
         String invalidToken = "invalid.token.value";
