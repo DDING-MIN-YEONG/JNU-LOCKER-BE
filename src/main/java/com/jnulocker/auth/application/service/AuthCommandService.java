@@ -14,6 +14,7 @@ import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.response.AuthToken;
 import com.jnulocker.auth.event.ManagerApprovedEvent;
+import com.jnulocker.auth.event.ManagerRejectedEvent;
 import com.jnulocker.auth.exception.UserAlreadyExistException;
 import com.jnulocker.auth.jwt.TokenProvider;
 import com.jnulocker.auth.jwt.exception.InvalidRefreshTokenException;
@@ -114,7 +115,7 @@ public class AuthCommandService
         // refreshToken 삭제
         tokenProvider.deleteRefreshTokenById(approvee.getId());
 
-        publishManagerApprovalEvent(approvee);
+        publishManagerApprovedEvent(approvee);
     }
 
     @Override
@@ -127,6 +128,8 @@ public class AuthCommandService
         approver.validateManagerApproval(rejectee.getDepartment());
 
         deleteMember(rejectee);
+
+        publishManagerRejectedEvent(rejectee);
     }
 
     @Override
@@ -190,8 +193,13 @@ public class AuthCommandService
         memberCommand.delete(member);
     }
 
-    private void publishManagerApprovalEvent(Member member) {
+    private void publishManagerApprovedEvent(Member member) {
         eventPublisher.publishEvent(
                 ManagerApprovedEvent.of(member.getEmail(), member.getDepartment().getName()));
+    }
+
+    public void publishManagerRejectedEvent(Member member) {
+        eventPublisher.publishEvent(
+                ManagerRejectedEvent.of(member.getEmail(), member.getDepartment().getName()));
     }
 }
