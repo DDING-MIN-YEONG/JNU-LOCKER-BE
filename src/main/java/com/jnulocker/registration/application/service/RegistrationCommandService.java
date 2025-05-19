@@ -14,6 +14,7 @@ import com.jnulocker.registration.application.port.out.RegistrationRecordPort;
 import com.jnulocker.registration.domain.Registration;
 import com.jnulocker.registration.exception.RegistrationAlreadyExistsException;
 import com.jnulocker.registration.exception.RegistrationNotFoundException;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -64,5 +65,19 @@ public class RegistrationCommandService implements RegistrationCommand {
         locker.markAsAvailable();
 
         registrationRecordPort.delete(registration);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAllByMember(Member member) {
+        // 해당 회원의 모든 등록 정보 삭제
+        List<Registration> registrations = registrationLoadPort.getAllByMember(member);
+
+        for (Registration registration : registrations) {
+            Locker locker = registration.getLocker();
+            locker.markAsAvailable(); // 사물함을 사용 가능 상태로 변경
+        }
+
+        registrationRecordPort.deleteAllByMember(member);
     }
 }

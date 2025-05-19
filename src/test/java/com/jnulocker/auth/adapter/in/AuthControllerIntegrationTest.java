@@ -4,6 +4,9 @@ import static auth.application.port.in.request.ManagerSignupRequestTestDataBuild
 import static auth.application.port.in.request.SendEmailRequestTestDataBuilder.sendEmailRequestBuilder;
 import static auth.application.port.in.request.UserSignupRequestTestDataBuilder.userSignupRequestBuilder;
 import static auth.application.port.in.request.VerifyCodeRequestTestDataBuilder.verifyCodeRequestBuilder;
+import static com.jnulocker.events.adapter.in.EventControllerIntegrationTest.getEventLockers;
+import static com.jnulocker.registration.adapter.in.RegistrationControllerIntegrationTest.createRequestForAvailableLocker;
+import static com.jnulocker.registration.adapter.in.RegistrationControllerIntegrationTest.registerForEvent;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThatList;
@@ -23,6 +26,12 @@ import com.jnulocker.auth.jwt.exception.JwtErrorCode;
 import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.common.util.RedisUtil;
+import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
+import com.jnulocker.events.domain.Event;
+import com.jnulocker.events.domain.EventStatus;
+import com.jnulocker.events.domain.Locker;
+import com.jnulocker.events.utils.EventTestUtil;
+import com.jnulocker.events.utils.LockerEventContext;
 import com.jnulocker.member.adapter.out.MemberRepository;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
@@ -31,6 +40,10 @@ import com.jnulocker.member.utils.MemberTestUtil;
 import com.jnulocker.organization.domain.Department;
 import com.jnulocker.organization.exception.DepartmentErrorCode;
 import com.jnulocker.organization.utils.OrganizationTestUtil;
+import com.jnulocker.registration.adapter.out.RegistrationRepository;
+import com.jnulocker.registration.application.port.in.request.RegisterForEventRequest;
+import com.jnulocker.registration.domain.Registration;
+import com.jnulocker.registration.utils.RegistrationTestUtil;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import io.restassured.RestAssured;
@@ -39,7 +52,10 @@ import io.restassured.http.Cookies;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -70,9 +86,15 @@ class AuthControllerIntegrationTest {
 
     @Autowired private TokenRepository tokenRepository;
 
+    @Autowired private RegistrationRepository registrationRepository;
+
     @Autowired private MemberTestUtil memberTestUtil;
 
     @Autowired private OrganizationTestUtil organizationTestUtil;
+
+    @Autowired private EventTestUtil eventTestUtil;
+
+    @Autowired private RegistrationTestUtil registrationTestUtil;
 
     @Autowired private RedisUtil redisUtil;
 
@@ -91,8 +113,10 @@ class AuthControllerIntegrationTest {
 
     @AfterEach
     void tearDown() {
-        memberRepository.deleteAll();
         tokenRepository.deleteAll();
+        registrationTestUtil.deleteAll();
+        memberRepository.deleteAll(); // Member를 먼저 삭제 (Department 참조)
+        eventTestUtil.deleteAll(); // Event, Department, Organization 삭제
         redisUtil.deleteAll();
     }
 
@@ -761,6 +785,186 @@ class AuthControllerIntegrationTest {
         assertThat(refreshTokenResponse).isBlank();
     }
 
+    @Test
+    void USER는_회원탈퇴할_수_있다() {
+        // given
+        Department department = organizationTestUtil.createCouncilDepartment();
+        UserSignupRequest signupRequest =
+                userSignupRequestBuilder().withDepartmentId(department.getId()).build();
+        signupUser(signupRequest).statusCode(HttpStatus.CREATED.value());
+
+        LoginRequest loginRequest =
+                new LoginRequest(signupRequest.email(), signupRequest.password());
+        ExtractableResponse<Response> loginResponse =
+                login(loginRequest).statusCode(HttpStatus.OK.value()).extract();
+        String accessToken = getCookieValue(loginResponse.detailedCookies(), ACCESS_TOKEN);
+
+        // 회원 존재 확인
+        boolean memberExistsBefore = memberRepository.existsByEmail(signupRequest.email());
+        assertThat(memberExistsBefore).isTrue();
+
+        // when
+        withdraw(accessToken).statusCode(HttpStatus.NO_CONTENT.value());
+
+        // then
+        boolean memberExistsAfter = memberRepository.existsByEmail(signupRequest.email());
+        assertThat(memberExistsAfter).isFalse();
+    }
+
+    @Test
+    void MANAGER는_회원탈퇴할_수_있다() {
+        // given
+        Department department = organizationTestUtil.createCouncilDepartment();
+        ManagerSignupRequest signupRequest =
+                managerSignupRequestBuilder().withDepartmentId(department.getId()).build();
+        signupManager(signupRequest).statusCode(HttpStatus.CREATED.value());
+
+        Member member = memberTestUtil.findMemberByEmail(signupRequest.email());
+        String approverToken =
+                authTestUtil.generateAccessTokenWithDepartment(Role.MANAGER, department);
+
+        // 관리자 승인
+        ManagerApproveRequest approveRequest = new ManagerApproveRequest(member.getId());
+        approveManagerSignup(approverToken, approveRequest)
+                .statusCode(HttpStatus.NO_CONTENT.value());
+
+        // 로그인 후 탈퇴
+        LoginRequest loginRequest =
+                new LoginRequest(signupRequest.email(), signupRequest.password());
+        ExtractableResponse<Response> loginResponse =
+                login(loginRequest).statusCode(HttpStatus.OK.value()).extract();
+        String accessToken = getCookieValue(loginResponse.detailedCookies(), ACCESS_TOKEN);
+
+        // 회원 존재 확인
+        boolean memberExistsBefore = memberRepository.existsByEmail(signupRequest.email());
+        assertThat(memberExistsBefore).isTrue();
+
+        // when
+        withdraw(accessToken).statusCode(HttpStatus.NO_CONTENT.value());
+
+        // then
+        boolean memberExistsAfter = memberRepository.existsByEmail(signupRequest.email());
+        assertThat(memberExistsAfter).isFalse();
+    }
+
+    @Test
+    void 사물함_신청_후_회원탈퇴하면_Registration이_삭제되고_Locker가_사용가능_상태가_된다() {
+        // given
+        List<Integer> lockersPerFloor = Arrays.asList(5, 5);
+        LockerEventContext context =
+                eventTestUtil.setUpLockerEventForRegistration(
+                        lockersPerFloor, Role.USER, EventStatus.OPEN, true);
+
+        Event event = context.event();
+        Member member = context.member();
+        String accessToken = context.accessToken();
+
+        // 사물함 조회
+        List<FloorWithLockersResponse> floors =
+                getEventLockers(event.getId(), accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .jsonPath()
+                        .getList(".", FloorWithLockersResponse.class);
+        Long lockerId = floors.getFirst().lockers().get(1).lockerId();
+
+        // 사물함 신청
+        RegisterForEventRequest registerRequest = new RegisterForEventRequest(lockerId);
+        registerForEvent(event.getId(), registerRequest, accessToken)
+                .statusCode(HttpStatus.CREATED.value());
+
+        // 신청된 Registration과 Locker 상태 확인
+        Optional<Registration> registrationBefore =
+                registrationRepository.findByMemberIdAndLocker_Floor_EventId(
+                        member.getId(), event.getId());
+        assertThat(registrationBefore).isPresent();
+
+        Locker lockerBefore = registrationBefore.get().getLocker();
+        assertThat(lockerBefore.getAvailable()).isFalse(); // 신청으로 인해 사용불가 상태
+
+        // when
+        withdraw(accessToken).statusCode(HttpStatus.NO_CONTENT.value());
+
+        // then
+        // 회원 삭제 확인
+        boolean memberExists = memberRepository.existsById(member.getId());
+        assertThat(memberExists).isFalse();
+
+        // Registration 삭제 확인
+        Optional<Registration> registrationAfter =
+                registrationRepository.findByMemberIdAndLocker_Floor_EventId(
+                        member.getId(), event.getId());
+        assertThat(registrationAfter).isNotPresent();
+    }
+
+    @Test
+    void 여러_사물함_신청_후_회원탈퇴하면_모든_Registration이_삭제되고_Locker들이_사용가능_상태가_된다() {
+        // given
+        List<Integer> lockersPerFloor = Arrays.asList(5, 5);
+
+        // 첫 번째 이벤트 생성
+        LockerEventContext context =
+                eventTestUtil.setUpLockerEventForRegistration(
+                        lockersPerFloor, Role.USER, EventStatus.OPEN, true);
+
+        Event event1 = context.event();
+        Department department = context.department();
+        Member member = context.member();
+        String accessToken = context.accessToken();
+
+        // 두 번째 이벤트 생성 (같은 멤버)
+        Event event2 =
+                eventTestUtil.createEventWithParticipationDepartment(
+                        lockersPerFloor, department, EventStatus.OPEN, true);
+
+        RegisterForEventRequest registerRequest1 =
+                createRequestForAvailableLocker(event1, accessToken);
+        RegisterForEventRequest registerRequest2 =
+                createRequestForAvailableLocker(event2, accessToken);
+
+        // 첫 번째 이벤트에 사물함 신청
+        registerForEvent(event1.getId(), registerRequest1, accessToken)
+                .statusCode(HttpStatus.CREATED.value());
+
+        // 두 번째 이벤트에 사물함 신청
+        registerForEvent(event2.getId(), registerRequest2, accessToken)
+                .statusCode(HttpStatus.CREATED.value());
+
+        // 신청 확인
+        List<Registration> registrationsBefore =
+                registrationRepository.findAll().stream()
+                        .filter(r -> r.getMember().getId().equals(member.getId()))
+                        .toList();
+        assertThatList(registrationsBefore).hasSize(2);
+
+        // when
+        withdraw(accessToken).statusCode(HttpStatus.NO_CONTENT.value());
+
+        // then
+        // 모든 Registration 삭제 확인
+        List<Registration> registrationsAfter =
+                registrationRepository.findAll().stream()
+                        .filter(r -> r.getMember().getId().equals(member.getId()))
+                        .toList();
+        assertThatList(registrationsAfter).isEmpty();
+
+        // 회원 삭제 확인
+        boolean memberExists = memberRepository.existsById(member.getId());
+        assertThat(memberExists).isFalse();
+    }
+
+    @Test
+    void 인증되지_않은_사용자는_회원탈퇴할_수_없다() {
+        // given
+        String invalidToken = "invalid.token.value";
+
+        // when
+        ValidatableResponse response = withdraw(invalidToken);
+
+        // then
+        response.statusCode(HttpStatus.UNAUTHORIZED.value());
+    }
+
     private ValidatableResponse rejectManagerSignup(
             String accessToken, ManagerRejectRequest request) {
         return given().contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -892,5 +1096,15 @@ class AuthControllerIntegrationTest {
                 .then()
                 .log()
                 .all();
+    }
+
+    public static ValidatableResponse withdraw(String accessToken) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .when()
+                .delete(AUTH_URL + "/withdraw")
+                .then()
+                .log()
+                .ifError();
     }
 }

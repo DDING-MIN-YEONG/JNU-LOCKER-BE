@@ -1,9 +1,11 @@
 package com.jnulocker.registration.adapter.out;
 
 import com.jnulocker.common.annotation.PersistenceAdapter;
+import com.jnulocker.member.domain.Member;
 import com.jnulocker.registration.application.port.out.RegistrationLoadPort;
 import com.jnulocker.registration.application.port.out.RegistrationRecordPort;
 import com.jnulocker.registration.domain.Registration;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -40,5 +42,15 @@ public class RegistrationPersistenceAdapter
     @Override
     public Optional<Registration> getRegistrationByMemberIdAndEventId(Long memberId, UUID eventId) {
         return registrationRepository.findByMemberIdAndLocker_Floor_EventId(memberId, eventId);
+    }
+
+    @Override
+    public List<Registration> getAllByMember(Member member) {
+        return registrationRepository.findAllByMember(member);
+    }
+
+    @Override
+    public void deleteAllByMember(Member member) {
+        registrationRepository.deleteAllByMember(member);
     }
 }
