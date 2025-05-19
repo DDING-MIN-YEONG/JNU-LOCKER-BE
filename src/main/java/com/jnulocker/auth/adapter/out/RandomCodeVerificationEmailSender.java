@@ -1,6 +1,6 @@
 package com.jnulocker.auth.adapter.out;
 
-import com.jnulocker.auth.application.port.out.EmailSender;
+import com.jnulocker.auth.application.port.out.VerificationEmailSender;
 import com.jnulocker.auth.exception.FailedToCreateCodeException;
 import com.jnulocker.auth.exception.SendEmailException;
 import com.jnulocker.common.util.RedisUtil;
@@ -20,7 +20,7 @@ import org.thymeleaf.context.Context;
 @Component
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "custom.email-verification.fixed", havingValue = "false")
-public class RandomCodeEmailSender implements EmailSender {
+public class RandomCodeVerificationEmailSender implements VerificationEmailSender {
 
     private final RedisUtil redisUtil;
     private final JavaMailSender javaMailSender;

@@ -1,6 +1,6 @@
 package com.jnulocker.auth.application.port.out;
 
-public interface EmailSender {
+public interface VerificationEmailSender {
     void sendVerificationEmail(String email, String code);
 
     String generateVerificationCode();

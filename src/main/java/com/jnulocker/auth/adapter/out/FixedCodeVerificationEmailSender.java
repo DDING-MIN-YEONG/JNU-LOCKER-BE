@@ -1,6 +1,6 @@
 package com.jnulocker.auth.adapter.out;
 
-import com.jnulocker.auth.application.port.out.EmailSender;
+import com.jnulocker.auth.application.port.out.VerificationEmailSender;
 import com.jnulocker.common.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "custom.email-verification.fixed", havingValue = "true")
-public class FixedCodeEmailSender implements EmailSender {
+public class FixedCodeVerificationEmailSender implements VerificationEmailSender {
 
     private final RedisUtil redisUtil;
 

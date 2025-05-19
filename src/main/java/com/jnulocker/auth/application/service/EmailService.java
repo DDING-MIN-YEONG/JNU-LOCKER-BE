@@ -4,7 +4,7 @@ import com.jnulocker.auth.application.port.in.SendEmailCommand;
 import com.jnulocker.auth.application.port.in.VerifyCodeCommand;
 import com.jnulocker.auth.application.port.in.request.SendEmailRequest;
 import com.jnulocker.auth.application.port.in.request.VerifyCodeRequest;
-import com.jnulocker.auth.application.port.out.EmailSender;
+import com.jnulocker.auth.application.port.out.VerificationEmailSender;
 import com.jnulocker.auth.exception.CodeNotCorrectException;
 import com.jnulocker.common.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 public class EmailService implements SendEmailCommand, VerifyCodeCommand {
 
     private final RedisUtil redisUtil;
-    private final EmailSender emailSender;
+    private final VerificationEmailSender verificationEmailSender;
     private final AuthCommandService authCommandService;
 
     @Override
@@ -29,8 +29,8 @@ public class EmailService implements SendEmailCommand, VerifyCodeCommand {
             redisUtil.deleteVerifiedData(request.email());
         }
 
-        String code = emailSender.generateVerificationCode();
-        emailSender.sendVerificationEmail(request.email(), code);
+        String code = verificationEmailSender.generateVerificationCode();
+        verificationEmailSender.sendVerificationEmail(request.email(), code);
     }
 
     @Override
