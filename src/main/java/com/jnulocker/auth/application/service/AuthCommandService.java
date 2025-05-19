@@ -198,7 +198,7 @@ public class AuthCommandService
                 ManagerApprovedEvent.of(member.getEmail(), member.getDepartment().getName()));
     }
 
-    public void publishManagerRejectedEvent(Member member) {
+    private void publishManagerRejectedEvent(Member member) {
         eventPublisher.publishEvent(
                 ManagerRejectedEvent.of(member.getEmail(), member.getDepartment().getName()));
     }
