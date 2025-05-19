@@ -13,6 +13,8 @@ import com.jnulocker.auth.application.port.in.request.ManagerRejectRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerSignupRequest;
 import com.jnulocker.auth.application.port.in.request.UserSignupRequest;
 import com.jnulocker.auth.application.port.in.response.AuthToken;
+import com.jnulocker.auth.event.ManagerApprovedEvent;
+import com.jnulocker.auth.event.ManagerRejectedEvent;
 import com.jnulocker.auth.exception.UserAlreadyExistException;
 import com.jnulocker.auth.jwt.TokenProvider;
 import com.jnulocker.auth.jwt.exception.InvalidRefreshTokenException;
@@ -25,6 +27,7 @@ import com.jnulocker.organization.application.port.in.DepartmentQuery;
 import com.jnulocker.organization.domain.Department;
 import com.jnulocker.registration.application.port.in.RegistrationCommand;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -50,6 +53,7 @@ public class AuthCommandService
     private final RedisUtil redisUtil;
     private final TokenRepository tokenRepository;
     private final RegistrationCommand registrationCommand;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -111,7 +115,7 @@ public class AuthCommandService
         // refreshToken 삭제
         tokenProvider.deleteRefreshTokenById(approvee.getId());
 
-        memberCommand.save(approvee);
+        publishManagerApprovedEvent(approvee);
     }
 
     @Override
@@ -124,6 +128,8 @@ public class AuthCommandService
         approver.validateManagerApproval(rejectee.getDepartment());
 
         deleteMember(rejectee);
+
+        publishManagerRejectedEvent(rejectee);
     }
 
     @Override
@@ -185,5 +191,15 @@ public class AuthCommandService
 
         // 회원 삭제
         memberCommand.delete(member);
+    }
+
+    private void publishManagerApprovedEvent(Member member) {
+        eventPublisher.publishEvent(
+                ManagerApprovedEvent.of(member.getEmail(), member.getDepartment().getName()));
+    }
+
+    private void publishManagerRejectedEvent(Member member) {
+        eventPublisher.publishEvent(
+                ManagerRejectedEvent.of(member.getEmail(), member.getDepartment().getName()));
     }
 }
