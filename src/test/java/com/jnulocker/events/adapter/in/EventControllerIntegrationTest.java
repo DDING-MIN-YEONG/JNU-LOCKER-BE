@@ -714,12 +714,13 @@ public class EventControllerIntegrationTest {
         accessToken = authTestUtil.generateAccessTokenWithMember(member);
         ErrorResponse errorResponse =
                 getMyEventDetail(event.getId(), accessToken)
-                        .statusCode(EventErrorCode.EVENT_NOT_FOUND.getHttpStatus().value())
+                        .statusCode(EventErrorCode.EVENT_NOT_PUBLISHED.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
 
         // then
-        assertThat(errorResponse.message()).isEqualTo(EventErrorCode.EVENT_NOT_FOUND.getMessage());
+        assertThat(errorResponse.message())
+                .isEqualTo(EventErrorCode.EVENT_NOT_PUBLISHED.getMessage());
     }
 
     @Test

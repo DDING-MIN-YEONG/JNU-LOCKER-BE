@@ -100,9 +100,7 @@ public class EventQueryService implements EventQuery {
             throw OnlyParticipationDepartmentCanSeeEventException.EXCEPTION;
         }
 
-        if (!event.getPublish()) {
-            throw EventNotFoundException.EXCEPTION;
-        }
+        event.validatePublishStatus();
 
         return MyEventResponse.from(event);
     }
