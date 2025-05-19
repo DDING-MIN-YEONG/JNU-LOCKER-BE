@@ -131,6 +131,7 @@ public class AuthController implements AuthApi {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    @Override
     @DeleteMapping("/withdraw")
     public ResponseEntity<Void> withdraw() {
         withdrawCommand.withdraw();

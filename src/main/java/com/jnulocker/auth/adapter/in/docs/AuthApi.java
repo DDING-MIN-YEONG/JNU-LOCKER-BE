@@ -83,4 +83,8 @@ public interface AuthApi {
     @Operation(summary = "로그아웃", description = "로그아웃합니다.")
     @ApiResponse(responseCode = "204", description = "로그아웃 성공")
     ResponseEntity<Void> logout(HttpServletResponse response);
+
+    @Operation(summary = "회원 탈퇴", description = "회원 탈퇴합니다.")
+    @ApiResponse(responseCode = "204", description = "회원 탈퇴 성공")
+    ResponseEntity<Void> withdraw();
 }
