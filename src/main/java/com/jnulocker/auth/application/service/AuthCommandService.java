@@ -23,7 +23,7 @@ import com.jnulocker.member.application.port.in.MemberQuery;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.organization.application.port.in.DepartmentQuery;
 import com.jnulocker.organization.domain.Department;
-import com.jnulocker.registration.application.port.out.RegistrationRecordPort;
+import com.jnulocker.registration.application.port.in.RegistrationCommand;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -49,7 +49,7 @@ public class AuthCommandService
     private final TokenProvider tokenProvider;
     private final RedisUtil redisUtil;
     private final TokenRepository tokenRepository;
-    private final RegistrationRecordPort registrationRecordPort;
+    private final RegistrationCommand registrationCommand;
 
     @Override
     @Transactional
@@ -181,7 +181,7 @@ public class AuthCommandService
         tokenProvider.deleteRefreshTokenById(member.getId());
 
         // 신청 기록 삭제: 사물함 available 상태로 변경
-        registrationRecordPort.deleteAllByMember(member);
+        registrationCommand.deleteAllByMember(member);
 
         // 회원 삭제
         memberCommand.delete(member);

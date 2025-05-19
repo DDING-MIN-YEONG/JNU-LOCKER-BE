@@ -45,14 +45,12 @@ public class RegistrationPersistenceAdapter
     }
 
     @Override
-    public void deleteAllByMember(Member member) {
-        List<Registration> registrations = registrationRepository.findAllByMember(member);
-        for (Registration registration : registrations) {
-            // Locker를 다시 사용가능 상태로 변경
-            registration.getLocker().markAsAvailable();
-        }
+    public List<Registration> getAllByMember(Member member) {
+        return registrationRepository.findAllByMember(member);
+    }
 
-        // Registration 삭제
+    @Override
+    public void deleteAllByMember(Member member) {
         registrationRepository.deleteAllByMember(member);
     }
 }
