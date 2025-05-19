@@ -13,6 +13,7 @@ import com.jnulocker.auth.application.port.in.ReissueCommand;
 import com.jnulocker.auth.application.port.in.SendEmailCommand;
 import com.jnulocker.auth.application.port.in.UserSignupCommand;
 import com.jnulocker.auth.application.port.in.VerifyCodeCommand;
+import com.jnulocker.auth.application.port.in.WithdrawCommand;
 import com.jnulocker.auth.application.port.in.request.LoginRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerApproveRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerRejectRequest;
@@ -51,6 +52,7 @@ public class AuthController implements AuthApi {
     private final SendEmailCommand sendEmailCommand;
     private final VerifyCodeCommand verifyCodeCommand;
     private final LogoutCommand logoutCommand;
+    private final WithdrawCommand withdrawCommand;
 
     @Override
     @PostMapping("/users/signup")
@@ -126,6 +128,12 @@ public class AuthController implements AuthApi {
     public ResponseEntity<Void> logout(HttpServletResponse response) {
         logoutCommand.logout();
         clearAuthCookies(response);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<Void> withdraw() {
+        withdrawCommand.withdraw();
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
