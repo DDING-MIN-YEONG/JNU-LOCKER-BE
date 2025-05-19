@@ -6,6 +6,7 @@ import com.jnulocker.auth.application.port.in.LogoutCommand;
 import com.jnulocker.auth.application.port.in.ManagerSignupCommand;
 import com.jnulocker.auth.application.port.in.ReissueCommand;
 import com.jnulocker.auth.application.port.in.UserSignupCommand;
+import com.jnulocker.auth.application.port.in.WithdrawCommand;
 import com.jnulocker.auth.application.port.in.request.LoginRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerApproveRequest;
 import com.jnulocker.auth.application.port.in.request.ManagerRejectRequest;
@@ -22,6 +23,7 @@ import com.jnulocker.member.application.port.in.MemberQuery;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.organization.application.port.in.DepartmentQuery;
 import com.jnulocker.organization.domain.Department;
+import com.jnulocker.registration.application.port.out.RegistrationRecordPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,7 +39,8 @@ public class AuthCommandService
                 ManagerSignupCommand,
                 LoginCommand,
                 ReissueCommand,
-                LogoutCommand {
+                LogoutCommand,
+                WithdrawCommand {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final MemberQuery memberQuery;
@@ -46,6 +49,7 @@ public class AuthCommandService
     private final TokenProvider tokenProvider;
     private final RedisUtil redisUtil;
     private final TokenRepository tokenRepository;
+    private final RegistrationRecordPort registrationRecordPort;
 
     @Override
     @Transactional
@@ -119,11 +123,7 @@ public class AuthCommandService
 
         approver.validateManagerApproval(rejectee.getDepartment());
 
-        // refreshToken 삭제
-        tokenProvider.deleteRefreshTokenById(rejectee.getId());
-
-        // reject는 가입 거부이므로 회원 삭제
-        memberCommand.delete(rejectee);
+        deleteMember(rejectee);
     }
 
     @Override
@@ -166,5 +166,24 @@ public class AuthCommandService
         if (memberQuery.existsByEmail(email)) {
             throw UserAlreadyExistException.EXCEPTION;
         }
+    }
+
+    @Override
+    @Transactional
+    public void withdraw() {
+        Long memberId = SecurityUtils.getCurrentMemberId();
+        Member member = memberQuery.findByIdOrThrow(memberId);
+        deleteMember(member);
+    }
+
+    private void deleteMember(Member member) {
+        // RefreshToken 삭제
+        tokenProvider.deleteRefreshTokenById(member.getId());
+
+        // 신청 기록 삭제: 사물함 available 상태로 변경
+        registrationRecordPort.deleteAllByMember(member);
+
+        // 회원 삭제
+        memberCommand.delete(member);
     }
 }
