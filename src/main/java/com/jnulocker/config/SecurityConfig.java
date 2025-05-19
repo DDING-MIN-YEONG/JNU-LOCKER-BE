@@ -75,6 +75,7 @@ public class SecurityConfig {
                                         HttpMethod.GET,
                                         "/v1/events/*/registrations/me",
                                         "/v1/events/me",
+                                        "/v1/events/me/*",
                                         "/v1/announces/me",
                                         "/v1/announces/me/*")
                                 .hasAuthority(Role.USER.getRole())

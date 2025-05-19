@@ -4,6 +4,7 @@ import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.EventResponse;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import com.jnulocker.events.application.port.in.response.MyEventCustomPage;
+import com.jnulocker.events.application.port.in.response.MyEventResponse;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.Locker;
 import java.util.List;
@@ -23,4 +24,6 @@ public interface EventQuery {
     List<FloorWithLockersResponse> getLockersByEventId(UUID eventId);
 
     EventResponse getEvent(UUID eventId);
+
+    MyEventResponse getMyEvent(UUID eventId);
 }

@@ -379,12 +379,13 @@ public class RegistrationControllerIntegrationTest {
         // when
         ErrorResponse errorResponse =
                 registerForEvent(event.getId(), request, accessToken)
-                        .statusCode(EventErrorCode.EVENT_NOT_OPEN.getHttpStatus().value())
+                        .statusCode(EventErrorCode.EVENT_NOT_PUBLISHED.getHttpStatus().value())
                         .extract()
                         .as(ErrorResponse.class);
 
         // then
-        assertThat(errorResponse.message()).isEqualTo(EventErrorCode.EVENT_NOT_OPEN.getMessage());
+        assertThat(errorResponse.message())
+                .isEqualTo(EventErrorCode.EVENT_NOT_PUBLISHED.getMessage());
     }
 
     @Test

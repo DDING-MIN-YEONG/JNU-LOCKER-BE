@@ -20,6 +20,7 @@ import com.jnulocker.events.application.port.in.response.EventPageable;
 import com.jnulocker.events.application.port.in.response.EventResponse;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import com.jnulocker.events.application.port.in.response.MyEventCustomPage;
+import com.jnulocker.events.application.port.in.response.MyEventResponse;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.exception.EventErrorCode;
@@ -623,6 +624,207 @@ public class EventControllerIntegrationTest {
     }
 
     @Test
+    void 자신이_속한_학과가_참여하는_이벤트의_상세정보를_조회할_수_있다() {
+        // given
+        Department department = organizationTestUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
+
+        // 이벤트 생성: 해당 학과가 참여하는 이벤트
+        Event event =
+                eventTestUtil.createEventWithParticipationDepartment(
+                        List.of(5, 10), department, EventStatus.OPEN, true);
+
+        // when
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+        MyEventResponse myEventResponse =
+                getMyEventDetail(event.getId(), accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(MyEventResponse.class);
+
+        // then
+        assertThat(myEventResponse.id()).isEqualTo(event.getId());
+        assertThat(myEventResponse.title()).isEqualTo(event.getTitle());
+        assertThat(myEventResponse.startAt()).isEqualTo(event.getEventSchedule().getStartAt());
+        assertThat(myEventResponse.endAt()).isEqualTo(event.getEventSchedule().getEndAt());
+        assertThat(myEventResponse.status()).isEqualTo(event.getEventStatus());
+    }
+
+    @Test
+    void 자신이_속한_학과가_참여하지_않는_이벤트는_상세조회할_수_없다() {
+        // given
+        Department participatingDepartment = organizationTestUtil.createCouncilDepartment();
+        Department nonParticipatingDepartment = organizationTestUtil.createCommitteeDepartment();
+        Member member =
+                memberTestUtil.createMemberFromRoleWithDepartment(
+                        Role.USER, nonParticipatingDepartment);
+
+        // 이벤트 생성: 다른 학과만 참여하는 이벤트
+        Event event =
+                eventTestUtil.createEventWithParticipationDepartment(
+                        List.of(5, 10), participatingDepartment, EventStatus.OPEN, true);
+
+        // when
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+        ErrorResponse errorResponse =
+                getMyEventDetail(event.getId(), accessToken)
+                        .statusCode(
+                                EventErrorCode.ONLY_PARTICIPATION_DEPARTMENT_CAN_SEE_EVENT
+                                        .getHttpStatus()
+                                        .value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(EventErrorCode.ONLY_PARTICIPATION_DEPARTMENT_CAN_SEE_EVENT.getMessage());
+    }
+
+    @Test
+    void 존재하지_않는_이벤트에_대한_내_이벤트_상세조회는_불가능하다() {
+        // given
+        Department department = organizationTestUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
+        UUID nonExistentEventId = UUID.randomUUID();
+
+        // when
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+        ErrorResponse errorResponse =
+                getMyEventDetail(nonExistentEventId, accessToken)
+                        .statusCode(EventErrorCode.EVENT_NOT_FOUND.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message()).isEqualTo(EventErrorCode.EVENT_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void publish되지_않은_이벤트는_내_이벤트_상세조회할_수_없다() {
+        // given
+        Department department = organizationTestUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
+
+        // 이벤트 생성: publish = false
+        Event event =
+                eventTestUtil.createEventWithParticipationDepartment(
+                        List.of(5, 10), department, EventStatus.OPEN, false);
+
+        // when
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+        ErrorResponse errorResponse =
+                getMyEventDetail(event.getId(), accessToken)
+                        .statusCode(EventErrorCode.EVENT_NOT_PUBLISHED.getHttpStatus().value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        assertThat(errorResponse.message())
+                .isEqualTo(EventErrorCode.EVENT_NOT_PUBLISHED.getMessage());
+    }
+
+    @Test
+    void publish된_이벤트만_내_이벤트_상세조회가_가능하다() {
+        // given
+        Department department = organizationTestUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
+
+        // 이벤트 생성: publish = true
+        Event publishedEvent =
+                eventTestUtil.createEventWithParticipationDepartment(
+                        List.of(5, 10), department, EventStatus.OPEN, true);
+
+        // when
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+        MyEventResponse myEventResponse =
+                getMyEventDetail(publishedEvent.getId(), accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(MyEventResponse.class);
+
+        // then
+        assertThat(myEventResponse.id()).isEqualTo(publishedEvent.getId());
+        assertThat(myEventResponse.title()).isEqualTo(publishedEvent.getTitle());
+        assertThat(myEventResponse.status()).isEqualTo(publishedEvent.getEventStatus());
+    }
+
+    @Test
+    void 참여하지_않는_학과_소속이면서_publish되지_않은_이벤트는_권한_오류가_먼저_발생한다() {
+        // given
+        Department participatingDepartment = organizationTestUtil.createCouncilDepartment();
+        Department nonParticipatingDepartment = organizationTestUtil.createCommitteeDepartment();
+        Member member =
+                memberTestUtil.createMemberFromRoleWithDepartment(
+                        Role.USER, nonParticipatingDepartment);
+
+        // 이벤트 생성: 다른 학과만 참여, publish = false
+        Event event =
+                eventTestUtil.createEventWithParticipationDepartment(
+                        List.of(5, 10), participatingDepartment, EventStatus.OPEN, false);
+
+        // when
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+        ErrorResponse errorResponse =
+                getMyEventDetail(event.getId(), accessToken)
+                        .statusCode(
+                                EventErrorCode.ONLY_PARTICIPATION_DEPARTMENT_CAN_SEE_EVENT
+                                        .getHttpStatus()
+                                        .value())
+                        .extract()
+                        .as(ErrorResponse.class);
+
+        // then
+        // 권한 검증이 publish 검증보다 우선되어 권한 오류가 발생
+        assertThat(errorResponse.message())
+                .isEqualTo(EventErrorCode.ONLY_PARTICIPATION_DEPARTMENT_CAN_SEE_EVENT.getMessage());
+    }
+
+    @Test
+    void 다양한_이벤트_상태의_내_이벤트_상세조회가_가능하다() {
+        // given
+        Department department = organizationTestUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(Role.USER, department);
+
+        // 다양한 상태의 이벤트 생성
+        Event readyEvent =
+                eventTestUtil.createEventWithParticipationDepartment(
+                        List.of(5), department, EventStatus.READY, true);
+        Event openEvent =
+                eventTestUtil.createEventWithParticipationDepartment(
+                        List.of(5), department, EventStatus.OPEN, true);
+        Event closedEvent =
+                eventTestUtil.createEventWithParticipationDepartment(
+                        List.of(5), department, EventStatus.CLOSED, true);
+
+        // when & then
+        accessToken = authTestUtil.generateAccessTokenWithMember(member);
+
+        // READY 상태 이벤트 조회
+        MyEventResponse readyEventResponse =
+                getMyEventDetail(readyEvent.getId(), accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(MyEventResponse.class);
+        assertThat(readyEventResponse.status()).isEqualTo(EventStatus.READY);
+
+        // OPEN 상태 이벤트 조회
+        MyEventResponse openEventResponse =
+                getMyEventDetail(openEvent.getId(), accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(MyEventResponse.class);
+        assertThat(openEventResponse.status()).isEqualTo(EventStatus.OPEN);
+
+        // CLOSED 상태 이벤트 조회
+        MyEventResponse closedEventResponse =
+                getMyEventDetail(closedEvent.getId(), accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .as(MyEventResponse.class);
+        assertThat(closedEventResponse.status()).isEqualTo(EventStatus.CLOSED);
+    }
+
+    @Test
     void 다양한_층과_접두사_범위로_생성된_이벤트_상세조회시_정확히_반환된다() {
         // given
         Department department = organizationTestUtil.createCouncilDepartment();
@@ -818,6 +1020,16 @@ public class EventControllerIntegrationTest {
                 .queryParam("sort", eventPageable.getSort())
                 .when()
                 .get(EVENT_URL + "/me")
+                .then()
+                .log()
+                .ifError();
+    }
+
+    public static ValidatableResponse getMyEventDetail(UUID eventId, String accessToken) {
+        return given().contentType(MediaType.APPLICATION_JSON_VALUE)
+                .cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .when()
+                .get(EVENT_URL + "/me/{event-id}", eventId)
                 .then()
                 .log()
                 .ifError();

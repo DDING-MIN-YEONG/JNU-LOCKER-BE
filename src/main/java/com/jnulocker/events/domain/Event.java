@@ -2,6 +2,7 @@ package com.jnulocker.events.domain;
 
 import com.jnulocker.common.persistence.BaseEntity;
 import com.jnulocker.events.exception.EventNotOpenException;
+import com.jnulocker.events.exception.EventNotPublishedException;
 import com.jnulocker.events.exception.OnlyManagerCanDeleteEventException;
 import com.jnulocker.events.exception.OnlyManagerCanUpdateEventException;
 import com.jnulocker.events.exception.OnlyParticipationDepartmentCanRegisterException;
@@ -87,27 +88,27 @@ public class Event extends BaseEntity {
     }
 
     public void validateRegistration(Department department) {
-        validateParticipationDepartment(department);
+        validateParticipationDepartmentRegistration(department);
         validatePublishStatus();
         validateEventStatus();
     }
 
-    private void validateParticipationDepartment(Department department) {
+    private void validateParticipationDepartmentRegistration(Department department) {
         if (!isParticipationDepartment(department)) {
             throw OnlyParticipationDepartmentCanRegisterException.EXCEPTION;
         }
     }
 
-    private boolean isParticipationDepartment(Department department) {
+    public boolean isParticipationDepartment(Department department) {
         return eventParticipations.stream()
                 .anyMatch(
                         eventParticipation ->
                                 eventParticipation.getDepartment().equals(department));
     }
 
-    private void validatePublishStatus() {
+    public void validatePublishStatus() {
         if (Boolean.FALSE.equals(publish)) {
-            throw EventNotOpenException.EXCEPTION;
+            throw EventNotPublishedException.EXCEPTION;
         }
     }
 

@@ -6,6 +6,7 @@ import com.jnulocker.common.swagger.ExplainError;
 import com.jnulocker.common.swagger.SwaggerExceptionDoc;
 import com.jnulocker.events.exception.EventNotFoundException;
 import com.jnulocker.events.exception.EventNotOpenException;
+import com.jnulocker.events.exception.EventNotPublishedException;
 import com.jnulocker.events.exception.InvalidLockerForEventException;
 import com.jnulocker.events.exception.LockerNotFoundException;
 import com.jnulocker.events.exception.LockerUnavailableException;
@@ -36,9 +37,11 @@ public class RegistrationForEventExceptionDocs implements SwaggerExceptionDoc {
     public static final BusinessException 이미_해당_이벤트에서_사물함을_신청했을_때 =
             RegistrationAlreadyExistsException.EXCEPTION;
 
-    @ExplainError(
-            "이벤트가 열려있지 않을 때 발생하는 예외입니다. eventStatus가 OPEN이 아니거나, USER가 publish == false인 이벤트에서 신청을 요청하는 경우 발생합니다.")
+    @ExplainError("이벤트가 열려있지 않을 때 발생하는 예외입니다. eventStatus가 OPEN이 아닐 때 발생합니다.")
     public static final BusinessException 이벤트가_열려있지_않을_때 = EventNotOpenException.EXCEPTION;
+
+    @ExplainError("이벤트가 게시되지 않았을 때 발생하는 예외입니다.")
+    public static final BusinessException 이벤트가_게시되지_않았을_때 = EventNotPublishedException.EXCEPTION;
 
     @ExplainError("사물함이 사용중(available == false)일 때 발생하는 예외입니다.")
     public static final BusinessException 사물함이_사용중일_때 = LockerUnavailableException.EXCEPTION;
