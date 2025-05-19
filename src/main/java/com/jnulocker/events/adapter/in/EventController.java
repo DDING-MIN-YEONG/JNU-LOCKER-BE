@@ -11,6 +11,7 @@ import com.jnulocker.events.application.port.in.response.EventPageable;
 import com.jnulocker.events.application.port.in.response.EventResponse;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import com.jnulocker.events.application.port.in.response.MyEventCustomPage;
+import com.jnulocker.events.application.port.in.response.MyEventResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -56,6 +57,11 @@ public class EventController implements EventApi {
             @Valid @ParameterObject EventPageable eventPageable) {
         Pageable pageable = eventPageable.toPageable();
         return ResponseEntity.ok(eventQuery.getMyEvents(pageable));
+    }
+
+    @GetMapping("/me/{event-id}")
+    public ResponseEntity<MyEventResponse> getMyEvent(@PathVariable("event-id") UUID eventId) {
+        return ResponseEntity.ok(eventQuery.getMyEvent(eventId));
     }
 
     @Override
