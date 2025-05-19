@@ -110,8 +110,6 @@ public class AuthCommandService
 
         // refreshToken 삭제
         tokenProvider.deleteRefreshTokenById(approvee.getId());
-
-        memberCommand.save(approvee);
     }
 
     @Override
