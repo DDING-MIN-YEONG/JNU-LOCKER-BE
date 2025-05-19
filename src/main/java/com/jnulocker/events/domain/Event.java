@@ -87,18 +87,18 @@ public class Event extends BaseEntity {
     }
 
     public void validateRegistration(Department department) {
-        validateParticipationDepartment(department);
+        validateParticipationDepartmentRegistration(department);
         validatePublishStatus();
         validateEventStatus();
     }
 
-    private void validateParticipationDepartment(Department department) {
+    private void validateParticipationDepartmentRegistration(Department department) {
         if (!isParticipationDepartment(department)) {
             throw OnlyParticipationDepartmentCanRegisterException.EXCEPTION;
         }
     }
 
-    private boolean isParticipationDepartment(Department department) {
+    public boolean isParticipationDepartment(Department department) {
         return eventParticipations.stream()
                 .anyMatch(
                         eventParticipation ->

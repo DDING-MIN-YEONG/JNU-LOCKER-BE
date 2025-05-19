@@ -10,6 +10,7 @@ import com.jnulocker.events.application.port.in.response.EventResponse;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import com.jnulocker.events.application.port.in.response.LockerResponse;
 import com.jnulocker.events.application.port.in.response.MyEventCustomPage;
+import com.jnulocker.events.application.port.in.response.MyEventResponse;
 import com.jnulocker.events.application.port.out.EventLoadPort;
 import com.jnulocker.events.application.port.out.FloorLoadPort;
 import com.jnulocker.events.application.port.out.LockerLoadPort;
@@ -18,7 +19,8 @@ import com.jnulocker.events.domain.Floor;
 import com.jnulocker.events.domain.Locker;
 import com.jnulocker.events.exception.EventNotFoundException;
 import com.jnulocker.events.exception.LockerNotFoundException;
-import com.jnulocker.events.exception.OnlyDepartmentMemberCanSeeEventException;
+import com.jnulocker.events.exception.OnlyDepartmentManagerCanSeeEventException;
+import com.jnulocker.events.exception.OnlyParticipationDepartmentCanSeeEventException;
 import com.jnulocker.member.application.port.in.MemberQuery;
 import com.jnulocker.member.domain.Member;
 import java.util.*;
@@ -64,7 +66,7 @@ public class EventQueryService implements EventQuery {
                         .orElseThrow(() -> EventNotFoundException.EXCEPTION);
 
         if (!event.isSameDepartment(member.getDepartment())) {
-            throw OnlyDepartmentMemberCanSeeEventException.EXCEPTION;
+            throw OnlyDepartmentManagerCanSeeEventException.EXCEPTION;
         }
 
         // 이벤트에 속한 층과 사물함 정보 조회
@@ -82,6 +84,27 @@ public class EventQueryService implements EventQuery {
         Member member = memberQuery.findByIdOrThrow(memberId);
 
         return eventLoadPort.getEventsByParticipationDepartment(member.getDepartment(), pageable);
+    }
+
+    @Override
+    public MyEventResponse getMyEvent(UUID eventId) {
+        Long memberId = SecurityUtils.getCurrentMemberId();
+        Member member = memberQuery.findByIdOrThrow(memberId);
+
+        Event event =
+                eventLoadPort
+                        .getEventByIdWithEventParticipation(eventId)
+                        .orElseThrow(() -> EventNotFoundException.EXCEPTION);
+
+        if (!event.isParticipationDepartment(member.getDepartment())) {
+            throw OnlyParticipationDepartmentCanSeeEventException.EXCEPTION;
+        }
+
+        if (!event.getPublish()) {
+            throw EventNotFoundException.EXCEPTION;
+        }
+
+        return MyEventResponse.from(event);
     }
 
     @Override
