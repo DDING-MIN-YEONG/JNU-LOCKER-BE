@@ -59,6 +59,7 @@ public class EventController implements EventApi {
         return ResponseEntity.ok(eventQuery.getMyEvents(pageable));
     }
 
+    @Override
     @GetMapping("/me/{event-id}")
     public ResponseEntity<MyEventResponse> getMyEvent(@PathVariable("event-id") UUID eventId) {
         return ResponseEntity.ok(eventQuery.getMyEvent(eventId));
