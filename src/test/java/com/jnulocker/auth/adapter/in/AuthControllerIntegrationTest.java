@@ -4,7 +4,6 @@ import static auth.application.port.in.request.ManagerSignupRequestTestDataBuild
 import static auth.application.port.in.request.SendEmailRequestTestDataBuilder.sendEmailRequestBuilder;
 import static auth.application.port.in.request.UserSignupRequestTestDataBuilder.userSignupRequestBuilder;
 import static auth.application.port.in.request.VerifyCodeRequestTestDataBuilder.verifyCodeRequestBuilder;
-import static com.jnulocker.events.adapter.in.EventControllerIntegrationTest.getEventLockers;
 import static com.jnulocker.registration.adapter.in.RegistrationControllerIntegrationTest.createRequestForAvailableLocker;
 import static com.jnulocker.registration.adapter.in.RegistrationControllerIntegrationTest.registerForEvent;
 import static io.restassured.RestAssured.given;
@@ -26,7 +25,6 @@ import com.jnulocker.auth.jwt.exception.JwtErrorCode;
 import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.common.util.RedisUtil;
-import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.domain.Locker;
@@ -859,17 +857,9 @@ class AuthControllerIntegrationTest {
         Member member = context.member();
         String accessToken = context.accessToken();
 
-        // 사물함 조회
-        List<FloorWithLockersResponse> floors =
-                getEventLockers(event.getId(), accessToken)
-                        .statusCode(HttpStatus.OK.value())
-                        .extract()
-                        .jsonPath()
-                        .getList(".", FloorWithLockersResponse.class);
-        Long lockerId = floors.getFirst().lockers().get(1).lockerId();
-
         // 사물함 신청
-        RegisterForEventRequest registerRequest = new RegisterForEventRequest(lockerId);
+        RegisterForEventRequest registerRequest =
+                createRequestForAvailableLocker(event, accessToken);
         registerForEvent(event.getId(), registerRequest, accessToken)
                 .statusCode(HttpStatus.CREATED.value());
 

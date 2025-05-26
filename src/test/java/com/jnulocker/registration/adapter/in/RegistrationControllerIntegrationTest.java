@@ -125,7 +125,6 @@ public class RegistrationControllerIntegrationTest {
 
         assertThat(registrationCustomPage.totalElements()).isEqualTo(1);
         assertThat(listItem.floorNumber()).isEqualTo(1);
-        assertThat(listItem.lockerCode()).isEqualTo("A-002");
         assertThat(memberInfo.name()).isEqualTo("테스트 이름");
         assertThat(memberInfo.studentNumber()).isEqualTo("221965");
         assertThat(memberInfo.organization()).isEqualTo("테스트 조직명");
@@ -584,7 +583,18 @@ public class RegistrationControllerIntegrationTest {
             Event event, String accessToken) {
         List<FloorWithLockersResponse> floors = getFloors(event, accessToken);
         // 짝수 번째 인덱스의 사물함은 테스트에서 사용 가능한 상태 (eventTestUtil 참고)
-        Long lockerId = floors.getFirst().lockers().get(1).lockerId(); // 짝수 번째 사용 가능
+        UUID lockerId = null;
+        for (FloorWithLockersResponse floor : floors) {
+            for (var locker : floor.lockers()) {
+                if (locker.available()) {
+                    lockerId = locker.lockerId();
+                    break;
+                }
+            }
+            if (lockerId != null) {
+                break;
+            }
+        }
         return new RegisterForEventRequest(lockerId);
     }
 
@@ -592,7 +602,18 @@ public class RegistrationControllerIntegrationTest {
             Event event, String accessToken) {
         List<FloorWithLockersResponse> floors = getFloors(event, accessToken);
         // 홀수 번째 인덱스의 사물함은 테스트에서 사용 불가능한 상태 (eventTestUtil 참고)
-        Long lockerId = floors.getLast().lockers().getFirst().lockerId(); // 홀수 번째 사용 불가
+        UUID lockerId = null;
+        for (FloorWithLockersResponse floor : floors) {
+            for (var locker : floor.lockers()) {
+                if (!locker.available()) {
+                    lockerId = locker.lockerId();
+                    break;
+                }
+            }
+            if (lockerId != null) {
+                break;
+            }
+        }
         return new RegisterForEventRequest(lockerId);
     }
 
