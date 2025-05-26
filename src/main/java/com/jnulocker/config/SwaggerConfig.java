@@ -23,7 +23,6 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
-import jakarta.servlet.ServletContext;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
@@ -51,10 +50,12 @@ public class SwaggerConfig {
     private final ApplicationContext applicationContext;
 
     @Bean
-    public OpenAPI openAPI(ServletContext servletContext) {
+    public OpenAPI openAPI() {
 
-        String contextPath = servletContext.getContextPath();
-        Server server = new Server().url(contextPath);
+        List<Server> servers =
+                Arrays.asList(
+                        new Server().url("http://localhost:8080").description("로컬 서버"),
+                        new Server().url("https://api.dev.jnu-locker.site").description("개발 서버"));
 
         // JWT 토큰을 위한 SecurityScheme 정의
         SecurityScheme securityScheme =
@@ -69,7 +70,7 @@ public class SwaggerConfig {
                 new SecurityRequirement().addList(SECURITY_SCHEME_NAME);
 
         return new OpenAPI()
-                .servers(List.of(server))
+                .servers(servers)
                 .info(swaggerInfo())
                 .components(
                         new Components().addSecuritySchemes(SECURITY_SCHEME_NAME, securityScheme))
