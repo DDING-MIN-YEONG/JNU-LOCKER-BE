@@ -67,7 +67,7 @@ public interface AuthApi {
 
     @ApiExceptionExamples(ReissueExceptionDocs.class)
     @Operation(summary = "토큰 재발급", description = "refreshToken을 이용하여 토큰을 재발급합니다.")
-    @ApiResponse(responseCode = "204", description = "토큰 재발급 성공")
+    @ApiResponse(responseCode = "200", description = "토큰 재발급 성공")
     ResponseEntity<AuthTokenResponse> reissue(
             HttpServletRequest request, HttpServletResponse response);
 
