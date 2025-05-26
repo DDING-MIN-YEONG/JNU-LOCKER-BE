@@ -2,10 +2,10 @@ package com.jnulocker.events.adapter.out;
 
 import com.jnulocker.common.annotation.PersistenceAdapter;
 import com.jnulocker.events.application.port.out.LockerLoadPort;
-import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.Locker;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
 @PersistenceAdapter
@@ -15,17 +15,12 @@ public class LockerPersistenceAdapter implements LockerLoadPort {
     private final LockerRepository lockerRepository;
 
     @Override
-    public Optional<Locker> getById(Long lockerId) {
+    public Optional<Locker> getById(UUID lockerId) {
         return lockerRepository.findByIdWithFloorAndEvent(lockerId);
     }
 
     @Override
-    public List<Locker> getLockersByFloorId(Long floorId) {
+    public List<Locker> getLockersByFloorId(UUID floorId) {
         return lockerRepository.findAllByFloorId(floorId);
-    }
-
-    @Override
-    public Integer getAvailableLockerCountOfEvent(Event event) {
-        return lockerRepository.countAvailableLockersByAvailableTrueAndFloor_Event(event);
     }
 }

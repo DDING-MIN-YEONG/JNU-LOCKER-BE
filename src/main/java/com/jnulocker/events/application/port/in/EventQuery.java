@@ -19,7 +19,7 @@ public interface EventQuery {
 
     EventCustomPage getAllEvents(Pageable pageable);
 
-    Locker getLockerByIdOrThrow(Long lockerId);
+    Locker getLockerByIdOrThrow(UUID lockerId);
 
     List<FloorWithLockersResponse> getLockersByEventId(UUID eventId);
 

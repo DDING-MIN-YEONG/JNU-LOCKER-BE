@@ -106,7 +106,7 @@ public class EventQueryService implements EventQuery {
     }
 
     @Override
-    public Locker getLockerByIdOrThrow(Long lockerId) {
+    public Locker getLockerByIdOrThrow(UUID lockerId) {
         return lockerLoadPort
                 .getById(lockerId)
                 .orElseThrow(() -> LockerNotFoundException.EXCEPTION);
