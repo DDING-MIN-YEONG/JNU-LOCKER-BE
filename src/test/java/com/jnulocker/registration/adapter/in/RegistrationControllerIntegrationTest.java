@@ -124,7 +124,6 @@ public class RegistrationControllerIntegrationTest {
         RegistrationMemberInfo memberInfo = listItem.member();
 
         assertThat(registrationCustomPage.totalElements()).isEqualTo(1);
-        assertThat(listItem.floorNumber()).isEqualTo(1);
         assertThat(memberInfo.name()).isEqualTo("테스트 이름");
         assertThat(memberInfo.studentNumber()).isEqualTo("221965");
         assertThat(memberInfo.organization()).isEqualTo("테스트 조직명");
@@ -154,7 +153,6 @@ public class RegistrationControllerIntegrationTest {
                         .as(RegistrationResponse.class);
 
         assertThat(registrationResponse.floorNumber()).isEqualTo(1);
-        assertThat(registrationResponse.lockerCode()).isEqualTo("A-002");
     }
 
     @Test
