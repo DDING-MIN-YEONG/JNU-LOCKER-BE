@@ -20,7 +20,7 @@ public class LockerPersistenceAdapter implements LockerLoadPort {
     }
 
     @Override
-    public List<Locker> getLockersByFloorId(Long floorId) {
+    public List<Locker> getLockersByFloorId(UUID floorId) {
         return lockerRepository.findAllByFloorId(floorId);
     }
 }

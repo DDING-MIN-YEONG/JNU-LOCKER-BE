@@ -9,5 +9,5 @@ public interface LockerLoadPort {
 
     Optional<Locker> getById(UUID lockerId);
 
-    List<Locker> getLockersByFloorId(Long floorId);
+    List<Locker> getLockersByFloorId(UUID floorId);
 }

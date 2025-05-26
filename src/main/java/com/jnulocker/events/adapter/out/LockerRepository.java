@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface LockerRepository extends JpaRepository<Locker, UUID> {
 
-    List<Locker> findAllByFloorId(Long floorId);
+    List<Locker> findAllByFloorId(UUID floorId);
 
     @Query("SELECT l FROM Locker l JOIN FETCH l.floor f JOIN FETCH f.event WHERE l.id = :lockerId")
     Optional<Locker> findByIdWithFloorAndEvent(UUID lockerId);
