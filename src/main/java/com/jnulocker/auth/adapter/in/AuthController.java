@@ -102,11 +102,13 @@ public class AuthController implements AuthApi {
 
     @Override
     @PostMapping("/reissue")
-    public ResponseEntity<Void> reissue(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<AuthTokenResponse> reissue(
+            HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = getRefreshToken(request);
         AuthToken authToken = reissueCommand.reissue(refreshToken);
         addCookieFromAuthToken(response, authToken);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.ok(
+                AuthTokenResponse.of(authToken.accessToken(), authToken.refreshToken()));
     }
 
     @Override

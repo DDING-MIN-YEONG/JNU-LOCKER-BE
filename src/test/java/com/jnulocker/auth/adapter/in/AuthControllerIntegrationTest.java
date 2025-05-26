@@ -364,11 +364,19 @@ class AuthControllerIntegrationTest {
 
         // when
         ExtractableResponse<Response> response =
-                reissueToken(refreshToken).statusCode(HttpStatus.NO_CONTENT.value()).extract();
+                reissueToken(refreshToken).statusCode(HttpStatus.OK.value()).extract();
 
         // then
-        String newAccessToken = getCookieValue(response.detailedCookies(), ACCESS_TOKEN);
-        assertThat(newAccessToken).isNotBlank();
+        Cookies cookies = response.detailedCookies();
+        String accessTokenFromCookie = getCookieValue(cookies, ACCESS_TOKEN);
+        String refreshTokenFromCookie = getCookieValue(cookies, REFRESH_TOKEN);
+        String accessTokenFromBody = response.jsonPath().getString("accessToken");
+        String refreshTokenFromBody = response.jsonPath().getString("refreshToken");
+
+        assertThat(accessTokenFromCookie).isNotBlank();
+        assertThat(refreshTokenFromCookie).isNotBlank();
+        assertThat(accessTokenFromBody).isNotBlank();
+        assertThat(refreshTokenFromBody).isNotBlank();
     }
 
     @Test
