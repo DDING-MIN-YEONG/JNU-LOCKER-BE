@@ -25,6 +25,7 @@ public class OrganizationQueryService implements OrganizationQuery, DepartmentQu
     @Override
     public List<OrganizationResponse> getOrganizations(OrganizationType organizationType) {
         return organizationLoadPort.getAllByType(organizationType).stream()
+                .filter(org -> !org.getName().contains("테스트"))
                 .map(OrganizationResponse::from)
                 .toList();
     }
