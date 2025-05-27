@@ -15,6 +15,6 @@ public class FloorPersistenceAdapter implements FloorLoadPort {
 
     @Override
     public List<Floor> getFloorsByEventId(UUID eventId) {
-        return floorRepository.findAllByEventId(eventId);
+        return floorRepository.findAllByEventIdOrderByFloorNumber(eventId);
     }
 }
