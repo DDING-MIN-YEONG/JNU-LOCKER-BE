@@ -177,7 +177,7 @@ public class EventControllerIntegrationTest {
         assertThat(floors)
                 .extracting(FloorWithLockersResponse::lockers)
                 .map(List::size)
-                .containsAnyElementsOf(lockersPerFloor);
+                .containsExactlyElementsOf(lockersPerFloor);
     }
 
     @Test

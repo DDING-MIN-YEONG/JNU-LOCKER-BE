@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FloorRepository extends JpaRepository<Floor, Long> {
 
-    List<Floor> findAllByEventId(UUID eventId);
+    List<Floor> findAllByEventIdOrderByFloorNumber(UUID eventId);
 
     void deleteAllByEvent(Event event);
 }
