@@ -15,7 +15,8 @@ public class ManagerApprovedEventHandler {
     @TransactionalEventListener(
             classes = ManagerApprovedEvent.class,
             phase = TransactionPhase.AFTER_COMMIT)
-    public void handle(ManagerApprovedEvent event) {
-        managerEmailSender.sendManagerApprovedEmail(event.getEmail(), event.getDepartment());
+    public void handle(ManagerApprovedEvent managerApprovedEvent) {
+        managerEmailSender.sendManagerApprovedEmail(
+                managerApprovedEvent.getEmail(), managerApprovedEvent.getDepartment());
     }
 }

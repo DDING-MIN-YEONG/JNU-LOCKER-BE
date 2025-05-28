@@ -15,7 +15,8 @@ public class ManagerRejectedEventHandler {
     @TransactionalEventListener(
             classes = ManagerRejectedEvent.class,
             phase = TransactionPhase.AFTER_COMMIT)
-    public void handle(ManagerRejectedEvent event) {
-        managerEmailSender.sendManagerRejectedEmail(event.getEmail(), event.getDepartment());
+    public void handle(ManagerRejectedEvent managerRejectedEvent) {
+        managerEmailSender.sendManagerRejectedEmail(
+                managerRejectedEvent.getEmail(), managerRejectedEvent.getDepartment());
     }
 }
