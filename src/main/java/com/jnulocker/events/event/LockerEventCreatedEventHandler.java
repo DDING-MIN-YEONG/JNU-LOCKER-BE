@@ -16,8 +16,9 @@ public class LockerEventCreatedEventHandler {
     @TransactionalEventListener(
             classes = LockerEventCreatedEvent.class,
             phase = TransactionPhase.AFTER_COMMIT)
-    public void handle(LockerEventCreatedEvent event) {
-        UUID eventId = event.getEventId();
-        quartzSchedulerUtil.scheduleEventJobs(eventId, event.getStartAt(), event.getEndAt());
+    public void handle(LockerEventCreatedEvent lockerEventCreatedEvent) {
+        UUID eventId = lockerEventCreatedEvent.getEventId();
+        quartzSchedulerUtil.scheduleEventJobs(
+                eventId, lockerEventCreatedEvent.getStartAt(), lockerEventCreatedEvent.getEndAt());
     }
 }

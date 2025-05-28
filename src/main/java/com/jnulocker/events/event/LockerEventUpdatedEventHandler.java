@@ -17,13 +17,14 @@ public class LockerEventUpdatedEventHandler {
     @TransactionalEventListener(
             classes = LockerEventUpdatedEvent.class,
             phase = TransactionPhase.AFTER_COMMIT)
-    public void handle(LockerEventUpdatedEvent event) throws SchedulerException {
-        UUID eventId = event.getEventId();
+    public void handle(LockerEventUpdatedEvent lockerEventUpdatedEvent) throws SchedulerException {
+        UUID eventId = lockerEventUpdatedEvent.getEventId();
 
         // 기존 스케줄링 작업 삭제
         quartzSchedulerUtil.deleteEventJobs(eventId);
 
         // 새로운 스케줄링 작업 생성
-        quartzSchedulerUtil.scheduleEventJobs(eventId, event.getStartAt(), event.getEndAt());
+        quartzSchedulerUtil.scheduleEventJobs(
+                eventId, lockerEventUpdatedEvent.getStartAt(), lockerEventUpdatedEvent.getEndAt());
     }
 }
