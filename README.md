@@ -57,12 +57,25 @@
 
 <table>
   <tr>
-    <td><img src="https://velog.velcdn.com/images/dubu1001/post/dde17006-f3b0-4c33-af92-a1dc3e077832/image.png" alt="Image 1" width="400"></td>
-    <td><img src="https://velog.velcdn.com/images/dubu1001/post/30c519e0-2a55-4ad7-be28-3c4e9472109b/image.png" alt="Image 2" width="400"></td>
+    <td style="vertical-align: top;">
+      <img src="https://velog.velcdn.com/images/dubu1001/post/dde17006-f3b0-4c33-af92-a1dc3e077832/image.png" alt="Image 1" width="200">
+    </td>
+    <td style="vertical-align: top;">
+      <img src="https://velog.velcdn.com/images/dubu1001/post/30c519e0-2a55-4ad7-be28-3c4e9472109b/image.png" alt="Image 2" width="200">
+    </td>
   </tr>
 </table>
 
+
 ### 그 외 기능
+
+- 공지사항 작성
+- 실시간 사물함 현황 조회
+- 사물함 신청 현황 관리
+    ![](https://velog.velcdn.com/images/dubu1001/post/ef88b2d4-155d-4bad-a415-a93b7ca91fbf/image.png)
+- 위원회 관리자 목록 관리
+![](https://velog.velcdn.com/images/dubu1001/post/0c3e9971-3dfd-45e4-9e1e-e63fb2b26d7e/image.png) 
+
 
 ## 인프라 아키텍처
 
