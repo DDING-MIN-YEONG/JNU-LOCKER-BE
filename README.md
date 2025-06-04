@@ -55,10 +55,12 @@
 
 인증 이후 본인의 소속학과가 참여하는 공지사항과 사물함 신청을 확인하고 신청할 수 있습니다.
 
-
-| <img src="https://velog.velcdn.com/images/dubu1001/post/dde17006-f3b0-4c33-af92-a1dc3e077832/image.png" alt="dev1"/> | <img src="https://velog.velcdn.com/images/dubu1001/post/30c519e0-2a55-4ad7-be28-3c4e9472109b/image.png" alt="dev2"/> |
-
-
+<table>
+  <tr>
+    <td><img src="https://velog.velcdn.com/images/dubu1001/post/dde17006-f3b0-4c33-af92-a1dc3e077832/image.png" alt="Image 1" width="400"></td>
+    <td><img src="https://velog.velcdn.com/images/dubu1001/post/30c519e0-2a55-4ad7-be28-3c4e9472109b/image.png" alt="Image 2" width="400"></td>
+  </tr>
+</table>
 
 ### 그 외 기능
 
