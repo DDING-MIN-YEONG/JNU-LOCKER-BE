@@ -31,7 +31,7 @@
 
 </br>
 
-**목차**
+### 목차
 
 - [실행 방법](#실행-방법)
 - [서비스 개요](#서비스-개요)
@@ -39,19 +39,18 @@
 - [주요 특징](#주요-특징)
 - [문서](#문서)
 - [BE 기술 스택](#be-기술-스택)
-- [시스템 아키텍처](#시스템-아키텍쳐)
+- [시스템 아키텍처](#시스템-아키텍처)
 - [팀원](#팀원)
 
 ## 실행 방법
 
-```
+```Bash
 git clone https://github.com/DDING-MIN-YEONG/JNU-LOCKER-BE.git
 
 # 환경변수 설정 .env
 # docker-compose.yml 파일이 있는 경로에서 실행
 
 docker compose up -d
-
 ```
 
 <details>
@@ -185,7 +184,7 @@ MAIL_PORT=587
 
 ![](https://velog.velcdn.com/images/dubu1001/post/0cba0d68-d9ee-46d2-8101-31b0ae27056d/image.svg)
 
-## 시스템 아키텍쳐
+## 시스템 아키텍처
 
 ![](https://velog.velcdn.com/images/dubu1001/post/5c93fa82-d80b-489b-9d0a-e957991afa8a/image.png)
 
