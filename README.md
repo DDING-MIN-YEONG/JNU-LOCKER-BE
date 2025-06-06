@@ -1,6 +1,6 @@
 ## JNU-LOCKER, 전남대학교 사물함 신청 서비스
 
-![](https://velog.velcdn.com/images/dubu1001/post/417a1d62-273a-4297-970e-61510f382bec/image.png)
+![서비스 대표 이미지](https://velog.velcdn.com/images/dubu1001/post/417a1d62-273a-4297-970e-61510f382bec/image.png)
 
 
 🌐 이제는 온라인으로 신청하고 하나의 플랫폼에서 통합 관리하는 사물함 신청 및 관리 서비스 
@@ -29,7 +29,7 @@
 
 </details>
 
-</br>
+<br/>
 
 ### 목차
 
@@ -62,7 +62,7 @@ docker compose up -d
 PROFILE=local
 
 # MySQL 설정 (docker-compose로 실행할 경우 host는 mysql로)
-MYSQL_HOST=localhost
+MYSQL_HOST=mysql
 MYSQL_PORT=3306
 MYSQL_DATABASE=locker
 MYSQL_USERNAME=root
@@ -90,7 +90,7 @@ IMAGE_TAG=latest # 또는 커밋 해시값 등
 MANAGEMENT_BASE_PATH=/management
 
 # Redis 설정 (docker-compose에서는 redis, 로컬에서는 localhost)
-REDIS_HOST=localhost
+REDIS_HOST=redis
 REDIS_PORT=6379
 
 # 이메일 발송 설정 (메일 인증 필요 시 사용)
