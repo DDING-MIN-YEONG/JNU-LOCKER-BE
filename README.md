@@ -183,7 +183,7 @@ MAIL_PORT=587
 
 ## 인프라 아키텍처
 
-![](https://velog.velcdn.com/images/dubu1001/post/cbdaebe0-266b-426c-8ea9-82ed8168b176/image.png)
+![](https://velog.velcdn.com/images/dubu1001/post/142f8ad7-4998-4673-89bf-6c179576d28e/image.svg)
 
 ## 시스템 아키텍쳐
 
