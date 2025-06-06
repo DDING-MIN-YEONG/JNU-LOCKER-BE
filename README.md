@@ -11,22 +11,101 @@
 
 [[학생용] 전남대학교 사물함 신청 서비스](https://www.jnu-locker.site/)
 
-테스트 계정: test@jnu.ac.kr(이메일), testpassword123!(비밀번호)
+<details>
+<summary>👩‍🎓 학생용 테스트 계정</summary>
+
+- **이메일**: `test@jnu.ac.kr`  
+- **비밀번호**: `testpassword123!`
+
+</details>
+</br>
 
 [[위원회용] 전남대학교 사물함 신청 서비스](https://www.jnu-locker.site/committee)
 
-테스트 계정: test@example.com(이메일), abcde12345!(비밀번호)
+<details>
+<summary>🧑‍💼 위원회용 테스트 계정</summary>
+
+- **이메일**: `test@example.com`  
+- **비밀번호**: `abcde12345!`
+
+</details>
+
+</br>
 
 **목차**
 
+- [실행 방법](#실행-방법)
 - [서비스 개요](#서비스-개요)
 - [서비스 소개](#서비스-소개)
 - [주요 특징](#주요-특징)
-- [시스템 아키텍처](#시스템-아키텍쳐)
 - [문서](#문서)
 - [BE 기술 스택](#be-기술-스택)
-- [실행 방법](#실행-방법)
+- [시스템 아키텍처](#시스템-아키텍쳐)
 - [팀원](#팀원)
+
+## 실행 방법
+
+```
+git clone https://github.com/DDING-MIN-YEONG/JNU-LOCKER-BE.git
+
+# 환경변수 설정 .env
+# docker-compose.yml 파일이 있는 경로에서 실행
+
+docker compose up -d
+
+```
+
+<details>
+<summary> .env파일 예시</summary>
+<div markdown="1">
+
+```
+# Spring 실행 프로파일
+PROFILE=local
+
+# MySQL 설정 (docker-compose로 실행할 경우 host는 mysql로)
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_DATABASE=locker
+MYSQL_USERNAME=root
+MYSQL_PASSWORD= # TODO: 비밀번호 입력
+
+# 데이터가 저장될 로컬 경로
+MYSQL_DATA_PATH=./mysql
+
+# 로그 설정
+LOGGING_LEVEL=INFO
+LOGGING_DIR=/app/log
+LOGGING_FILE=locker.log
+LOGGING_FILE_NAME_PATTERN=locker-%d{yyyy-MM-dd}-%i.log.gz
+
+# 로그가 저장될 로컬 경로 (로컬에서는 ./logs 권장)
+WAS_LOG_PATH=./logs
+
+# Docker Hub 정보 (배포 시 사용)
+DOCKER_REPO=your-docker-repo-name
+DOCKER_USERNAME=your-dockerhub-id
+DOCKER_PASSWORD= # TODO: 비밀번호 입력
+IMAGE_TAG=latest # 또는 커밋 해시값 등
+
+# Spring Actuator 관리용 경로 (보안을 위해 /actuator는 피하는 것이 좋음)
+MANAGEMENT_BASE_PATH=/management
+
+# Redis 설정 (docker-compose에서는 redis, 로컬에서는 localhost)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# 이메일 발송 설정 (메일 인증 필요 시 사용)
+SPRING_MAIL_USERNAME=your-email@example.com
+SPRING_MAIL_PASSWORD= # TODO: 비밀번호 입력
+EMAIL_SENDER=your-email@example.com
+MAIL_HOST=smtp.example.com
+MAIL_PORT=587
+
+```
+
+</div>
+</details>
 
 ## 서비스 개요
 
@@ -46,7 +125,7 @@
 이벤트 기본 정보를 설정하고 사물함 신청 참여 학과를 설정함으로써 사물함 신청하기를 만들 수 있습니다.
 
 <p align="center">
-  <img src="https://velog.velcdn.com/images/dubu1001/post/3dc39bbe-7bac-4c6a-81ce-c4c873cb73fc/image.png" width="400px">
+  <img src="https://velog.velcdn.com/images/dubu1001/post/3dc39bbe-7bac-4c6a-81ce-c4c873cb73fc/image.png" width="500px">
 </p>
 
 ### 사물함 신청하기
@@ -54,6 +133,8 @@
 학생들이 언제 어디서나 편리하게 이용할 수 있도록 접근성을 높이기 위해 반응형 웹으로 구현하였습니다. 
 
 인증 이후 본인의 소속학과가 참여하는 공지사항과 사물함 신청을 확인하고 신청할 수 있습니다.
+
+<div align="center">
 
 <table>
   <tr>
@@ -66,27 +147,17 @@
   </tr>
 </table>
 
+</div>
+
+
 ### 그 외 기능
 
 - 공지사항 작성
 - 실시간 사물함 현황 조회
 - 사물함 신청 현황 관리
-<p align="center">
-  <img src="https://velog.velcdn.com/images/dubu1001/post/bd4f2c6d-19c8-4d3d-a8de-defa3cf2b11c/image.png" width="400px">
-</p>
-
+![](https://velog.velcdn.com/images/dubu1001/post/bd4f2c6d-19c8-4d3d-a8de-defa3cf2b11c/image.png)
 - 위원회 관리자 목록 관리
- <p align="center">
-  <img src="https://velog.velcdn.com/images/dubu1001/post/b9bdbe6a-3056-450d-900e-4e2a73883c1f/image.png" width="400px">
-</p>
-
-## 인프라 아키텍처
-
-![](https://velog.velcdn.com/images/dubu1001/post/cbdaebe0-266b-426c-8ea9-82ed8168b176/image.png)
-
-## 시스템 아키텍쳐
-
-![](https://velog.velcdn.com/images/dubu1001/post/5c93fa82-d80b-489b-9d0a-e957991afa8a/image.png)
+![](https://velog.velcdn.com/images/dubu1001/post/b9bdbe6a-3056-450d-900e-4e2a73883c1f/image.png)
 
 ## 문서
 
@@ -111,18 +182,13 @@
 | Mail System  | SMTP                | 이메일 인증을 위한 프로토콜                                             |
 
 
+## 인프라 아키텍처
 
-## 실행 방법
+![](https://velog.velcdn.com/images/dubu1001/post/cbdaebe0-266b-426c-8ea9-82ed8168b176/image.png)
 
-```
-git clone https://github.com/DDING-MIN-YEONG/JNU-LOCKER-BE.git
+## 시스템 아키텍쳐
 
-# 환경변수 설정 .env
-# docker-compose.yml 파일이 있는 경로에서 실행
-
-docker compose up -d
-
-```
+![](https://velog.velcdn.com/images/dubu1001/post/5c93fa82-d80b-489b-9d0a-e957991afa8a/image.png)
 
 ## 팀원
 
