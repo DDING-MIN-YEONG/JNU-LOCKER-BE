@@ -44,7 +44,7 @@
 
 ## 실행 방법
 
-```Bash
+```bash
 git clone https://github.com/DDING-MIN-YEONG/JNU-LOCKER-BE.git
 
 # 환경변수 설정 .env
@@ -57,7 +57,7 @@ docker compose up -d
 <summary> .env파일 예시</summary>
 <div markdown="1">
 
-```
+```bash
 # Spring 실행 프로파일
 PROFILE=local
 
@@ -99,7 +99,6 @@ SPRING_MAIL_PASSWORD= # TODO: 비밀번호 입력
 EMAIL_SENDER=your-email@example.com
 MAIL_HOST=smtp.example.com
 MAIL_PORT=587
-
 ```
 
 </div>
