@@ -18,7 +18,6 @@
 - **비밀번호**: `testpassword123!`
 
 </details>
-</br>
 
 [[위원회용] 전남대학교 사물함 신청 서비스](https://www.jnu-locker.site/committee)
 
@@ -139,10 +138,10 @@ MAIL_PORT=587
 <table>
   <tr>
     <td style="vertical-align: top;">
-      <img src="https://velog.velcdn.com/images/dubu1001/post/5e3dd64e-d152-4829-bfb6-5a7f462885d2/image.png" alt="Image 1" width="200">
+      <img src="https://velog.velcdn.com/images/dubu1001/post/02967fc8-691d-4aa7-8e4f-b822a733f5c4/image.png" alt="Image 1">
     </td>
     <td style="vertical-align: top;">
-      <img src="https://velog.velcdn.com/images/dubu1001/post/dde17006-f3b0-4c33-af92-a1dc3e077832/image.png" alt="Image 2" width="200">
+      <img src="https://velog.velcdn.com/images/dubu1001/post/cf666d22-3b0f-4f73-9a89-5c886e63742a/image.png" alt="Image 2">
     </td>
   </tr>
 </table>
