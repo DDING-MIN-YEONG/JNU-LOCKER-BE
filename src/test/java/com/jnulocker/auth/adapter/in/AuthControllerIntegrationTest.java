@@ -873,8 +873,7 @@ class AuthControllerIntegrationTest {
 
         // 신청된 Registration과 Locker 상태 확인
         Optional<Registration> registrationBefore =
-                registrationRepository.findByMemberIdAndLocker_Floor_EventId(
-                        member.getId(), event.getId());
+                registrationRepository.findByMemberIdAndEventId(member.getId(), event.getId());
         assertThat(registrationBefore).isPresent();
 
         Locker lockerBefore = registrationBefore.get().getLocker();
@@ -890,8 +889,7 @@ class AuthControllerIntegrationTest {
 
         // Registration 삭제 확인
         Optional<Registration> registrationAfter =
-                registrationRepository.findByMemberIdAndLocker_Floor_EventId(
-                        member.getId(), event.getId());
+                registrationRepository.findByMemberIdAndEventId(member.getId(), event.getId());
         assertThat(registrationAfter).isNotPresent();
     }
 
