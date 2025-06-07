@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum CommonErrorCode implements ErrorCode {
     INVALID_INPUT_VALUE("C001", HttpStatus.BAD_REQUEST, "요청 값이 올바르지 않습니다."),
+    LOCK_ACQUISITION_FAILED("C002", HttpStatus.INTERNAL_SERVER_ERROR, "락 획득에 실패했습니다."),
     ;
 
     private final String code;
