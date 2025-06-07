@@ -36,12 +36,12 @@ public class RegistrationPersistenceAdapter
 
     @Override
     public Page<Registration> getRegistrationsByEventId(UUID eventId, Pageable pageable) {
-        return registrationRepository.findAllByLocker_Floor_EventId(eventId, pageable);
+        return registrationRepository.findAllByEventIdOptimized(eventId, pageable);
     }
 
     @Override
     public Optional<Registration> getRegistrationByMemberIdAndEventId(Long memberId, UUID eventId) {
-        return registrationRepository.findByMemberIdAndLocker_Floor_EventId(memberId, eventId);
+        return registrationRepository.findByMemberIdAndEventId(memberId, eventId);
     }
 
     @Override

@@ -10,22 +10,31 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
     boolean existsByMemberIdAndLocker_Floor_EventId(Long memberId, UUID eventId);
 
-    @EntityGraph(
-            attributePaths = {
-                "member",
-                "member.department",
-                "member.department.organization",
-                "locker",
-                "locker.floor"
-            })
-    Page<Registration> findAllByLocker_Floor_EventId(UUID eventId, Pageable pageable);
+    @Query(
+            """
+        SELECT r FROM Registration r
+        JOIN FETCH r.member m
+        JOIN FETCH m.department d
+        JOIN FETCH r.locker l
+        JOIN FETCH l.floor f
+        WHERE f.event.id = :eventId
+        ORDER BY r.createdAt
+        """)
+    Page<Registration> findAllByEventIdOptimized(UUID eventId, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"member", "member.department", "locker", "locker.floor"})
-    Optional<Registration> findByMemberIdAndLocker_Floor_EventId(Long memberId, UUID eventId);
+    @Query(
+            """
+        SELECT r FROM Registration r
+        JOIN FETCH r.locker l
+        JOIN FETCH l.floor f
+        WHERE r.member.id = :memberId AND f.event.id = :eventId
+        """)
+    Optional<Registration> findByMemberIdAndEventId(Long memberId, UUID eventId);
 
     void deleteAllByLocker_Floor_Event(Event event);
 
