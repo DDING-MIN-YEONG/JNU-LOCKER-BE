@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class RedisLockManager {
 
+    private static final Long DEFAULT_LEASE_TIME = 4L; // 기본 락 해제 시간 (초 단위)
+
     private final RedissonClient redissonClient;
     private final TransactionForSupplier transactionForSupplier;
     private final TransactionForConsumer transactionForConsumer;
@@ -55,7 +57,7 @@ public class RedisLockManager {
 
     private void checkLockable(String key, Long waitSecond, RLock lock)
             throws InterruptedException {
-        boolean lockable = lock.tryLock(waitSecond, TimeUnit.SECONDS);
+        boolean lockable = lock.tryLock(waitSecond, DEFAULT_LEASE_TIME, TimeUnit.SECONDS);
         if (!lockable) {
             log.error("락 획득 실패: {}", key);
             throw LockAcquisitionFailedException.EXCEPTION;

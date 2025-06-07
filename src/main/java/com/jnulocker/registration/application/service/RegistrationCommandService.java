@@ -39,7 +39,7 @@ public class RegistrationCommandService implements RegistrationCommand {
 
         redisLockManager.lock(
                 lockerId.toString(),
-                3L,
+                5L,
                 v -> {
                     Member member = memberQuery.findByIdOrThrow(memberId);
 
