@@ -2,7 +2,6 @@ package com.jnulocker.common.util;
 
 import com.jnulocker.common.exception.LockAcquisitionFailedException;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +20,7 @@ public class RedisLockManager {
 
     private final RedissonClient redissonClient;
     private final TransactionForSupplier transactionForSupplier;
-    private final TransactionForConsumer transactionForConsumer;
+    private final TransactionForRunnable transactionForRunnable;
 
     // 반환값이 있는 경우: Supplier<T> 사용
     public <T> T lock(String key, Long waitSecond, Supplier<T> supplier) {
@@ -40,12 +39,12 @@ public class RedisLockManager {
         }
     }
 
-    // 반환값이 없는 경우: Consumer<Void> 사용
-    public void lock(String key, Long waitSecond, Consumer<Void> consumer) {
+    // 반환값이 없는 경우: Runnable 사용
+    public void lock(String key, Long waitSecond, Runnable runnable) {
         RLock lock = redissonClient.getLock(key);
         try {
             checkLockable(key, waitSecond, lock);
-            transactionForConsumer.executeWithTransaction(consumer);
+            transactionForRunnable.executeWithTransaction(runnable);
         } catch (InterruptedException e) {
             log.error("락 획득 중 인터럽트 발생: {}", key, e);
             Thread.currentThread().interrupt();
