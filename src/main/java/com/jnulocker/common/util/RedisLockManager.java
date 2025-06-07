@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -15,7 +16,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class RedisLockManager {
 
-    private static final Long DEFAULT_LEASE_TIME = 4L; // 기본 락 해제 시간 (초 단위)
+    @Value("${custom.lock.lease-time}")
+    private Long leaseTime;
 
     private final RedissonClient redissonClient;
     private final TransactionForSupplier transactionForSupplier;
@@ -57,7 +59,7 @@ public class RedisLockManager {
 
     private void checkLockable(String key, Long waitSecond, RLock lock)
             throws InterruptedException {
-        boolean lockable = lock.tryLock(waitSecond, DEFAULT_LEASE_TIME, TimeUnit.SECONDS);
+        boolean lockable = lock.tryLock(waitSecond, leaseTime, TimeUnit.SECONDS);
         if (!lockable) {
             log.error("락 획득 실패: {}", key);
             throw LockAcquisitionFailedException.EXCEPTION;

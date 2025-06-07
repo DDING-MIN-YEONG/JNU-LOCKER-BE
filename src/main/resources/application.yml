@@ -92,6 +92,8 @@ custom:
     refresh-secret-key: ${JWT_REFRESH_SECRET_KEY:dGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNo}
     access-token-expire-time: ${JWT_ACCESS_TOKEN_EXPIRE_TIME:3600}
     refresh-token-expire-time: ${JWT_REFRESH_TOKEN_EXPIRE_TIME:86400}
+  lock:
+    lease-time: ${LOCK_LEASE_TIME:3} # 락 유지 시간 (초 단위)
 
 email:
   sender: ${EMAIL_SENDER}
