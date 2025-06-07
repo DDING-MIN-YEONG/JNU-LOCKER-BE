@@ -8,7 +8,6 @@ import com.jnulocker.events.application.port.in.request.FloorInfo;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.EventResponse;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
-import com.jnulocker.events.application.port.in.response.LockerResponse;
 import com.jnulocker.events.application.port.in.response.MyEventCustomPage;
 import com.jnulocker.events.application.port.in.response.MyEventResponse;
 import com.jnulocker.events.application.port.out.EventLoadPort;
@@ -24,7 +23,9 @@ import com.jnulocker.events.exception.OnlyParticipationDepartmentCanSeeEventExce
 import com.jnulocker.member.application.port.in.MemberQuery;
 import com.jnulocker.member.domain.Member;
 import java.util.*;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class EventQueryService implements EventQuery {
 
     private final EventLoadPort eventLoadPort;
@@ -119,20 +121,24 @@ public class EventQueryService implements EventQuery {
         }
 
         List<Floor> floors = floorLoadPort.getFloorsByEventId(eventId);
+        if (floors.isEmpty()) {
+            return List.of();
+        }
+
+        // 모든 사물함을 가져와서 층별로 그룹화
+        List<Locker> allLockers = lockerLoadPort.getLockersByFloorIds(floors);
+        Map<UUID, List<Locker>> lockersByFloorId =
+                allLockers.stream()
+                        .collect(Collectors.groupingBy(locker -> locker.getFloor().getId()));
 
         return floors.stream()
-                .map(
-                        floor ->
-                                FloorWithLockersResponse.of(
-                                        floor.getId(),
-                                        floor.getFloorNumber(),
-                                        getLockerResponsesByFloor(floor)))
+                .map(floor -> convertToFloorResponse(floor, lockersByFloorId))
                 .toList();
     }
 
-    private List<LockerResponse> getLockerResponsesByFloor(Floor floor) {
-        return lockerLoadPort.getLockersByFloorId(floor.getId()).stream()
-                .map(LockerResponse::from)
-                .toList();
+    private FloorWithLockersResponse convertToFloorResponse(
+            Floor floor, Map<UUID, List<Locker>> lockersByFloorId) {
+        List<Locker> lockersForFloor = lockersByFloorId.getOrDefault(floor.getId(), List.of());
+        return FloorWithLockersResponse.of(floor, lockersForFloor);
     }
 }
