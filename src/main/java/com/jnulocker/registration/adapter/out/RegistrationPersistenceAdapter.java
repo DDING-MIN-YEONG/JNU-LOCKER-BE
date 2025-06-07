@@ -36,7 +36,7 @@ public class RegistrationPersistenceAdapter
 
     @Override
     public Page<Registration> getRegistrationsByEventId(UUID eventId, Pageable pageable) {
-        return registrationRepository.findAllByEventIdOptimized(eventId, pageable);
+        return registrationRepository.findAllByEventId(eventId, pageable);
     }
 
     @Override

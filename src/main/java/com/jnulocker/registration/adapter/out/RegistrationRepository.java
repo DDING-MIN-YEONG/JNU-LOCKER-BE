@@ -17,23 +17,22 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
 
     @Query(
             """
-        SELECT r FROM Registration r
-        JOIN FETCH r.member m
-        JOIN FETCH m.department d
-        JOIN FETCH r.locker l
-        JOIN FETCH l.floor f
-        WHERE f.event.id = :eventId
-        ORDER BY r.createdAt
-        """)
-    Page<Registration> findAllByEventIdOptimized(UUID eventId, Pageable pageable);
+                    SELECT r FROM Registration r
+                    JOIN FETCH r.member m
+                    JOIN FETCH m.department d
+                    JOIN FETCH r.locker l
+                    JOIN FETCH l.floor f
+                    WHERE f.event.id = :eventId
+                    """)
+    Page<Registration> findAllByEventId(UUID eventId, Pageable pageable);
 
     @Query(
             """
-        SELECT r FROM Registration r
-        JOIN FETCH r.locker l
-        JOIN FETCH l.floor f
-        WHERE r.member.id = :memberId AND f.event.id = :eventId
-        """)
+                    SELECT r FROM Registration r
+                    JOIN FETCH r.locker l
+                    JOIN FETCH l.floor f
+                    WHERE r.member.id = :memberId AND f.event.id = :eventId
+                    """)
     Optional<Registration> findByMemberIdAndEventId(Long memberId, UUID eventId);
 
     void deleteAllByLocker_Floor_Event(Event event);
