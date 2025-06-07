@@ -2,6 +2,7 @@ package com.jnulocker.events.adapter.out;
 
 import com.jnulocker.common.annotation.PersistenceAdapter;
 import com.jnulocker.events.application.port.out.LockerLoadPort;
+import com.jnulocker.events.domain.Floor;
 import com.jnulocker.events.domain.Locker;
 import java.util.List;
 import java.util.Optional;
@@ -20,7 +21,7 @@ public class LockerPersistenceAdapter implements LockerLoadPort {
     }
 
     @Override
-    public List<Locker> getLockersByFloorId(UUID floorId) {
-        return lockerRepository.findAllByFloorIdOrderByCode(floorId);
+    public List<Locker> getLockersByFloorIds(List<Floor> floors) {
+        return lockerRepository.findAllByFloorInOrderByCode(floors);
     }
 }
