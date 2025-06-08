@@ -7,16 +7,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class RedisLockManager {
-
-    @Value("${custom.lock.lease-time}")
-    private Long leaseTime;
 
     private final RedissonClient redissonClient;
     private final TransactionForSupplier transactionForSupplier;
@@ -58,7 +54,8 @@ public class RedisLockManager {
 
     private void checkLockable(String key, Long waitSecond, RLock lock)
             throws InterruptedException {
-        boolean lockable = lock.tryLock(waitSecond, leaseTime, TimeUnit.SECONDS);
+        // Watchdog 방식: leaseTime = -1로 설정하여 자동 갱신 활성화
+        boolean lockable = lock.tryLock(waitSecond, -1, TimeUnit.SECONDS);
         if (!lockable) {
             log.error("락 획득 실패: {}", key);
             throw LockAcquisitionFailedException.EXCEPTION;
