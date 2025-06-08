@@ -93,7 +93,8 @@ custom:
     access-token-expire-time: ${JWT_ACCESS_TOKEN_EXPIRE_TIME:3600}
     refresh-token-expire-time: ${JWT_REFRESH_TOKEN_EXPIRE_TIME:86400}
   lock:
-    lease-time: ${LOCK_LEASE_TIME:3} # 락 유지 시간 (초 단위)
+    watchdog:
+      timeout: ${LOCK_WATCHDOG_TIMEOUT:30000} # Watchdog 타임아웃 (밀리초, 기본: 30초)
 
 email:
   sender: ${EMAIL_SENDER}
