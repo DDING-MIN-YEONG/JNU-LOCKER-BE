@@ -37,6 +37,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
+    // redisson
+    implementation "org.redisson:redisson-spring-boot-starter:3.49.0"
+
     // querydsl
     implementation "io.github.openfeign.querydsl:querydsl-jpa:${querydslVersion}"
     annotationProcessor "io.github.openfeign.querydsl:querydsl-apt:${querydslVersion}:jpa"

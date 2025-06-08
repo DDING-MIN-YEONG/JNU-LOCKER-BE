@@ -1,6 +1,7 @@
 package com.jnulocker.registration.application.service;
 
 import com.jnulocker.auth.security.SecurityUtils;
+import com.jnulocker.common.util.RedisLockManager;
 import com.jnulocker.events.application.port.in.EventQuery;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.Locker;
@@ -28,27 +29,35 @@ public class RegistrationCommandService implements RegistrationCommand {
     private final EventQuery eventQuery;
     private final RegistrationLoadPort registrationLoadPort;
     private final RegistrationRecordPort registrationRecordPort;
+    private final RedisLockManager redisLockManager;
 
     @Override
     @Transactional
     public void registerForEvent(UUID eventId, RegisterForEventRequest request) {
         Long memberId = SecurityUtils.getCurrentMemberId();
-        Member member = memberQuery.findByIdOrThrow(memberId);
+        UUID lockerId = request.lockerId();
 
-        Event event = eventQuery.getByIdOrThrow(eventId);
-        Locker locker = eventQuery.getLockerByIdOrThrow(request.lockerId());
+        redisLockManager.lock(
+                lockerId.toString(),
+                5L,
+                () -> {
+                    Member member = memberQuery.findByIdOrThrow(memberId);
 
-        if (!event.equals(locker.getFloor().getEvent())) {
-            throw InvalidLockerForEventException.EXCEPTION;
-        }
+                    Event event = eventQuery.getByIdOrThrow(eventId);
+                    Locker locker = eventQuery.getLockerByIdOrThrow(request.lockerId());
 
-        // 이미 해당 이벤트에서 사물함 신청을 완료한 경우 예외 발생
-        if (registrationLoadPort.existsByMemberIdAndEventId(memberId, eventId)) {
-            throw RegistrationAlreadyExistsException.EXCEPTION;
-        }
+                    if (!event.equals(locker.getFloor().getEvent())) {
+                        throw InvalidLockerForEventException.EXCEPTION;
+                    }
 
-        Registration registration = Registration.create(member, locker);
-        registrationRecordPort.save(registration);
+                    // 이미 해당 이벤트에서 사물함 신청을 완료한 경우 예외 발생
+                    if (registrationLoadPort.existsByMemberIdAndEventId(memberId, eventId)) {
+                        throw RegistrationAlreadyExistsException.EXCEPTION;
+                    }
+
+                    Registration registration = Registration.create(member, locker);
+                    registrationRecordPort.save(registration);
+                });
     }
 
     @Override
