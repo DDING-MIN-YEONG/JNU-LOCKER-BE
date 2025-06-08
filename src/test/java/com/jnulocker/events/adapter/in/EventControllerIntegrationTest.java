@@ -954,11 +954,20 @@ public class EventControllerIntegrationTest {
                         );
         List<PrefixInfo> prefixes3 = List.of(new PrefixInfo("X", rangesX));
 
+        // 4층: 접두사 "공대7호관", 연속적인 범위
+        List<LockerRange> rangesEngineering =
+                List.of(
+                        new LockerRange(1, 10), // 공대7호관-001 ~ 공대7호관-010
+                        new LockerRange(20, 30) // 공대7호관-020 ~ 공대7호관-030
+                        );
+        List<PrefixInfo> prefixes4 = List.of(new PrefixInfo("공대7호관", rangesEngineering));
+
         List<FloorInfo> floors =
                 List.of(
                         new FloorInfo(1, prefixes1),
                         new FloorInfo(2, prefixes2),
-                        new FloorInfo(3, prefixes3));
+                        new FloorInfo(3, prefixes3),
+                        new FloorInfo(4, prefixes4));
 
         return createEventRequestBuilder()
                 .withTitle("다양한 층과 접두사를 가진 이벤트")
