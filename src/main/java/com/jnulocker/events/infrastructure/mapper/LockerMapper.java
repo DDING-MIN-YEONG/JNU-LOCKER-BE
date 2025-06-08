@@ -26,7 +26,7 @@ public class LockerMapper {
      * 없을 수 있고, 있다면 하이픈을 포함하지 않고 문자만 캡쳐 </br> - (\\d+) : 필수 숫자 부분
      */
     private static final Pattern LOCKER_CODE_PATTERN =
-            Pattern.compile("^(?:([A-Za-zㄱ-ㅣ가-힣]+)-)?(\\d+)$");
+            Pattern.compile("^(?:([A-Za-zㄱ-ㅣ가-힣0-9]+)-)?(\\d+)$");
 
     /**
      * FloorWithLockersResponse 목록을 FloorInfo 목록으로 변환합니다. 이 메소드는 사물함 코드를 분석하여 prefix, 숫자 범위를 추출하고
