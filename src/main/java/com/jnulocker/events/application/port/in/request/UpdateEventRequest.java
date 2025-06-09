@@ -30,15 +30,20 @@ public record UpdateEventRequest(
 
     @AssertTrue(message = "이벤트 종료 시간은 시작 시간 이후여야 합니다.")
     private boolean isEndAtAfterStartAt() {
-        return !endAt.isBefore(startAt);
+        return startAt == null || endAt == null || !endAt.isBefore(startAt);
     }
 
     @AssertTrue(message = "전체 사물함 개수는 2000개를 초과할 수 없습니다.")
     private boolean isTotalLockersWithinLimit() {
+        // 시작 번호, 종료 번호는 검증하지 않는다
         int lockerCount =
                 floors.stream()
                         .flatMap(floor -> floor.prefixes().stream())
                         .flatMap(prefix -> prefix.ranges().stream())
+                        .filter(
+                                range ->
+                                        range.lockerStartNumber() != null
+                                                && range.lockerEndNumber() != null)
                         .mapToInt(range -> range.lockerEndNumber() - range.lockerStartNumber() + 1)
                         .sum();
         return lockerCount <= 2000;
