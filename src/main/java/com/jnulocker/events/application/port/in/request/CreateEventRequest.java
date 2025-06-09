@@ -35,6 +35,7 @@ public record CreateEventRequest(
 
     @AssertTrue(message = "전체 사물함 개수는 2000개를 초과할 수 없습니다.")
     private boolean isTotalLockersWithinLimit() {
+        // null 여부는 @NotNull에 의해 처리되므로, null이면 검증 스킵
         int lockerCount =
                 floors.stream()
                         .flatMap(floor -> floor.prefixes().stream())
