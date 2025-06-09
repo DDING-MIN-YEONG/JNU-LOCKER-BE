@@ -32,4 +32,9 @@ public record CreateEventRequest(
     private boolean isEndAtAfterStartAt() {
         return startAt == null || endAt == null || !endAt.isBefore(startAt);
     }
+
+    @AssertTrue(message = "전체 사물함 개수는 2000개를 초과할 수 없습니다.")
+    private boolean isTotalLockersWithinLimit() {
+        return LockerValidationUtils.isTotalLockersWithinLimit(floors);
+    }
 }
