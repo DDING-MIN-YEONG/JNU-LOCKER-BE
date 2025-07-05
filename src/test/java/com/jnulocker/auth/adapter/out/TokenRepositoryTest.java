@@ -6,17 +6,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 import com.jnulocker.auth.jwt.RefreshToken;
-import com.jnulocker.config.RedisConfig;
+import com.jnulocker.config.RedisTest;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest;
-import org.springframework.context.annotation.Import;
 
-@DataRedisTest
-@Import(RedisConfig.class) // keyspace events를 구독하기 위해 RedisConfig를 import
-class TokenRepositoryTest {
+class TokenRepositoryTest extends RedisTest {
 
     @Autowired TokenRepository tokenRepository;
 

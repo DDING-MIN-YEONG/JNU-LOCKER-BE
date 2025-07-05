@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.common.exception.ErrorResponse;
+import com.jnulocker.config.RedisTest;
 import com.jnulocker.events.application.port.in.request.CreateEventRequest;
 import com.jnulocker.events.application.port.in.request.FloorInfo;
 import com.jnulocker.events.application.port.in.request.LockerRange;
@@ -54,14 +55,10 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Testcontainers
-@ActiveProfiles("test")
 @DisplayName("이벤트 컨트롤러 통합 테스트")
-public class EventControllerIntegrationTest {
+public class EventControllerIntegrationTest extends RedisTest {
 
     private static final String EVENT_URL = "/v1/events";
     private static final String ACCESS_TOKEN = "access_token";
