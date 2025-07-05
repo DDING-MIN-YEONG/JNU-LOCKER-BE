@@ -5,9 +5,11 @@ import com.jnulocker.registration.application.port.in.RegistrationCommand;
 import com.jnulocker.registration.application.port.in.RegistrationQuery;
 import com.jnulocker.registration.application.port.in.request.RegisterForEventRequest;
 import com.jnulocker.registration.application.port.in.response.RegistrationCustomPage;
+import com.jnulocker.registration.application.port.in.response.RegistrationListItem;
 import com.jnulocker.registration.application.port.in.response.RegistrationPageable;
 import com.jnulocker.registration.application.port.in.response.RegistrationResponse;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -37,6 +39,13 @@ public class RegistrationController implements RegistrationApi {
             @Valid @ParameterObject RegistrationPageable registrationPageable) {
         Pageable pageable = registrationPageable.toPageable();
         return ResponseEntity.ok(registrationQuery.getRegistrations(eventId, pageable));
+    }
+
+    @Override
+    @GetMapping("/all")
+    public ResponseEntity<List<RegistrationListItem>> getAllRegistrations(
+            @PathVariable("event-id") UUID eventId) {
+        return ResponseEntity.ok(registrationQuery.getAllRegistrations(eventId));
     }
 
     @Override
