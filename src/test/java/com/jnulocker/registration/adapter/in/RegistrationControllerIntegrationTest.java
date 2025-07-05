@@ -183,7 +183,7 @@ public class RegistrationControllerIntegrationTest extends RedisTest {
         RegistrationListItem firstItem = registrations.get(0);
         RegistrationListItem secondItem = registrations.get(1);
 
-        // 첫 번째 항목 (1층 2번 사물함, 사용자 1)
+        // 첫 번째 항목 (1층 사물함, 사용자 1)
         assertThat(firstItem.floorNumber()).isEqualTo(1);
         assertThat(firstItem.lockerCode()).isEqualTo(user1Locker);
         assertThat(firstItem.member().name()).isEqualTo(user1.getName());
@@ -193,7 +193,7 @@ public class RegistrationControllerIntegrationTest extends RedisTest {
         assertThat(firstItem.member().department()).isEqualTo(user1.getDepartment().getName());
         assertThat(firstItem.member().email()).isEqualTo(user1.getEmail());
 
-        // 두 번째 항목 (2층 3번 사물함, 사용자 2)
+        // 두 번째 항목 (2층 사물함, 사용자 2)
         assertThat(secondItem.floorNumber()).isEqualTo(2);
         assertThat(secondItem.lockerCode()).isEqualTo(user2Locker);
         assertThat(secondItem.member().name()).isEqualTo(user2.getName());
