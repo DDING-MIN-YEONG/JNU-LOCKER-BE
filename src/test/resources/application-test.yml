@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: jnu-locker
+
+  datasource:
+    url: jdbc:tc:mysql:8.0:///test-database
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+
+  sql:
+    init:
+      mode: never
+
+custom:
+  jwt:
+    access-secret-key: dGVzdC1zZWNyZXQta2V5LXRlc3Qtc2VjcmV0LWtleS10ZXN0LXNlY3JldC1rZXktdGVzdC1zZWNyZXQta2V5
+    refresh-secret-key: dGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNo
+    access-token-expire-time: 3600
+    refresh-token-expire-time: 86400
+  lock:
+    watchdog:
+      timeout: 30000 # Watchdog 타임아웃 (밀리초, 기본: 30초)
+
+logging:
+  level:
+    p6spy: info
+    org.springframework:
+      transaction.interceptor: trace
