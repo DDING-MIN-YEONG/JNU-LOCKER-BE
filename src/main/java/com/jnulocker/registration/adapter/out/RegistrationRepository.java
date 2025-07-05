@@ -12,7 +12,8 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-public interface RegistrationRepository extends JpaRepository<Registration, Long> {
+public interface RegistrationRepository
+        extends JpaRepository<Registration, Long>, RegistrationRepositoryCustom {
     boolean existsByMemberIdAndLocker_Floor_EventId(Long memberId, UUID eventId);
 
     @Query(

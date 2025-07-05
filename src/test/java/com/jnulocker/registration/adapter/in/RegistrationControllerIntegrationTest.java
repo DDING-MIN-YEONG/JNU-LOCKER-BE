@@ -8,8 +8,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.jnulocker.auth.jwt.exception.JwtErrorCode;
 import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.common.exception.ErrorResponse;
+import com.jnulocker.config.RedisTest;
 import com.jnulocker.events.application.port.in.response.EventPageable;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
+import com.jnulocker.events.application.port.in.response.LockerResponse;
 import com.jnulocker.events.application.port.in.response.MyEventCustomPage;
 import com.jnulocker.events.application.port.in.response.MyEventListItem;
 import com.jnulocker.events.domain.Event;
@@ -17,6 +19,7 @@ import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.exception.EventErrorCode;
 import com.jnulocker.events.utils.EventTestUtil;
 import com.jnulocker.events.utils.LockerEventContext;
+import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.utils.MemberTestUtil;
 import com.jnulocker.registration.application.port.in.request.RegisterForEventRequest;
@@ -48,7 +51,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 @ActiveProfiles("test")
 @DisplayName("이벤트 신청 컨트롤러 통합 테스트")
-public class RegistrationControllerIntegrationTest {
+public class RegistrationControllerIntegrationTest extends RedisTest {
 
     private static final String REGISTRATION_URL = "/v1/events/{event-id}/registrations";
     private static final String ACCESS_TOKEN = "access_token";
@@ -129,6 +132,76 @@ public class RegistrationControllerIntegrationTest {
         assertThat(memberInfo.organization()).isEqualTo("테스트 조직명");
         assertThat(memberInfo.department()).isEqualTo("테스트 학과명");
         assertThat(memberInfo.email()).isEqualTo("test@email.com");
+    }
+
+    @Test
+    @DisplayName("신청된 사물함 목록 전체 조회 시, 층과 사물함번호 순으로 정렬된다")
+    void 신청된_사물함_목록_전체_조회_시_층과_사물함번호_순으로_정렬된다() {
+        // given
+        LockerEventContext context =
+                eventTestUtil.setUpLockerEventForRegistration(
+                        List.of(10, 5), Role.USER, EventStatus.OPEN, true);
+        Event event = context.event();
+        Member eventParticipant = context.member();
+
+        // 사용자 2가 2층 사물함을 먼저 신청
+        Member user2 =
+                memberTestUtil.createMemberFromRoleWithDepartment(
+                        Role.USER, eventParticipant.getDepartment());
+        String user2Token = authTestUtil.generateAccessTokenWithMember(user2);
+        String user2Locker = "B-002";
+        RegisterForEventRequest request2 =
+                createRequestForSpecificLocker(event, user2Token, 2, user2Locker);
+        registerForEvent(event.getId(), request2, user2Token)
+                .statusCode(HttpStatus.CREATED.value());
+
+        // 사용자 1이 1층 사물함을 나중에 신청
+        Member user1 =
+                memberTestUtil.createMemberFromRoleWithDepartment(
+                        Role.USER, eventParticipant.getDepartment());
+        String user1Token = authTestUtil.generateAccessTokenWithMember(user1);
+        String user1Locker = "A-008";
+        RegisterForEventRequest request1 =
+                createRequestForSpecificLocker(event, user1Token, 1, user1Locker);
+        registerForEvent(event.getId(), request1, user1Token)
+                .statusCode(HttpStatus.CREATED.value());
+
+        accessToken = authTestUtil.generateAccessToken(Role.MANAGER);
+
+        // when
+        List<RegistrationListItem> registrations =
+                getAllRegistrations(event.getId())
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .jsonPath()
+                        .getList(".", RegistrationListItem.class);
+
+        // then
+        assertThat(registrations).hasSize(2);
+
+        // 정렬 순서 검증: 층(asc), 사물함 코드(asc)
+        RegistrationListItem firstItem = registrations.get(0);
+        RegistrationListItem secondItem = registrations.get(1);
+
+        // 첫 번째 항목 (1층 사물함, 사용자 1)
+        assertThat(firstItem.floorNumber()).isEqualTo(1);
+        assertThat(firstItem.lockerCode()).isEqualTo(user1Locker);
+        assertThat(firstItem.member().name()).isEqualTo(user1.getName());
+        assertThat(firstItem.member().studentNumber()).isEqualTo(user1.getStudentNumber());
+        assertThat(firstItem.member().organization())
+                .isEqualTo(user1.getDepartment().getOrganization().getName());
+        assertThat(firstItem.member().department()).isEqualTo(user1.getDepartment().getName());
+        assertThat(firstItem.member().email()).isEqualTo(user1.getEmail());
+
+        // 두 번째 항목 (2층 사물함, 사용자 2)
+        assertThat(secondItem.floorNumber()).isEqualTo(2);
+        assertThat(secondItem.lockerCode()).isEqualTo(user2Locker);
+        assertThat(secondItem.member().name()).isEqualTo(user2.getName());
+        assertThat(secondItem.member().studentNumber()).isEqualTo(user2.getStudentNumber());
+        assertThat(secondItem.member().organization())
+                .isEqualTo(user2.getDepartment().getOrganization().getName());
+        assertThat(secondItem.member().department()).isEqualTo(user2.getDepartment().getName());
+        assertThat(secondItem.member().email()).isEqualTo(user2.getEmail());
     }
 
     @Test
@@ -543,6 +616,15 @@ public class RegistrationControllerIntegrationTest {
                 .ifError();
     }
 
+    private ValidatableResponse getAllRegistrations(UUID eventId) {
+        return given().cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
+                .when()
+                .get(REGISTRATION_URL + "/all", eventId)
+                .then()
+                .log()
+                .ifError();
+    }
+
     private ValidatableResponse getMyRegistration(UUID eventId) {
         return given().cookie(new Cookie.Builder(ACCESS_TOKEN, accessToken).build())
                 .when()
@@ -621,5 +703,19 @@ public class RegistrationControllerIntegrationTest {
                 .extract()
                 .jsonPath()
                 .getList(".", FloorWithLockersResponse.class);
+    }
+
+    private RegisterForEventRequest createRequestForSpecificLocker(
+            Event event, String accessToken, int floorNumber, String lockerNumber) {
+        List<FloorWithLockersResponse> floors = getFloors(event, accessToken);
+        UUID lockerId =
+                floors.stream()
+                        .filter(floor -> floor.floorNumber() == floorNumber)
+                        .flatMap(floor -> floor.lockers().stream())
+                        .filter(locker -> locker.code().equals(lockerNumber))
+                        .findFirst()
+                        .map(LockerResponse::lockerId)
+                        .orElseThrow(() -> new AssertionError("Cannot find specified locker"));
+        return new RegisterForEventRequest(lockerId);
     }
 }

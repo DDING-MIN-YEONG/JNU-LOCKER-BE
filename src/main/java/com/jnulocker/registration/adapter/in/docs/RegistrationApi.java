@@ -3,6 +3,7 @@ package com.jnulocker.registration.adapter.in.docs;
 import com.jnulocker.common.swagger.ApiExceptionExamples;
 import com.jnulocker.registration.application.port.in.request.RegisterForEventRequest;
 import com.jnulocker.registration.application.port.in.response.RegistrationCustomPage;
+import com.jnulocker.registration.application.port.in.response.RegistrationListItem;
 import com.jnulocker.registration.application.port.in.response.RegistrationPageable;
 import com.jnulocker.registration.application.port.in.response.RegistrationResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.MediaType;
@@ -33,6 +35,18 @@ public interface RegistrationApi {
     ResponseEntity<RegistrationCustomPage> getRegistrations(
             @PathVariable("event-id") UUID eventId,
             @Valid @ParameterObject RegistrationPageable registrationPageable);
+
+    @ApiExceptionExamples(GetRegistrationsExceptionDocs.class)
+    @Operation(summary = "사물함 신청 목록 전체 조회", description = "이벤트에 대한 신청 목록을 전체 조회합니다.")
+    @ApiResponse(
+            responseCode = "200",
+            description = "사물함 신청 목록 전체 조회 성공",
+            content =
+                    @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = RegistrationListItem.class)))
+    ResponseEntity<List<RegistrationListItem>> getAllRegistrations(
+            @PathVariable("event-id") UUID eventId);
 
     @ApiExceptionExamples(GetMyRegistrationExceptionDocs.class)
     @Operation(summary = "자신의 사물함 신청 현황 조회", description = "이벤트에 대한 자신의 신청 현황을 조회합니다")

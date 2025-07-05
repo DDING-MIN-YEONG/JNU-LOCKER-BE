@@ -86,6 +86,8 @@ public class SecurityConfig {
                                         "/v1/auth/managers/pending",
                                         "/v1/events",
                                         "/v1/events/*",
+                                        "/v1/events/*/registrations",
+                                        "/v1/events/*/registrations/all",
                                         "/v1/announces",
                                         "/v1/announces/*")
                                 .hasAuthority(Role.MANAGER.getRole())
