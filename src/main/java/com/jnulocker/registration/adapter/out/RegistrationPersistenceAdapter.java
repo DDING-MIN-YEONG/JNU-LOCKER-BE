@@ -40,6 +40,11 @@ public class RegistrationPersistenceAdapter
     }
 
     @Override
+    public List<Registration> getAllRegistrationsByEventId(UUID eventId) {
+        return registrationRepository.findAllByEventId(eventId);
+    }
+
+    @Override
     public Optional<Registration> getRegistrationByMemberIdAndEventId(Long memberId, UUID eventId) {
         return registrationRepository.findByMemberIdAndEventId(memberId, eventId);
     }

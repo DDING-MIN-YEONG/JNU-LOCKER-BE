@@ -14,6 +14,8 @@ public interface RegistrationLoadPort {
 
     Page<Registration> getRegistrationsByEventId(UUID eventId, Pageable pageable);
 
+    List<Registration> getAllRegistrationsByEventId(UUID eventId);
+
     Optional<Registration> getRegistrationByMemberIdAndEventId(Long memberId, UUID eventId);
 
     List<Registration> getAllByMember(Member member);

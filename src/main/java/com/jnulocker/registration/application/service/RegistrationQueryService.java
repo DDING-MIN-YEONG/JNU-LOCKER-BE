@@ -5,10 +5,12 @@ import com.jnulocker.events.application.port.in.EventQuery;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.registration.application.port.in.RegistrationQuery;
 import com.jnulocker.registration.application.port.in.response.RegistrationCustomPage;
+import com.jnulocker.registration.application.port.in.response.RegistrationListItem;
 import com.jnulocker.registration.application.port.in.response.RegistrationResponse;
 import com.jnulocker.registration.application.port.out.RegistrationLoadPort;
 import com.jnulocker.registration.domain.Registration;
 import com.jnulocker.registration.exception.RegistrationNotFoundException;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,6 +32,14 @@ public class RegistrationQueryService implements RegistrationQuery {
         Page<Registration> registrations =
                 registrationLoadPort.getRegistrationsByEventId(event.getId(), pageable);
         return RegistrationCustomPage.from(registrations);
+    }
+
+    @Override
+    public List<RegistrationListItem> getAllRegistrations(UUID eventId) {
+        Event event = eventQuery.getByIdOrThrow(eventId);
+        List<Registration> registrations =
+                registrationLoadPort.getAllRegistrationsByEventId(event.getId());
+        return registrations.stream().map(RegistrationListItem::from).toList();
     }
 
     @Override
