@@ -59,8 +59,6 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private static final String MEDIA_TYPE = "application/json; charset=UTF-8";
-    private static final String AUTHORIZATION_HEADER = "Authorization";
-    private static final String BEARER_PREFIX = "Bearer ";
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
