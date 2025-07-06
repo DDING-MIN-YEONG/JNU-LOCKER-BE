@@ -20,15 +20,6 @@ spring:
         order_inserts: true # Action Queue 내부 insert 문을 정렬하여 실행
         order_updates: true # Action Queue 내부 update 문을 정렬하여 실행
     defer-datasource-initialization: true
-  sql:
-    init:
-      mode: never
-
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      password: ${REDIS_PASSWORD}
-      port: ${REDIS_PORT}
 
   mail:
     host: ${MAIL_HOST}
@@ -85,13 +76,13 @@ decorator:
 
 custom:
   email-verification:
-    fixed: ${EMAIL_VERIFICATION_FIXED:false}
-    code: ${EMAIL_VERIFICATION_CODE:123456}
+    fixed: ${EMAIL_VERIFICATION_FIXED}
+    code: ${EMAIL_VERIFICATION_CODE}
   jwt:
-    access-secret-key: ${JWT_ACCESS_SECRET_KEY:dGVzdC1zZWNyZXQta2V5LXRlc3Qtc2VjcmV0LWtleS10ZXN0LXNlY3JldC1rZXktdGVzdC1zZWNyZXQta2V5}
-    refresh-secret-key: ${JWT_REFRESH_SECRET_KEY:dGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNoLXNlY3JldC1rZXktdGVzdC1yZWZyZXNo}
-    access-token-expire-time: ${JWT_ACCESS_TOKEN_EXPIRE_TIME:3600}
-    refresh-token-expire-time: ${JWT_REFRESH_TOKEN_EXPIRE_TIME:86400}
+    access-secret-key: ${JWT_ACCESS_SECRET_KEY}
+    refresh-secret-key: ${JWT_REFRESH_SECRET_KEY}
+    access-token-expire-time: ${JWT_ACCESS_TOKEN_EXPIRE_TIME}
+    refresh-token-expire-time: ${JWT_REFRESH_TOKEN_EXPIRE_TIME}
   lock:
     watchdog:
       timeout: ${LOCK_WATCHDOG_TIMEOUT:30000} # Watchdog 타임아웃 (밀리초, 기본: 30초)
@@ -103,7 +94,13 @@ email:
 spring:
   config:
     activate:
-      on-profile: dev
+      on-profile: local
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      password: ${REDIS_PASSWORD}
+      port: ${REDIS_PORT}
 
   sql:
     init:
@@ -111,12 +108,37 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-      
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      password: ${REDIS_PASSWORD}
+      port: ${REDIS_PORT}
+
+  sql:
+    init:
+      mode: never
+  jpa:
+    hibernate:
+      ddl-auto: update
+
 ---
 spring:
   config:
     activate:
       on-profile: prod
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      password: ${REDIS_PASSWORD}
+      port: ${REDIS_PORT}
 
   sql:
     init:
@@ -127,23 +149,3 @@ decorator:
   datasource:
     p6spy:
       enable-logging: false
-
----
-spring:
-  config:
-    activate:
-      on-profile: test
-
-  datasource:
-    url: jdbc:tc:mysql:8.0:///test-database
-    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
-
-  sql:
-    init:
-      mode: never
-
-logging:
-  level:
-    p6spy: info
-    org.springframework:
-      transaction.interceptor: trace

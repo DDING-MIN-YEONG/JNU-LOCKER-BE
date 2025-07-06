@@ -25,6 +25,7 @@ import com.jnulocker.auth.jwt.exception.JwtErrorCode;
 import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.common.exception.ErrorResponse;
 import com.jnulocker.common.util.RedisUtil;
+import com.jnulocker.config.RedisTest;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.EventStatus;
 import com.jnulocker.events.domain.Locker;
@@ -65,14 +66,10 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Testcontainers
-@ActiveProfiles("test")
 @DisplayName("인증 통합 테스트")
-class AuthControllerIntegrationTest {
+class AuthControllerIntegrationTest extends RedisTest {
 
     private static final String AUTH_URL = "/v1/auth";
     private static final String ACCESS_TOKEN = "access_token";

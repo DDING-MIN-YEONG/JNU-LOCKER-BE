@@ -16,6 +16,7 @@ import com.jnulocker.announce.exception.AnnounceErrorCode;
 import com.jnulocker.announce.utils.AnnounceTestUtil;
 import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.common.exception.ErrorResponse;
+import com.jnulocker.config.RedisTest;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
 import com.jnulocker.member.utils.MemberTestUtil;
@@ -37,14 +38,10 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Testcontainers
-@ActiveProfiles("test")
 @DisplayName("공지사항 컨트롤러 통합 테스트")
-public class AnnounceControllerIntegrationTest {
+public class AnnounceControllerIntegrationTest extends RedisTest {
 
     private static final String ANNOUNCE_URL = "/v1/announces";
     private static final String ACCESS_TOKEN = "access_token";

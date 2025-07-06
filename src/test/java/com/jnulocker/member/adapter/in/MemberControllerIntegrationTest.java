@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.jnulocker.auth.utils.AuthTestUtil;
+import com.jnulocker.config.RedisTest;
 import com.jnulocker.member.application.port.in.response.MemberInfoResponse;
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.member.domain.Role;
@@ -23,14 +24,10 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Testcontainers
-@ActiveProfiles("test")
 @DisplayName("회원 통합 테스트")
-public class MemberControllerIntegrationTest {
+public class MemberControllerIntegrationTest extends RedisTest {
 
     private static final String MEMBER_URL = "/v1/members";
     private static final String ACCESS_TOKEN = "access_token";
