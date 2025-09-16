@@ -14,11 +14,13 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOriginPatterns(
                         "http://localhost:3000",
                         "https://localhost:3000",
+                        "https://localhost:3001",
                         "http://localhost:8080",
                         "https://localhost:8080",
                         "https://jnu-locker.vercel.app",
                         "https://api.dev.jnu-locker.site",
-                        "https://www.jnu-locker.site")
+                        "https://www.jnu-locker.site",
+                        "https://jnu-locker-manager.vercel.app")
                 .allowedMethods(
                         HttpMethod.GET.name(),
                         HttpMethod.POST.name(),
