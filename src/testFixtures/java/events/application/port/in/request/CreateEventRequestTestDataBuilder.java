@@ -7,8 +7,8 @@ import java.util.List;
 
 public class CreateEventRequestTestDataBuilder {
     private String title = "전자컴퓨터공학부 2025-2 사물함 신청";
-    private LocalDateTime startAt = LocalDateTime.of(2025, 8, 1, 15, 0);
-    private LocalDateTime endAt = LocalDateTime.of(2025, 8, 1, 16, 0);
+    private LocalDateTime startAt = LocalDateTime.now().plusHours(1);
+    private LocalDateTime endAt = LocalDateTime.now().plusHours(2);
     private List<Long> participationDepartmentIds = List.of(1L, 2L, 3L);
     private List<FloorInfo> floors = List.of(FloorInfoTestDataBuilder.floorInfoBuilder().build());
 
