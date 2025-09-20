@@ -7,6 +7,16 @@ plugins {
     id 'java-test-fixtures'
 }
 
+ext {
+    springAiVersion = "1.0.2"
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.ai:spring-ai-bom:$springAiVersion"
+    }
+}
+
 group = 'com'
 version = '0.0.1-SNAPSHOT'
 
@@ -36,6 +46,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // Spring AI
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai'
 
     // redisson
     implementation "org.redisson:redisson-spring-boot-starter:3.49.0"
