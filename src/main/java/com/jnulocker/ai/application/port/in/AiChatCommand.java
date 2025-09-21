@@ -1,5 +1,8 @@
 package com.jnulocker.ai.application.port.in;
 
+import com.jnulocker.ai.application.port.in.request.AiChatRequest;
+import com.jnulocker.ai.application.port.in.response.AiChatResponse;
+
 public interface AiChatCommand {
-    String chat(String message);
+    AiChatResponse chat(AiChatRequest request);
 }
