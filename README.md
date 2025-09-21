@@ -19,7 +19,7 @@
 
 </details>
 
-[[위원회용] 전남대학교 사물함 신청 서비스](https://www.jnu-locker.site/committee)
+[[위원회용] 전남대학교 사물함 신청 서비스](https://jnu-locker-manager.vercel.app/)
 
 <details>
 <summary>🧑‍💼 위원회용 테스트 계정</summary>
