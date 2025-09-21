@@ -23,5 +23,5 @@ public interface AiChatbotApi {
                     @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = AiChatResponse.class)))
-    ResponseEntity<AiChatResponse> post(@Valid @RequestBody AiChatRequest request);
+    ResponseEntity<AiChatResponse> chat(@Valid @RequestBody AiChatRequest request);
 }
