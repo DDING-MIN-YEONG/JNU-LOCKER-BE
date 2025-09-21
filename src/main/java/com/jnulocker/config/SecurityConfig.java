@@ -1,12 +1,14 @@
 package com.jnulocker.config;
 
 import com.jnulocker.auth.jwt.JwtFilter;
+import com.jnulocker.auth.jwt.TokenProvider;
 import com.jnulocker.auth.security.CustomAccessDeniedHandler;
 import com.jnulocker.auth.security.CustomAuthenticationEntryPoint;
 import com.jnulocker.auth.security.CustomUserDetailsService;
+import com.jnulocker.auth.security.SecurityPaths;
 import com.jnulocker.member.domain.Role;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -25,11 +27,8 @@ import org.springframework.web.cors.CorsUtils;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtFilter jwtFilter;
-
-    @Value("${management.endpoints.web.base-path}")
-    private String actuatorBasePath;
-
+    private final TokenProvider tokenProvider;
+    private final SecurityPaths securityPaths;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomUserDetailsService customUserDetailsService;
@@ -51,26 +50,15 @@ public class SecurityConfig {
                         requestMatcherRegistry
                                 .requestMatchers(CorsUtils::isPreFlightRequest)
                                 .permitAll()
-                                .requestMatchers( // swagger
-                                        "/api-docs/**", "/swagger-resources/**", "/swagger-ui/**")
+                                .requestMatchers(securityPaths.getPublicPaths())
                                 .permitAll()
-                                .requestMatchers( // actuator TODO: 접근 권한 설정 (ADMIN)
-                                        actuatorBasePath,
-                                        actuatorBasePath + "/health",
-                                        actuatorBasePath + "/prometheus")
+                                .requestMatchers(HttpMethod.GET, SecurityPaths.PUBLIC_GET_PATHS)
                                 .permitAll()
                                 .requestMatchers(
-                                        HttpMethod.GET,
-                                        "/v1/organizations",
-                                        "/v1/organizations/*/departments")
-                                .permitAll() // 소속대학/학과 조회 API 모든 접근 허용
-                                .requestMatchers(
-                                        "/v1/auth/*/signup",
-                                        "/v1/auth/login",
-                                        "/v1/auth/reissue",
-                                        "/v1/auth/send-email",
-                                        "/v1/auth/verify")
+                                        PathRequest.toStaticResources().atCommonLocations())
                                 .permitAll()
+
+                                // USER 권한 API
                                 .requestMatchers(
                                         HttpMethod.GET,
                                         "/v1/events/*/registrations/me",
@@ -81,6 +69,8 @@ public class SecurityConfig {
                                 .hasAuthority(Role.USER.getRole())
                                 .requestMatchers(HttpMethod.POST, "/v1/events/*/registrations")
                                 .hasAuthority(Role.USER.getRole())
+
+                                // MANAGER 권한 API
                                 .requestMatchers(
                                         HttpMethod.GET,
                                         "/v1/auth/managers/pending",
@@ -110,8 +100,9 @@ public class SecurityConfig {
                                 .anyRequest()
                                 .authenticated());
 
-        // JWT 필터 추가
-        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(
+                new JwtFilter(tokenProvider, securityPaths),
+                UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
