@@ -19,6 +19,7 @@ public class AiChatbotController implements AiChatbotApi {
 
     private final AiChatCommand aiChatCommand;
 
+    @Override
     @PostMapping
     public ResponseEntity<AiChatResponse> post(@Valid @RequestBody AiChatRequest request) {
         AiChatResponse chatResponse = aiChatCommand.chat(request);
