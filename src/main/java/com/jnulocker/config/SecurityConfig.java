@@ -5,9 +5,9 @@ import com.jnulocker.auth.jwt.TokenProvider;
 import com.jnulocker.auth.security.CustomAccessDeniedHandler;
 import com.jnulocker.auth.security.CustomAuthenticationEntryPoint;
 import com.jnulocker.auth.security.CustomUserDetailsService;
+import com.jnulocker.auth.security.SecurityPaths;
 import com.jnulocker.member.domain.Role;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +16,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -29,10 +28,7 @@ import org.springframework.web.cors.CorsUtils;
 public class SecurityConfig {
 
     private final TokenProvider tokenProvider;
-
-    @Value("${management.endpoints.web.base-path}")
-    private String actuatorBasePath;
-
+    private final SecurityPaths securityPaths;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomUserDetailsService customUserDetailsService;
@@ -54,6 +50,15 @@ public class SecurityConfig {
                         requestMatcherRegistry
                                 .requestMatchers(CorsUtils::isPreFlightRequest)
                                 .permitAll()
+                                .requestMatchers(securityPaths.getPublicPaths())
+                                .permitAll()
+                                .requestMatchers(HttpMethod.GET, SecurityPaths.PUBLIC_GET_PATHS)
+                                .permitAll()
+                                .requestMatchers(
+                                        PathRequest.toStaticResources().atCommonLocations())
+                                .permitAll()
+
+                                // USER 권한 API
                                 .requestMatchers(
                                         HttpMethod.GET,
                                         "/v1/events/*/registrations/me",
@@ -64,6 +69,8 @@ public class SecurityConfig {
                                 .hasAuthority(Role.USER.getRole())
                                 .requestMatchers(HttpMethod.POST, "/v1/events/*/registrations")
                                 .hasAuthority(Role.USER.getRole())
+
+                                // MANAGER 권한 API
                                 .requestMatchers(
                                         HttpMethod.GET,
                                         "/v1/auth/managers/pending",
@@ -93,9 +100,9 @@ public class SecurityConfig {
                                 .anyRequest()
                                 .authenticated());
 
-        // JWT 필터 추가
         http.addFilterBefore(
-                new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
+                new JwtFilter(tokenProvider, securityPaths),
+                UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -113,30 +120,5 @@ public class SecurityConfig {
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return web ->
-                web.ignoring()
-                        .requestMatchers(
-                                "/v1/auth/*/signup",
-                                "/v1/auth/login",
-                                "/v1/auth/reissue",
-                                "/v1/auth/send-email",
-                                "/v1/auth/verify",
-                                "/v1/ai/chat",
-                                "/swagger-ui/**",
-                                "/swagger-resources/**",
-                                "/api-docs/**",
-                                "/v3/api-docs/**",
-                                actuatorBasePath,
-                                actuatorBasePath + "/health",
-                                actuatorBasePath + "/prometheus")
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/v1/organizations",
-                                "/v1/organizations/*/departments")
-                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 }

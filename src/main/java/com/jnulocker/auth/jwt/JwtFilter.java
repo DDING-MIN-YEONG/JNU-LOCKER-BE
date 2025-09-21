@@ -5,6 +5,7 @@ import static com.jnulocker.auth.util.AuthUtil.getAccessToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jnulocker.auth.exception.AuthErrorCode;
 import com.jnulocker.auth.jwt.exception.InvalidAccessTokenException;
+import com.jnulocker.auth.security.SecurityPaths;
 import com.jnulocker.common.exception.BusinessException;
 import com.jnulocker.common.exception.ErrorCode;
 import com.jnulocker.common.exception.ErrorResponse;
@@ -24,8 +25,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final TokenProvider tokenProvider;
+    private final SecurityPaths securityPaths;
 
     private static final String MEDIA_TYPE = "application/json; charset=UTF-8";
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return securityPaths.shouldNotFilter(request);
+    }
 
     @Override
     protected void doFilterInternal(
