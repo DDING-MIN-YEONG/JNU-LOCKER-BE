@@ -20,7 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "https://jnu-locker.vercel.app",
                         "https://api.dev.jnu-locker.site",
                         "https://www.jnu-locker.site",
-                        "https://jnu-locker-manager.vercel.app")
+                        "https://www.manager.jnu-locker.site")
                 .allowedMethods(
                         HttpMethod.GET.name(),
                         HttpMethod.POST.name(),
