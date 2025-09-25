@@ -87,10 +87,10 @@ public class Locker extends BaseEntity implements Comparable<Locker> {
         if (code.contains("-")) {
             // 접두사가 있는 경우: "A-001" -> ["A", "001"]
             String[] parts = code.split("-", 2);
-            return new String[]{parts[0], parts[1]};
+            return new String[] {parts[0], parts[1]};
         } else {
             // 접두사가 없는 경우: "001" -> [null, "001"]
-            return new String[]{null, code};
+            return new String[] {null, code};
         }
     }
 }

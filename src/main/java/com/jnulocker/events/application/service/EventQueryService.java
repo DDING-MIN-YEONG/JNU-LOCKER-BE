@@ -136,10 +136,8 @@ public class EventQueryService implements EventQuery {
 
     private FloorWithLockersResponse convertToFloorResponse(
             Floor floor, Map<UUID, List<Locker>> lockersByFloorId) {
-        List<Locker> lockersForFloor = lockersByFloorId.getOrDefault(floor.getId(), List.of())
-                .stream()
-                .sorted()
-                .toList();
+        List<Locker> lockersForFloor =
+                lockersByFloorId.getOrDefault(floor.getId(), List.of()).stream().sorted().toList();
         return FloorWithLockersResponse.of(floor, lockersForFloor);
     }
 }
