@@ -118,7 +118,9 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/data' # 기본값이 /data
-      - '--storage.tsdb.retention.time=1y' # 데이터 보존 기간 설정 (1년: 1y or 365d)
+      - '--storage.tsdb.retention.time=30d' # 데이터 보존 기간 설정 (1년: 1y or 365d)
+      - '--storage.tsdb.retention.size=3GB' # 데이터 보존 용량 설정
+      - '--web.enable-lifecycle' # reload 기능 활성화
     depends_on:
       was:
         condition: service_healthy
