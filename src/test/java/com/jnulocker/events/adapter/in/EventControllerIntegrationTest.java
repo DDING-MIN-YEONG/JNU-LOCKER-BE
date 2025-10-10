@@ -4,6 +4,7 @@ import static events.application.port.in.request.CreateEventRequestTestDataBuild
 import static events.application.port.in.request.UpdateEventRequestTestDataBuilder.updateEventRequestBuilder;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatList;
 
 import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.common.exception.ErrorResponse;
@@ -20,6 +21,7 @@ import com.jnulocker.events.application.port.in.response.EventListItem;
 import com.jnulocker.events.application.port.in.response.EventPageable;
 import com.jnulocker.events.application.port.in.response.EventResponse;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
+import com.jnulocker.events.application.port.in.response.LockerResponse;
 import com.jnulocker.events.application.port.in.response.MyEventCustomPage;
 import com.jnulocker.events.application.port.in.response.MyEventResponse;
 import com.jnulocker.events.domain.Event;
@@ -37,6 +39,7 @@ import io.restassured.response.ValidatableResponse;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -917,6 +920,168 @@ public class EventControllerIntegrationTest extends RedisTest {
         }
 
         return covered >= end; // 마지막 범위까지 확인 후 결과
+    }
+
+    @Test
+    void 접두사_없는_사물함들이_번호순으로_정렬된다() {
+        List<String> lockerCodes = List.of("010", "001", "1000", "101", "100");
+        Map<Integer, List<String>> floorToLockerCodes = Map.of(1, lockerCodes);
+
+        Event event =
+                eventTestUtil
+                        .setUpLockerEventWithCustomCodes(
+                                floorToLockerCodes, Role.MANAGER, EventStatus.OPEN, true)
+                        .event();
+
+        List<FloorWithLockersResponse> floors =
+                getEventLockers(event.getId(), accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .jsonPath()
+                        .getList(".", FloorWithLockersResponse.class);
+
+        List<LockerResponse> lockers = floors.getFirst().lockers();
+        assertThat(lockers).hasSize(lockerCodes.size());
+
+        assertThatList(lockers)
+                .extracting(LockerResponse::code)
+                .containsExactly("001", "010", "100", "101", "1000");
+    }
+
+    @Test
+    void 같은_접두사_내에서_사물함이_번호순으로_정렬된다() {
+        List<String> lockerCodes = List.of("A-1000", "A-001", "A-101", "A-010", "A-100");
+        Map<Integer, List<String>> floorToLockerCodes = Map.of(1, lockerCodes);
+
+        Event event =
+                eventTestUtil
+                        .setUpLockerEventWithCustomCodes(
+                                floorToLockerCodes, Role.MANAGER, EventStatus.OPEN, true)
+                        .event();
+
+        List<FloorWithLockersResponse> floors =
+                getEventLockers(event.getId(), accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .jsonPath()
+                        .getList(".", FloorWithLockersResponse.class);
+
+        List<LockerResponse> lockers = floors.getFirst().lockers();
+        assertThat(lockers).hasSize(lockerCodes.size());
+
+        assertThatList(lockers)
+                .extracting(LockerResponse::code)
+                .containsExactly("A-001", "A-010", "A-100", "A-101", "A-1000");
+    }
+
+    @Test
+    void 혼합_패턴에서_올바른_순서로_정렬된다() {
+        List<String> lockerCodes =
+                List.of("010", "A-100", "001", "A-101", "B-010", "A-1000", "B-001");
+        Map<Integer, List<String>> floorToLockerCodes = Map.of(1, lockerCodes);
+
+        Event event =
+                eventTestUtil
+                        .setUpLockerEventWithMixedPattern(
+                                floorToLockerCodes, Role.MANAGER, EventStatus.OPEN, true)
+                        .event();
+
+        List<FloorWithLockersResponse> floors =
+                getEventLockers(event.getId(), accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .jsonPath()
+                        .getList(".", FloorWithLockersResponse.class);
+
+        List<LockerResponse> lockers = floors.getFirst().lockers();
+        assertThat(lockers).hasSize(lockerCodes.size());
+
+        assertThatList(lockers)
+                .extracting(LockerResponse::code)
+                .containsExactly("001", "010", "A-100", "A-101", "A-1000", "B-001", "B-010");
+    }
+
+    @Test
+    void 문자열_정렬과_숫자_정렬이_다른_경우를_올바르게_처리한다() {
+        // 문자열 정렬: 010, 100, 2 순서 (잘못된 순서)
+        // 숫자 정렬: 2, 010, 100 순서 (올바른 순서)
+        List<String> lockerCodes = List.of("010", "100", "2");
+        Map<Integer, List<String>> floorToLockerCodes = Map.of(1, lockerCodes);
+
+        Event event =
+                eventTestUtil
+                        .setUpLockerEventWithCustomCodes(
+                                floorToLockerCodes, Role.MANAGER, EventStatus.OPEN, true)
+                        .event();
+
+        List<FloorWithLockersResponse> floors =
+                getEventLockers(event.getId(), accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .jsonPath()
+                        .getList(".", FloorWithLockersResponse.class);
+
+        List<LockerResponse> lockers = floors.getFirst().lockers();
+        assertThat(lockers).hasSize(lockerCodes.size());
+        // 숫자 정렬 순서로 검증 (2 < 010 < 100)
+        assertThatList(lockers).extracting(LockerResponse::code).containsExactly("2", "010", "100");
+    }
+
+    @Test
+    void 접두사가_있는_경우에도_숫자_정렬이_올바르게_동작한다() {
+        // 문자열 정렬: A-010, A-100, A-2 순서 (잘못된 순서)
+        // 숫자 정렬: A-2, A-010, A-100 순서 (올바른 순서)
+        List<String> lockerCodes = List.of("A-010", "A-100", "A-2");
+        Map<Integer, List<String>> floorToLockerCodes = Map.of(1, lockerCodes);
+
+        Event event =
+                eventTestUtil
+                        .setUpLockerEventWithCustomCodes(
+                                floorToLockerCodes, Role.MANAGER, EventStatus.OPEN, true)
+                        .event();
+
+        List<FloorWithLockersResponse> floors =
+                getEventLockers(event.getId(), accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .jsonPath()
+                        .getList(".", FloorWithLockersResponse.class);
+
+        List<LockerResponse> lockers = floors.getFirst().lockers();
+        assertThat(lockers).hasSize(lockerCodes.size());
+        // 숫자 정렬 순서로 검증 (A-2 < A-010 < A-100)
+        assertThatList(lockers)
+                .extracting(LockerResponse::code)
+                .containsExactly("A-2", "A-010", "A-100");
+    }
+
+    @Test
+    void 접두사가_다른_경우_접두사_우선_정렬_후_숫자_정렬이_동작한다() {
+        // 접두사 우선: B < A는 잘못된 순서, A < B가 올바른 순서
+        // 그리고 같은 접두사 내에서 숫자 정렬
+        List<String> lockerCodes = List.of("B-5", "A-100", "A-2", "B-10");
+        Map<Integer, List<String>> floorToLockerCodes = Map.of(1, lockerCodes);
+
+        Event event =
+                eventTestUtil
+                        .setUpLockerEventWithCustomCodes(
+                                floorToLockerCodes, Role.MANAGER, EventStatus.OPEN, true)
+                        .event();
+
+        List<FloorWithLockersResponse> floors =
+                getEventLockers(event.getId(), accessToken)
+                        .statusCode(HttpStatus.OK.value())
+                        .extract()
+                        .jsonPath()
+                        .getList(".", FloorWithLockersResponse.class);
+
+        List<LockerResponse> lockers = floors.getFirst().lockers();
+        assertThat(lockers).hasSize(lockerCodes.size());
+        // 올바른 정렬 순서: A-2, A-100, B-5, B-10
+
+        assertThatList(lockers)
+                .extracting(LockerResponse::code)
+                .containsExactly("A-2", "A-100", "B-5", "B-10");
     }
 
     // 다양한 층과 접두사, 범위를 가진 이벤트 생성 요청 준비
