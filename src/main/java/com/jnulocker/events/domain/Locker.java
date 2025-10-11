@@ -83,7 +83,7 @@ public class Locker extends BaseEntity implements Comparable<Locker> {
         return Integer.compare(thisNumber, otherNumber);
     }
 
-    private String[] parseCode(String code) {
+    private static String[] parseCode(String code) {
         if (code.contains("-")) {
             // 접두사가 있는 경우: "A-001" -> ["A", "001"]
             String[] parts = code.split("-", 2);
