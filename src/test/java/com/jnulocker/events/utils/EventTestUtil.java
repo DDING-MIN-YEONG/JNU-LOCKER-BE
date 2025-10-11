@@ -24,6 +24,7 @@ import com.jnulocker.organization.domain.Organization;
 import com.jnulocker.organization.utils.OrganizationTestUtil;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -179,5 +180,61 @@ public class EventTestUtil {
 
     public Event getEventById(UUID eventId) {
         return eventRepository.findById(eventId).orElseThrow();
+    }
+
+    public LockerEventContext setUpLockerEventWithCustomCodes(
+            Map<Integer, List<String>> floorToLockerCodes,
+            Role role,
+            EventStatus eventStatus,
+            boolean publish) {
+        Department department = organizationTestUtil.createCouncilDepartment();
+        Member member = memberTestUtil.createMemberFromRoleWithDepartment(role, department);
+        String accessToken = authTestUtil.generateAccessTokenWithMember(member);
+
+        Event event =
+                createEventWithCustomCodes(floorToLockerCodes, department, eventStatus, publish);
+
+        return new LockerEventContext(department, member, accessToken, event);
+    }
+
+    public LockerEventContext setUpLockerEventWithMixedPattern(
+            Map<Integer, List<String>> floorToLockerCodes,
+            Role role,
+            EventStatus eventStatus,
+            boolean publish) {
+        return setUpLockerEventWithCustomCodes(floorToLockerCodes, role, eventStatus, publish);
+    }
+
+    private Event createEventWithCustomCodes(
+            Map<Integer, List<String>> floorToLockerCodes,
+            Department department,
+            EventStatus eventStatus,
+            boolean publish) {
+        Event savedEvent = createAndSaveEvent(department, eventStatus, publish);
+        EventParticipation eventParticipation = EventParticipation.create(savedEvent, department);
+        eventParticipationRepository.save(eventParticipation);
+
+        createFloorsWithCustomCodes(floorToLockerCodes, savedEvent);
+        return savedEvent;
+    }
+
+    private void createFloorsWithCustomCodes(
+            Map<Integer, List<String>> floorToLockerCodes, Event savedEvent) {
+        for (Map.Entry<Integer, List<String>> entry : floorToLockerCodes.entrySet()) {
+            int floorNumber = entry.getKey();
+            List<String> lockerCodes = entry.getValue();
+            Floor floor = floorRepository.save(Floor.create(savedEvent, floorNumber));
+            createLockersWithCustomCodes(lockerCodes, floor);
+        }
+    }
+
+    private void createLockersWithCustomCodes(List<String> lockerCodes, Floor floor) {
+        List<Locker> lockers = new ArrayList<>();
+        for (int i = 0; i < lockerCodes.size(); i++) {
+            String code = lockerCodes.get(i);
+            boolean available = (i + 1) % 2 == 0;
+            lockers.add(Locker.create(floor, code, available));
+        }
+        lockerRepository.saveAll(lockers);
     }
 }
