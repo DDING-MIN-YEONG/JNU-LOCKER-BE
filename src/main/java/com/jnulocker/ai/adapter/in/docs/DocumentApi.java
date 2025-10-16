@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Tag(name = "AI Document", description = "AI 문서 관리 API")
+@Tag(name = "AI 문서", description = "AI 문서 관리 API")
 public interface DocumentApi {
 
     @ApiExceptionExamples(UploadDocumentExceptionDocs.class)
