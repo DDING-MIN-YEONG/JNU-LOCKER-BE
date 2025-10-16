@@ -44,7 +44,9 @@ public class DocumentCommandService implements DocumentCommand {
         chunks.forEach(
                 chunk -> {
                     chunk.getMetadata().put("fileName", originalFileName);
-                    chunk.getMetadata().put("category", request.category());
+                    if (request.category() != null) {
+                        chunk.getMetadata().put("category", request.category());
+                    }
                 });
 
         // Vector Store 저장
