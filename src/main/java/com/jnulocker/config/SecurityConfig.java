@@ -79,7 +79,9 @@ public class SecurityConfig {
                                         "/v1/events/*/registrations",
                                         "/v1/events/*/registrations/all",
                                         "/v1/announces",
-                                        "/v1/announces/*")
+                                        "/v1/announces/*",
+                                        "/v1/ai/documents",
+                                        "/v1/ai/documents/*")
                                 .hasAuthority(Role.MANAGER.getRole())
                                 .requestMatchers(
                                         HttpMethod.POST,
