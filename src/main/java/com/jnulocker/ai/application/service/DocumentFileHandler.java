@@ -26,7 +26,7 @@ public class DocumentFileHandler {
     private static final int MIN_CHUNK_LENGTH_TO_EMBED = 5;
     private static final boolean KEEP_SEPARATOR = true;
 
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024L; // 10MB
     private static final List<String> SUPPORTED_FILE_TYPES = List.of("PDF", "TXT");
 
     private final TokenTextSplitter textSplitter =
@@ -70,7 +70,7 @@ public class DocumentFileHandler {
 
     public String generateFileName(String originalFileName, String fileType) {
         String uuid = UUID.randomUUID().toString();
-        return originalFileName + uuid + "." + fileType.toLowerCase();
+        return originalFileName + "---" + uuid + "." + fileType.toLowerCase();
     }
 
     public List<Document> parsePdf(MultipartFile file) throws IOException {
