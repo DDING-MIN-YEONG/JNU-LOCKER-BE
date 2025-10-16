@@ -2,9 +2,7 @@ package com.jnulocker.auth.jwt;
 
 import com.jnulocker.auth.adapter.out.TokenRepository;
 import com.jnulocker.auth.application.port.in.response.AuthToken;
-import com.jnulocker.auth.jwt.exception.ExpiredTokenException;
-import com.jnulocker.auth.jwt.exception.InvalidAccessTokenException;
-import com.jnulocker.auth.jwt.exception.InvalidRefreshTokenException;
+import com.jnulocker.auth.jwt.exception.JwtException;
 import com.jnulocker.member.domain.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -144,12 +142,12 @@ public class TokenProvider {
                     .parseSignedClaims(token)
                     .getPayload();
         } catch (ExpiredJwtException e) {
-            throw ExpiredTokenException.EXCEPTION;
+            throw JwtException.EXPIRED_TOKEN;
         } catch (Exception e) {
             if (tokenType.equals(TokenType.ACCESS)) {
-                throw InvalidAccessTokenException.EXCEPTION;
+                throw JwtException.INVALID_ACCESS_TOKEN;
             }
-            throw InvalidRefreshTokenException.EXCEPTION;
+            throw JwtException.INVALID_REFRESH_TOKEN;
         }
     }
 
