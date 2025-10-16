@@ -26,7 +26,8 @@ public class UploadDocumentExceptionDocs implements SwaggerExceptionDoc {
     public static final BusinessException 파일_크기_초과 = DocumentFileException.FILE_SIZE_EXCEEDED;
 
     @ExplainError("지원하지 않는 파일 형식일 때 발생하는 예외입니다 (PDF, TXT만 지원)")
-    public static final BusinessException 지원하지_않는_파일_형식 = DocumentFileException.UNSUPPORTED_FILE_TYPE;
+    public static final BusinessException 지원하지_않는_파일_형식 =
+            DocumentFileException.UNSUPPORTED_FILE_TYPE;
 
     @ExplainError("문서 파싱에 실패했을 때 발생하는 예외입니다")
     public static final BusinessException 문서_파싱_실패 = DocumentParseFailedException.EXCEPTION;

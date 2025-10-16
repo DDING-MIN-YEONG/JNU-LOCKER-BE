@@ -22,7 +22,8 @@ public class DeleteDocumentExceptionDocs implements SwaggerExceptionDoc {
     public static final BusinessException 문서를_찾을_수_없을_때 = DocumentNotFoundException.EXCEPTION;
 
     @ExplainError("본인이 업로드한 문서가 아닐 때 발생하는 예외입니다")
-    public static final BusinessException 본인_문서가_아닐_때 = UnauthorizedDocumentAccessException.EXCEPTION;
+    public static final BusinessException 본인_문서가_아닐_때 =
+            UnauthorizedDocumentAccessException.EXCEPTION;
 
     @ExplainError("Vector Store에서 문서를 삭제하는 중 오류가 발생했을 때 발생하는 예외입니다")
     public static final BusinessException VECTOR_STORE_삭제_실패 = VectorStoreException.DELETE_FAILED;
