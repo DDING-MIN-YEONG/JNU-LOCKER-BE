@@ -68,9 +68,19 @@ public class DocumentFileHandler {
         };
     }
 
-    public String generateFileName(String originalFileName, String fileType) {
+    public String generateFileName(MultipartFile file) {
+        String originalFileName = file.getOriginalFilename();
+        String fileType = getFileType(file);
+        String fileNameWithoutExt = removeFileExtension(originalFileName);
         String uuid = UUID.randomUUID().toString();
-        return originalFileName + "---" + uuid + "." + fileType.toLowerCase();
+        return fileNameWithoutExt + "---" + uuid + "." + fileType.toLowerCase();
+    }
+
+    private String removeFileExtension(String fileName) {
+        if (fileName == null || !fileName.contains(".")) {
+            return fileName;
+        }
+        return fileName.substring(0, fileName.lastIndexOf("."));
     }
 
     public List<Document> parsePdf(MultipartFile file) throws IOException {

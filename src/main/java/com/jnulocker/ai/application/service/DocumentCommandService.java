@@ -53,8 +53,8 @@ public class DocumentCommandService implements DocumentCommand {
         List<String> vectorIds = vectorStoreManager.addDocuments(chunks);
 
         // DB에 메타데이터 저장
+        String fileName = documentFileHandler.generateFileName(file);
         String fileType = documentFileHandler.getFileType(file);
-        String fileName = documentFileHandler.generateFileName(originalFileName, fileType);
 
         AiDocument document =
                 AiDocument.create(
