@@ -178,6 +178,29 @@ services:
       grafana:
         condition: service_healthy
 
+  elasticsearch:
+    image: elasticsearch:8.19.5 # 8.14.0 이상 권장
+    container_name: elasticsearch-jnu-locker
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+      - TZ=Asia/Seoul
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      start_period: 30s
+      start_interval: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - jnu-locker-network
+
 networks:
   jnu-locker-network:
     driver: bridge
@@ -186,4 +209,6 @@ volumes:
   grafana-data:
     external: true
   prometheus-data:
+    external: true
+  elasticsearch-data:
     external: true

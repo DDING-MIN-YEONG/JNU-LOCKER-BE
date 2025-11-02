@@ -17,7 +17,7 @@ import com.jnulocker.auth.event.ManagerApprovedEvent;
 import com.jnulocker.auth.event.ManagerRejectedEvent;
 import com.jnulocker.auth.exception.UserAlreadyExistException;
 import com.jnulocker.auth.jwt.TokenProvider;
-import com.jnulocker.auth.jwt.exception.InvalidRefreshTokenException;
+import com.jnulocker.auth.jwt.exception.JwtException;
 import com.jnulocker.auth.security.SecurityUtils;
 import com.jnulocker.common.util.RedisUtil;
 import com.jnulocker.member.application.port.in.MemberCommand;
@@ -148,12 +148,12 @@ public class AuthCommandService
     @Override
     public AuthToken reissue(String refreshToken) {
         if (refreshToken == null) {
-            throw InvalidRefreshTokenException.EXCEPTION;
+            throw JwtException.INVALID_REFRESH_TOKEN;
         }
 
         if (!tokenProvider.existsByRefreshToken(refreshToken)
                 || !tokenProvider.validateRefreshToken(refreshToken)) {
-            throw InvalidRefreshTokenException.EXCEPTION;
+            throw JwtException.INVALID_REFRESH_TOKEN;
         }
 
         Long memberId = tokenProvider.getUserIdFromRefreshToken(refreshToken);

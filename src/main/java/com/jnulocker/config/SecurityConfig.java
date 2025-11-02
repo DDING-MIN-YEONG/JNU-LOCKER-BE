@@ -79,16 +79,22 @@ public class SecurityConfig {
                                         "/v1/events/*/registrations",
                                         "/v1/events/*/registrations/all",
                                         "/v1/announces",
-                                        "/v1/announces/*")
+                                        "/v1/announces/*",
+                                        "/v1/ai/documents",
+                                        "/v1/ai/documents/*")
                                 .hasAuthority(Role.MANAGER.getRole())
                                 .requestMatchers(
                                         HttpMethod.POST,
                                         "/v1/events",
                                         "/v1/announces",
-                                        "/v1/auth/managers/approve")
+                                        "/v1/auth/managers/approve",
+                                        "/v1/ai/documents")
                                 .hasAuthority(Role.MANAGER.getRole())
                                 .requestMatchers(
-                                        HttpMethod.DELETE, "/v1/events/*", "/v1/announces/*")
+                                        HttpMethod.DELETE,
+                                        "/v1/events/*",
+                                        "/v1/announces/*",
+                                        "/v1/ai/documents/*")
                                 .hasAuthority(Role.MANAGER.getRole())
                                 .requestMatchers(
                                         HttpMethod.PUT,

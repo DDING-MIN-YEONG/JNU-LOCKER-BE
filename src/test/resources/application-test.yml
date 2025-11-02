@@ -10,6 +10,17 @@ spring:
     init:
       mode: never
 
+  ai:
+    vectorstore:
+      elasticsearch:
+        initialize-schema: true
+        index-name: test-vector-store
+
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS:http://localhost:9200}
+    username: ${ELASTICSEARCH_USERNAME:elastic}
+    password: ${ELASTICSEARCH_PASSWORD:}
+
 custom:
   jwt:
     access-secret-key: dGVzdC1zZWNyZXQta2V5LXRlc3Qtc2VjcmV0LWtleS10ZXN0LXNlY3JldC1rZXktdGVzdC1zZWNyZXQta2V5

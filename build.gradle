@@ -49,9 +49,17 @@ dependencies {
 
     // Spring AI
     implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+    implementation 'org.springframework.ai:spring-ai-advisors-vector-store'
 
     // redisson
     implementation "org.redisson:redisson-spring-boot-starter:3.49.0"
+
+    // elasticsearch for vector store
+    implementation 'org.springframework.ai:spring-ai-starter-vector-store-elasticsearch'
+    implementation 'co.elastic.clients:elasticsearch-java:8.19.5' // Elasticsearch Java Client 버전 명시
+
+    // pdf document reader
+    implementation 'org.springframework.ai:spring-ai-pdf-document-reader'
 
     // querydsl
     implementation "io.github.openfeign.querydsl:querydsl-jpa:${querydslVersion}"

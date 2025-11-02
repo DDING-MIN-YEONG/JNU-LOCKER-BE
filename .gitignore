@@ -6,6 +6,8 @@ build/
 
 .env
 
+mysql
+
 ### STS ###
 .apt_generated
 .factorypath

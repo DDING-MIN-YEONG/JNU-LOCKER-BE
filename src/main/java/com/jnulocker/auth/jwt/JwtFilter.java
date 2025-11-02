@@ -4,7 +4,7 @@ import static com.jnulocker.auth.util.AuthUtil.getAccessToken;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jnulocker.auth.exception.AuthErrorCode;
-import com.jnulocker.auth.jwt.exception.InvalidAccessTokenException;
+import com.jnulocker.auth.jwt.exception.JwtException;
 import com.jnulocker.auth.security.SecurityPaths;
 import com.jnulocker.common.exception.BusinessException;
 import com.jnulocker.common.exception.ErrorCode;
@@ -41,13 +41,13 @@ public class JwtFilter extends OncePerRequestFilter {
         try {
             String accessToken = getAccessToken(request);
             if (accessToken == null) {
-                throw InvalidAccessTokenException.EXCEPTION;
+                throw JwtException.INVALID_ACCESS_TOKEN;
             }
             if (tokenProvider.validateAccessToken(accessToken)) {
                 Authentication authentication = tokenProvider.getAuthentication(accessToken);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } else {
-                throw InvalidAccessTokenException.EXCEPTION;
+                throw JwtException.INVALID_ACCESS_TOKEN;
             }
             filterChain.doFilter(request, response);
         } catch (BusinessException e) {

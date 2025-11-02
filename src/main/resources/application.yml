@@ -40,6 +40,20 @@ spring:
       chat:
         options:
           model: ${OPENAI_MODEL}
+    vectorstore:
+      elasticsearch:
+        initialize-schema: true
+        index-name: ${ELASTICSEARCH_INDEX}
+
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS}
+    username: ${ELASTICSEARCH_USERNAME}
+    password: ${ELASTICSEARCH_PASSWORD}
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 management:
   endpoints:
