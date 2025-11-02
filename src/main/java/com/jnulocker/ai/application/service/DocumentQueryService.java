@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DocumentQueryService implements DocumentQuery {
 
     private final DocumentLoadPort documentLoadPort;
+    private final DocumentResponseMapper documentResponseMapper;
 
     @Override
     public DocumentCustomPage getDocuments(Pageable pageable, String category) {
@@ -35,7 +36,7 @@ public class DocumentQueryService implements DocumentQuery {
     @Override
     public DocumentDetailResponse getDocument(Long documentId) {
         AiDocument document = getDocumentEntity(documentId);
-        return DocumentDetailResponse.from(document);
+        return documentResponseMapper.toDetailResponse(document);
     }
 
     @Override

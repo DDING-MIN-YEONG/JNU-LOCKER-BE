@@ -4,6 +4,7 @@ import com.jnulocker.ai.exception.DocumentFileException;
 import com.jnulocker.ai.exception.DocumentParseFailedException;
 import com.jnulocker.ai.exception.EmptyFileException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -101,7 +102,7 @@ public class DocumentFileHandler {
     }
 
     public List<Document> parseText(MultipartFile file) throws IOException {
-        String content = new String(file.getBytes());
+        String content = new String(file.getBytes(), StandardCharsets.UTF_8);
         Document document = new Document(content);
         return textSplitter.split(document);
     }
