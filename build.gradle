@@ -49,6 +49,7 @@ dependencies {
 
     // Spring AI
     implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+    implementation 'org.springframework.ai:spring-ai-advisors-vector-store'
 
     // redisson
     implementation "org.redisson:redisson-spring-boot-starter:3.49.0"
