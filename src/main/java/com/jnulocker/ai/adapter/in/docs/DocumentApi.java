@@ -36,7 +36,6 @@ public interface DocumentApi {
             @Parameter(description = "업로드할 파일 및 메타데이터") @Valid @ModelAttribute
                     UploadDocumentRequest request);
 
-    @ApiExceptionExamples(GetDocumentsExceptionDocs.class)
     @Operation(summary = "문서 목록 조회", description = "업로드된 문서 목록을 페이징하여 조회합니다.")
     @ApiResponse(
             responseCode = "200",
