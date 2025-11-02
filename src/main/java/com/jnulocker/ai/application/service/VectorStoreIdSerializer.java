@@ -38,7 +38,7 @@ public class VectorStoreIdSerializer {
             return objectMapper.readValue(vectorStoreIds, new TypeReference<>() {});
         } catch (JsonProcessingException e) {
             log.error("Failed to parse vectorStoreIds: {}", e.getMessage(), e);
-            return List.of();
+            throw new IllegalStateException("Vector Store ID 역직렬화에 실패했습니다.", e);
         }
     }
 }
