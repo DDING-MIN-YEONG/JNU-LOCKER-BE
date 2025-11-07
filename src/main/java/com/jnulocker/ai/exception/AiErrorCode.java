@@ -18,7 +18,9 @@ public enum AiErrorCode implements ErrorCode {
     VECTOR_STORE_DELETE_FAILED(
             "AI006", HttpStatus.INTERNAL_SERVER_ERROR, "Vector Store에서 문서를 삭제하는 중 오류가 발생했습니다."),
     EMPTY_FILE("AI007", HttpStatus.BAD_REQUEST, "파일이 비어있습니다."),
-    DOCUMENT_PARSE_FAILED("AI008", HttpStatus.INTERNAL_SERVER_ERROR, "문서 파싱에 실패했습니다.");
+    DOCUMENT_PARSE_FAILED("AI008", HttpStatus.INTERNAL_SERVER_ERROR, "문서 파싱에 실패했습니다."),
+    AI_TOOL_EXECUTION_ERROR(
+            "AI009", HttpStatus.INTERNAL_SERVER_ERROR, "AI 도구 실행 중 예상치 못한 오류가 발생했습니다.");
 
     private final String code;
     private final HttpStatus httpStatus;

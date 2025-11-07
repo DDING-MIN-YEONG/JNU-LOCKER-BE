@@ -1,8 +1,8 @@
 package com.jnulocker.events.utils;
 
-import static events.domain.EventTestDataBuilder.*;
-import static organization.domain.DepartmentTestDataBuilder.*;
-import static organization.domain.OrganizationTestDataBuilder.*;
+import static events.domain.EventTestDataBuilder.eventBuilder;
+import static organization.domain.DepartmentTestDataBuilder.departmentBuilder;
+import static organization.domain.OrganizationTestDataBuilder.organizationBuilder;
 
 import com.jnulocker.auth.utils.AuthTestUtil;
 import com.jnulocker.events.adapter.out.EventParticipationRepository;
@@ -52,16 +52,10 @@ public class EventTestUtil {
 
     public LockerEventContext setUpLockerEventForRegistration(
             List<Integer> lockersPerFloor, Role role, EventStatus eventStatus, boolean publish) {
-        // Department 생성
         Department department = organizationTestUtil.createCouncilDepartment();
-
-        // Member 생성
         Member member = memberTestUtil.createMemberFromRoleWithDepartment(role, department);
-
-        // AccessToken 생성
         String accessToken = authTestUtil.generateAccessTokenWithMember(member);
 
-        // Event 생성 및 Department를 EventParticipation에 추가
         Event event =
                 createEventWithParticipationDepartment(
                         lockersPerFloor, department, eventStatus, publish);
@@ -75,29 +69,15 @@ public class EventTestUtil {
             EventStatus eventStatus,
             boolean publish,
             List<Department> participationDepartments) {
-        // Department 생성 (사용자의 Department)
         Department userDepartment = organizationTestUtil.createCouncilDepartment();
-
-        // Member 생성
         Member member = memberTestUtil.createMemberFromRoleWithDepartment(role, userDepartment);
-
-        // AccessToken 생성
         String accessToken = authTestUtil.generateAccessTokenWithMember(member);
 
-        // Event 생성
         Event event = createEventWithFloorAndLockers(lockersPerFloor, eventStatus, publish);
 
-        // 지정된 Department들만 EventParticipation에 추가: 사용자의 Department는 제외
-        for (Department dept : participationDepartments) {
-            addParticipationDepartment(event, dept);
-        }
+        participationDepartments.forEach(dept -> addDepartmentToEvent(event, dept));
 
         return new LockerEventContext(userDepartment, member, accessToken, event);
-    }
-
-    private void addParticipationDepartment(Event event, Department department) {
-        EventParticipation participation = EventParticipation.create(event, department);
-        eventParticipationRepository.save(participation);
     }
 
     public Event createEventWithParticipationDepartment(
@@ -105,36 +85,29 @@ public class EventTestUtil {
             Department department,
             EventStatus eventStatus,
             boolean publish) {
-
-        // 이벤트 생성 및 저장
         Event savedEvent = createAndSaveEvent(department, eventStatus, publish);
 
-        // 이벤트 참여 학과 정보 생성 및 저장
-        EventParticipation eventParticipation = EventParticipation.create(savedEvent, department);
-        eventParticipationRepository.save(eventParticipation);
+        addDepartmentToEvent(savedEvent, department);
 
-        // 층 생성 및 저장
         createFloorsWithEvent(lockersPerFloor, savedEvent);
         return savedEvent;
     }
 
     public Event createEventWithFloorAndLockers(
             List<Integer> lockersPerFloor, EventStatus eventStatus, boolean publish) {
-        // 조직 생성 및 저장
-        Organization organization = organizationBuilder().build();
-        Organization savedOrganization = organizationRepository.save(organization);
-
-        // 학과 생성 및 저장
-        Department department = departmentBuilder().withOrganization(savedOrganization).build();
-        Department savedDepartment = departmentRepository.save(department);
-
-        // 이벤트 생성 및 저장
-        Event savedEvent = createAndSaveEvent(savedDepartment, eventStatus, publish);
-
-        // 층 생성 및 저장
+        Department department = createDepartmentWithOrganization();
+        Event savedEvent = createAndSaveEvent(department, eventStatus, publish);
         createFloorsWithEvent(lockersPerFloor, savedEvent);
 
         return savedEvent;
+    }
+
+    private Department createDepartmentWithOrganization() {
+        Organization organization = organizationBuilder().build();
+        Organization savedOrganization = organizationRepository.save(organization);
+
+        Department department = departmentBuilder().withOrganization(savedOrganization).build();
+        return departmentRepository.save(department);
     }
 
     private Event createAndSaveEvent(
@@ -152,17 +125,15 @@ public class EventTestUtil {
         for (int floorLevel = 0; floorLevel < lockersPerFloor.size(); floorLevel++) {
             int floorNumber = floorLevel + 1;
             Floor floor = floorRepository.save(Floor.create(savedEvent, floorNumber));
-            createLockersWithFloor(lockersPerFloor, floorLevel, floor);
+            createLockersForFloor(lockersPerFloor.get(floorLevel), floorLevel, floor);
         }
     }
 
-    private void createLockersWithFloor(
-            List<Integer> lockersPerFloor, int floorLevel, Floor floor) {
+    private void createLockersForFloor(int lockerCount, int floorLevel, Floor floor) {
         List<Locker> lockers = new ArrayList<>();
-        for (int j = 1; j <= lockersPerFloor.get(floorLevel); j++) {
-            String code =
-                    String.format("%c-%03d", 'A' + floorLevel, j); // A-001, A-002, B-001, B-002 등
-            boolean available = j % 2 == 0; // 짝수 번호 사물함은 사용 가능, 홀수는 사용 불가능으로 설정
+        for (int j = 1; j <= lockerCount; j++) {
+            String code = String.format("%c-%03d", 'A' + floorLevel, j);
+            boolean available = j % 2 == 0;
 
             lockers.add(Locker.create(floor, code, available));
         }
@@ -192,27 +163,19 @@ public class EventTestUtil {
         String accessToken = authTestUtil.generateAccessTokenWithMember(member);
 
         Event event =
-                createEventWithCustomCodes(floorToLockerCodes, department, eventStatus, publish);
+                createEventWithCustomLockerCodes(
+                        floorToLockerCodes, department, eventStatus, publish);
 
         return new LockerEventContext(department, member, accessToken, event);
     }
 
-    public LockerEventContext setUpLockerEventWithMixedPattern(
-            Map<Integer, List<String>> floorToLockerCodes,
-            Role role,
-            EventStatus eventStatus,
-            boolean publish) {
-        return setUpLockerEventWithCustomCodes(floorToLockerCodes, role, eventStatus, publish);
-    }
-
-    private Event createEventWithCustomCodes(
+    private Event createEventWithCustomLockerCodes(
             Map<Integer, List<String>> floorToLockerCodes,
             Department department,
             EventStatus eventStatus,
             boolean publish) {
         Event savedEvent = createAndSaveEvent(department, eventStatus, publish);
-        EventParticipation eventParticipation = EventParticipation.create(savedEvent, department);
-        eventParticipationRepository.save(eventParticipation);
+        addDepartmentToEvent(savedEvent, department);
 
         createFloorsWithCustomCodes(floorToLockerCodes, savedEvent);
         return savedEvent;
@@ -220,21 +183,24 @@ public class EventTestUtil {
 
     private void createFloorsWithCustomCodes(
             Map<Integer, List<String>> floorToLockerCodes, Event savedEvent) {
-        for (Map.Entry<Integer, List<String>> entry : floorToLockerCodes.entrySet()) {
-            int floorNumber = entry.getKey();
-            List<String> lockerCodes = entry.getValue();
-            Floor floor = floorRepository.save(Floor.create(savedEvent, floorNumber));
-            createLockersWithCustomCodes(lockerCodes, floor);
-        }
+        floorToLockerCodes.forEach(
+                (floorNumber, lockerCodes) -> {
+                    Floor floor = floorRepository.save(Floor.create(savedEvent, floorNumber));
+                    createLockersWithCustomCodes(lockerCodes, floor);
+                });
     }
 
     private void createLockersWithCustomCodes(List<String> lockerCodes, Floor floor) {
         List<Locker> lockers = new ArrayList<>();
         for (int i = 0; i < lockerCodes.size(); i++) {
-            String code = lockerCodes.get(i);
             boolean available = (i + 1) % 2 == 0;
-            lockers.add(Locker.create(floor, code, available));
+            lockers.add(Locker.create(floor, lockerCodes.get(i), available));
         }
         lockerRepository.saveAll(lockers);
+    }
+
+    public void addDepartmentToEvent(Event event, Department department) {
+        EventParticipation participation = EventParticipation.create(event, department);
+        eventParticipationRepository.save(participation);
     }
 }

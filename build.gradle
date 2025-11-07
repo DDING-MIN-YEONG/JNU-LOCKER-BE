@@ -8,7 +8,7 @@ plugins {
 }
 
 ext {
-    springAiVersion = "1.0.2"
+    springAiVersion = "1.1.0-M4"
 }
 
 dependencyManagement {
@@ -27,6 +27,9 @@ java {
 }
 
 configurations {
+    configureEach {
+        exclude group: 'commons-logging', module: 'commons-logging'
+    }
     compileOnly {
         extendsFrom annotationProcessor
     }

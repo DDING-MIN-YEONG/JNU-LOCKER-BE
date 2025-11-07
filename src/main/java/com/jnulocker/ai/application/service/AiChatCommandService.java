@@ -15,8 +15,6 @@ public class AiChatCommandService implements AiChatCommand {
 
     @Override
     public AiChatResponse chat(AiChatRequest request) {
-        // ChatClient에 defaultAdvisors로 QuestionAnswerAdvisor가 등록되어 있어
-        // 자동으로 VectorStore에서 관련 문서를 검색하고 context로 전달합니다.
         String message = client.prompt().user(request.message()).call().content();
 
         return AiChatResponse.of(message);

@@ -26,7 +26,7 @@ public class AnnounceTestUtil {
 
     @Autowired private DepartmentRepository departmentRepository;
 
-    public Announce createAnnounceWithParticipationDepartment(Department department) {
+    public void createAnnounceWithParticipationDepartment(Department department) {
         // 공지사항 생성 및 저장
         Announce savedAnnounce = createAndSaveAnnounce(department);
 
@@ -34,8 +34,6 @@ public class AnnounceTestUtil {
         AnnounceParticipation announceParticipation =
                 AnnounceParticipation.create(savedAnnounce, department);
         announceParticipationRepository.save(announceParticipation);
-
-        return savedAnnounce;
     }
 
     private Announce createAndSaveAnnounce(Department department) {
@@ -49,7 +47,7 @@ public class AnnounceTestUtil {
         announceParticipationRepository.deleteAll();
     }
 
-    public Announce createAnnounce() {
+    public void createAnnounce() {
         // 조직 생성 및 저장
         Organization organization = organizationBuilder().build();
         Organization savedOrganization = organizationRepository.save(organization);
@@ -59,8 +57,6 @@ public class AnnounceTestUtil {
         Department savedDepartment = departmentRepository.save(department);
 
         // 공지사항 생성 및 저장
-        Announce savedAnnounce = createAndSaveAnnounce(savedDepartment);
-
-        return savedAnnounce;
+        createAndSaveAnnounce(savedDepartment);
     }
 }
