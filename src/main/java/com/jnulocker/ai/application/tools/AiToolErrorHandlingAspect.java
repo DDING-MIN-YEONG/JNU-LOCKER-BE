@@ -1,6 +1,7 @@
 package com.jnulocker.ai.application.tools;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.jnulocker.ai.exception.AiToolExecutionException;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +42,7 @@ public class AiToolErrorHandlingAspect {
 
         } catch (Throwable t) {
             log.error("[AI Tool] 예상치 못한 오류 - {}.{}", className, methodName, t);
-            throw new RuntimeException("AI Tool 실행 중 예상치 못한 오류가 발생했습니다.", t);
+            throw AiToolExecutionException.EXCEPTION;
         }
     }
 
