@@ -982,7 +982,7 @@ public class EventControllerIntegrationTest extends RedisTest {
 
         Event event =
                 eventTestUtil
-                        .setUpLockerEventWithMixedPattern(
+                        .setUpLockerEventWithCustomCodes(
                                 floorToLockerCodes, Role.MANAGER, EventStatus.OPEN, true)
                         .event();
 
