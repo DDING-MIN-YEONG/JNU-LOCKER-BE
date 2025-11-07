@@ -25,10 +25,10 @@ public class MemberTools {
             return objectMapper.writeValueAsString(info);
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize MemberInfoResponse", e);
-            return "사용자 정보 조회 중 오류가 발생했습니다: " + e.getMessage();
+            return "사용자 정보 조회 중 오류가 발생했습니다: ";
         } catch (Exception e) {
             log.error("Failed to get member info", e);
-            return "사용자 정보 조회 중 오류가 발생했습니다: " + e.getMessage();
+            return "사용자 정보 조회 중 오류가 발생했습니다: ";
         }
     }
 }

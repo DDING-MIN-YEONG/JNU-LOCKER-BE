@@ -32,10 +32,10 @@ public class EventTools {
             return objectMapper.writeValueAsString(result);
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize EventCustomPage", e);
-            return "이벤트 목록 조회 중 오류가 발생했습니다: " + e.getMessage();
+            return "이벤트 목록 조회 중 오류가 발생했습니다: ";
         } catch (Exception e) {
             log.error("Failed to search events", e);
-            return "이벤트 검색 중 오류가 발생했습니다: " + e.getMessage();
+            return "이벤트 검색 중 오류가 발생했습니다: ";
         }
     }
 

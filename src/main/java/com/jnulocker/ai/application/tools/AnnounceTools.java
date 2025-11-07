@@ -30,10 +30,10 @@ public class AnnounceTools {
             return objectMapper.writeValueAsString(result);
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize AnnounceCustomPage", e);
-            return "공지사항 목록 조회 중 오류가 발생했습니다: " + e.getMessage();
+            return "공지사항 목록 조회 중 오류가 발생했습니다: ";
         } catch (Exception e) {
             log.error("Failed to search announcements", e);
-            return "공지사항 검색 중 오류가 발생했습니다: " + e.getMessage();
+            return "공지사항 검색 중 오류가 발생했습니다: ";
         }
     }
 }
