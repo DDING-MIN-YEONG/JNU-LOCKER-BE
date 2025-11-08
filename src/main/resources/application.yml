@@ -3,10 +3,10 @@ spring:
     name: jnu-locker
 
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}?rewriteBatchedStatements=true
-    username: ${MYSQL_USERNAME}
-    password: ${MYSQL_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:postgresql://${PGVECTOR_HOST}:${PGVECTOR_PORT}/${PGVECTOR_DATABASE}
+    username: ${PGVECTOR_USERNAME}
+    password: ${PGVECTOR_PASSWORD}
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     open-in-view: false
@@ -14,7 +14,7 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           batch_size: 50 # 한 번에 50개의 SQL 문을 배치로 실행
         order_inserts: true # Action Queue 내부 insert 문을 정렬하여 실행
@@ -41,14 +41,9 @@ spring:
         options:
           model: ${OPENAI_MODEL}
     vectorstore:
-      elasticsearch:
+      pgvector:
+        table-name: ${PGVECTOR_TABLE_NAME}
         initialize-schema: true
-        index-name: ${ELASTICSEARCH_INDEX}
-
-  elasticsearch:
-    uris: ${ELASTICSEARCH_URIS}
-    username: ${ELASTICSEARCH_USERNAME}
-    password: ${ELASTICSEARCH_PASSWORD}
 
   servlet:
     multipart:

@@ -1,26 +1,25 @@
 services:
-  mysql:
-    container_name: mysql-jnu-locker
-    image: mysql:8.0
-    ports:
-      - "3306:3306"
-    restart: unless-stopped
+  pgvector:
+    image: pgvector/pgvector:pg18
+    container_name: pgvector-jnu-locker
     environment:
       TZ: Asia/Seoul
       LC_ALL: C.UTF-8
-      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USERNAME}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      POSTGRES_USER: ${PGVECTOR_USERNAME}
+      POSTGRES_PASSWORD: ${PGVECTOR_PASSWORD}
+      POSTGRES_DB: ${PGVECTOR_DATABASE}
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mysql", "-u", "$MYSQL_USERNAME", "-p$MYSQL_PASSWORD", "-e", "SELECT 1;"]
+      test: [ "CMD-SHELL", "pg_isready -U $PGVECTOR_USERNAME" ]
       start_period: 20s
       start_interval: 3s
       interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 5
     volumes:
-      - ${MYSQL_DATA_PATH}:/var/lib/mysql
+      - pgvector-data:/var/lib/postgresql/data
     networks:
       - jnu-locker-network
 
@@ -32,7 +31,7 @@ services:
     restart: unless-stopped
     command: /bin/sh -c "redis-server --requirepass $REDIS_PASSWORD"
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       start_period: 10s
       start_interval: 3s
       interval: 10s
@@ -51,13 +50,13 @@ services:
       - .env
     healthcheck:
       test: [ "CMD-SHELL", "wget -q --spider http://localhost:8080$MANAGEMENT_BASE_PATH/health || exit 1" ]
-      start_period: 50s
+      start_period: 70s
       start_interval: 5s
       interval: 10s
       timeout: 5s
       retries: 3
     depends_on:
-      mysql:
+      pgvector:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -96,7 +95,7 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/healthz"]
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:8080/healthz" ]
       start_period: 15s
       start_interval: 3s
       interval: 10s
@@ -125,7 +124,7 @@ services:
       was:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090/metrics"]
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:9090/metrics" ]
       start_period: 20s
       start_interval: 5s
       interval: 10s
@@ -149,7 +148,7 @@ services:
       prometheus:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health" ]
       start_period: 20s
       start_interval: 5s
       interval: 10s
@@ -178,29 +177,6 @@ services:
       grafana:
         condition: service_healthy
 
-  elasticsearch:
-    image: elasticsearch:8.19.5 # 8.14.0 이상 권장
-    container_name: elasticsearch-jnu-locker
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - ES_JAVA_OPTS=-Xms256m -Xmx256m
-      - TZ=Asia/Seoul
-    volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
-      start_period: 30s
-      start_interval: 5s
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - jnu-locker-network
-
 networks:
   jnu-locker-network:
     driver: bridge
@@ -211,4 +187,6 @@ volumes:
   prometheus-data:
     external: true
   elasticsearch-data:
+    external: true
+  pgvector-data:
     external: true

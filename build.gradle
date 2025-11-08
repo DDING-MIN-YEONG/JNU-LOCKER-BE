@@ -57,9 +57,8 @@ dependencies {
     // redisson
     implementation "org.redisson:redisson-spring-boot-starter:3.49.0"
 
-    // elasticsearch for vector store
-    implementation 'org.springframework.ai:spring-ai-starter-vector-store-elasticsearch'
-    implementation 'co.elastic.clients:elasticsearch-java:8.19.5' // Elasticsearch Java Client 버전 명시
+    // pgvector for vector store
+    implementation 'org.springframework.ai:spring-ai-starter-vector-store-pgvector'
 
     // pdf document reader
     implementation 'org.springframework.ai:spring-ai-pdf-document-reader'
@@ -80,11 +79,11 @@ dependencies {
     // test containers
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
-    testImplementation 'org.testcontainers:mysql'
+    testImplementation 'org.testcontainers:postgresql'
 
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
-    runtimeOnly 'com.mysql:mysql-connector-j'
+    runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
     annotationProcessor 'org.projectlombok:lombok'
