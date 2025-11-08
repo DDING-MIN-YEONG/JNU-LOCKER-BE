@@ -12,7 +12,7 @@ services:
       - "5432:5432"
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U $POSTGRES_USERNAME" ]
+      test: [ "CMD-SHELL", "pg_isready -U $PGVECTOR_USERNAME" ]
       start_period: 20s
       start_interval: 3s
       interval: 10s
