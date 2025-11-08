@@ -6,6 +6,7 @@ import com.jnulocker.ai.application.service.VectorStoreManager;
 import com.jnulocker.ai.domain.AiDocument;
 import com.jnulocker.member.domain.Member;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Component;
@@ -102,6 +103,10 @@ public class DocumentTestUtil {
 
     /** 테스트용 AiDocument 엔티티 생성 및 저장 */
     public AiDocument createDocument(Member member, String category) {
+        String vectorId1 = UUID.randomUUID().toString();
+        String vectorId2 = UUID.randomUUID().toString();
+        String vectorStoreIds = String.format("[\"%s\", \"%s\"]", vectorId1, vectorId2);
+
         AiDocument document =
                 AiDocument.create(
                         "test-document.pdf",
@@ -111,19 +116,18 @@ public class DocumentTestUtil {
                         category,
                         5,
                         member,
-                        "[\"vector-id-1\", \"vector-id-2\"]");
+                        vectorStoreIds);
 
         return aiDocumentJpaRepository.save(document);
-    }
-
-    /** 카테고리 없이 테스트용 AiDocument 엔티티 생성 및 저장 */
-    public AiDocument createDocumentWithoutCategory(Member member) {
-        return createDocument(member, null);
     }
 
     /** 여러 개의 테스트용 문서 생성 */
     public void createMultipleDocuments(Member member, int count, String category) {
         for (int i = 0; i < count; i++) {
+            String vectorId1 = UUID.randomUUID().toString();
+            String vectorId2 = UUID.randomUUID().toString();
+            String vectorStoreIds = String.format("[\"%s\", \"%s\"]", vectorId1, vectorId2);
+
             AiDocument document =
                     AiDocument.create(
                             "test-document-" + i + ".pdf",
@@ -133,14 +137,9 @@ public class DocumentTestUtil {
                             category,
                             5 + i,
                             member,
-                            "[\"vector-id-" + i + "-1\", \"vector-id-" + i + "-2\"]");
+                            vectorStoreIds);
             aiDocumentJpaRepository.save(document);
         }
-    }
-
-    /** 문서 ID로 문서 조회 */
-    public AiDocument findDocumentById(Long documentId) {
-        return aiDocumentJpaRepository.findById(documentId).orElseThrow();
     }
 
     /** ElasticSearch에서 VectorStore 데이터 삭제 */
