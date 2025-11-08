@@ -3,7 +3,7 @@ spring:
     name: jnu-locker
 
   datasource:
-    url: jdbc:tc:mysql:8.0:///test-database
+    url: jdbc:tc:pgvector:pg18:///test-database
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
 
   sql:
@@ -12,14 +12,8 @@ spring:
 
   ai:
     vectorstore:
-      elasticsearch:
+      pgvector:
         initialize-schema: true
-        index-name: test-vector-store
-
-  elasticsearch:
-    uris: ${ELASTICSEARCH_URIS:http://localhost:9200}
-    username: ${ELASTICSEARCH_USERNAME:elastic}
-    password: ${ELASTICSEARCH_PASSWORD:}
 
 custom:
   jwt:
