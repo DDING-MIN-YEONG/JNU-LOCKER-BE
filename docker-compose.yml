@@ -83,27 +83,6 @@ services:
     networks:
       - jnu-locker-network
 
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
-    container_name: cadvisor-jnu-locker
-    restart: unless-stopped
-    ports:
-      - "8090:8080"
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    healthcheck:
-      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:8080/healthz" ]
-      start_period: 15s
-      start_interval: 3s
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    networks:
-      - jnu-locker-network
-
   prometheus:
     # user: root # 최초 실행시에만 하기 (컨테이너 접속 후 /data 경로 nobody 권한 주는 용도)
     container_name: prometheus-jnu-locker

@@ -15,6 +15,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: locker
         jdbc:
           batch_size: 50 # 한 번에 50개의 SQL 문을 배치로 실행
         order_inserts: true # Action Queue 내부 insert 문을 정렬하여 실행
@@ -123,7 +124,7 @@ spring:
       mode: never
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
 
 ---
 spring:
@@ -142,7 +143,7 @@ spring:
       mode: never
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
 
 ---
 spring:
@@ -159,6 +160,9 @@ spring:
   sql:
     init:
       mode: never
+  jpa:
+    hibernate:
+      ddl-auto: validate
 
 # 프로덕션 환경에서는 p6spy 로깅을 비활성화
 decorator:
