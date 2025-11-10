@@ -61,15 +61,13 @@ docker compose up -d
 # Spring 실행 프로파일
 PROFILE=local
 
-# MySQL 설정 (docker-compose로 실행할 경우 host는 mysql로)
-MYSQL_HOST=mysql
-MYSQL_PORT=3306
-MYSQL_DATABASE=locker
-MYSQL_USERNAME=root
-MYSQL_PASSWORD= # TODO: 비밀번호 입력
-
-# 데이터가 저장될 로컬 경로
-MYSQL_DATA_PATH=./mysql
+# PostgreSQL with pgvector 설정 (docker-compose로 실행할 경우 host는 pgvector로)
+PGVECTOR_HOST=pgvector
+PGVECTOR_PORT=5432
+PGVECTOR_DATABASE=locker
+PGVECTOR_USERNAME=admin
+PGVECTOR_PASSWORD= # TODO: 비밀번호 입력
+PGVECTOR_TABLE_NAME=document_embeddings
 
 # 로그 설정
 LOGGING_LEVEL=INFO
@@ -172,7 +170,7 @@ MAIL_PORT=587
 | Framework    | Spring Boot 3.3.3   | 익숙한 Java 언어로 서버 애플리케이션 개발                               |
 |              | Spring Data JPA     | ORM 기술로 DB를 객체지향적으로 다룸                                     |
 |              | Spring Security     | 인증/인가에 대한 간편한 설정                                            |
-| Database     | MySQL 8.0           | RDB 중 가장 많이 사용되는 MySQL 사용                                    |
+| Database     | PostgreSQL 16 with pgvector | 벡터 검색을 지원하는 고성능 관계형 데이터베이스 (AI 챗봇 기능 지원)  |
 |              | Redis               | RefreshToken 및 캐시 저장소로 인메모리 기반의 DB 사용         |
 | Infra        | Amazon Web Service  | AWS – 클라우드 환경에서 가용성 높은 서비스 가능                         |
 |              | Nginx | Nginx – 리버스 프록시를 통한 SSL/TLS                                 |
