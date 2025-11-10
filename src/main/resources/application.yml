@@ -160,6 +160,9 @@ spring:
   sql:
     init:
       mode: never
+  jpa:
+    hibernate:
+      ddl-auto: validate
 
 # 프로덕션 환경에서는 p6spy 로깅을 비활성화
 decorator:
