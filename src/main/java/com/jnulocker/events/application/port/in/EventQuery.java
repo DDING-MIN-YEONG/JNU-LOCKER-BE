@@ -1,10 +1,13 @@
 package com.jnulocker.events.application.port.in;
 
+import com.jnulocker.events.application.port.in.response.AvailableLockersResponse;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.EventResponse;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
+import com.jnulocker.events.application.port.in.response.LockerSummaryResponse;
 import com.jnulocker.events.application.port.in.response.MyEventCustomPage;
 import com.jnulocker.events.application.port.in.response.MyEventResponse;
+import com.jnulocker.events.application.port.in.response.PagedLockersResponse;
 import com.jnulocker.events.domain.Event;
 import com.jnulocker.events.domain.Locker;
 import java.util.List;
@@ -26,4 +29,10 @@ public interface EventQuery {
     EventResponse getEvent(UUID eventId);
 
     MyEventResponse getMyEvent(UUID eventId);
+
+    LockerSummaryResponse getLockerSummary(UUID eventId);
+
+    PagedLockersResponse getLockersByFloor(UUID eventId, Integer floorNumber, Pageable pageable);
+
+    AvailableLockersResponse getAvailableLockers(UUID eventId, Pageable pageable);
 }
