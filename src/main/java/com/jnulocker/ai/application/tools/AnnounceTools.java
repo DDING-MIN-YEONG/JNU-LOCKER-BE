@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jnulocker.announce.application.port.in.AnnounceQuery;
 import com.jnulocker.announce.application.port.in.response.AnnounceCustomPage;
+import com.jnulocker.announce.application.port.in.response.AnnounceDetailResponse;
 import com.jnulocker.announce.application.port.in.response.AnnouncePageable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.tool.annotation.Tool;
@@ -25,6 +26,14 @@ public class AnnounceTools {
             throws JsonProcessingException {
         Pageable pageable = new AnnouncePageable(page, null, "desc", null).toPageable();
         AnnounceCustomPage result = announceQuery.getAnnounces(pageable);
+        return objectMapper.writeValueAsString(result);
+    }
+
+    @Tool(description = "특정 공지사항의 상세 내용을 조회합니다. 제목, 내용, 작성자, 작성/수정 시간, 참여 학과 목록을 확인할 수 있습니다.")
+    @AiToolMethod
+    public String getAnnouncementDetail(@ToolParam(description = "공지사항 ID (숫자)") Long announceId)
+            throws JsonProcessingException {
+        AnnounceDetailResponse result = announceQuery.getAnnounce(announceId);
         return objectMapper.writeValueAsString(result);
     }
 }
