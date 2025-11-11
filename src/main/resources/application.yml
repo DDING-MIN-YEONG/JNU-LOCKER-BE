@@ -41,10 +41,12 @@ spring:
       chat:
         options:
           model: ${OPENAI_MODEL}
+          temperature: ${OPENAI_TEMPERATURE:0.2}
     vectorstore:
       pgvector:
         table-name: ${PGVECTOR_TABLE_NAME}
         initialize-schema: true
+        dimensions: ${PGVECTOR_DIMENSIONS:1536}
 
   servlet:
     multipart:
@@ -69,7 +71,8 @@ management:
 
 logging:
   level:
-    root: ${LOGGING_LEVEL}  # TRACE < DEBUG < INFO < WARN < ERROR < FATAL < OFF
+    root: ${LOGGING_LEVEL:WARN}  # TRACE < DEBUG < INFO < WARN < ERROR < FATAL < OFF
+    com.jnulocker.ai.application.advisor: ${LOGGING_LEVEL_ADVISOR:INFO}
 
   file:
     name: ${LOGGING_DIR}/${LOGGING_FILE}
