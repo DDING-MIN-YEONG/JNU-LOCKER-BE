@@ -6,6 +6,11 @@ spring:
     url: jdbc:tc:pgvector:pg18:///test-database
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
 
+  jpa:
+    properties:
+      hibernate:
+        default_schema: public # Testcontainers의 임시 DB를 사용하므로 스키마를 public으로 설정
+
   sql:
     init:
       mode: never
