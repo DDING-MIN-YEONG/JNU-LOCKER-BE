@@ -5,11 +5,17 @@ import static com.jnulocker.events.infrastructure.mapper.LockerMapper.*;
 import com.jnulocker.auth.security.SecurityUtils;
 import com.jnulocker.events.application.port.in.EventQuery;
 import com.jnulocker.events.application.port.in.request.FloorInfo;
+import com.jnulocker.events.application.port.in.response.AvailableLockersResponse;
 import com.jnulocker.events.application.port.in.response.EventCustomPage;
 import com.jnulocker.events.application.port.in.response.EventResponse;
+import com.jnulocker.events.application.port.in.response.FloorSummary;
 import com.jnulocker.events.application.port.in.response.FloorWithLockersResponse;
+import com.jnulocker.events.application.port.in.response.LockerResponse;
+import com.jnulocker.events.application.port.in.response.LockerSummaryResponse;
+import com.jnulocker.events.application.port.in.response.LockerWithFloorInfo;
 import com.jnulocker.events.application.port.in.response.MyEventCustomPage;
 import com.jnulocker.events.application.port.in.response.MyEventResponse;
+import com.jnulocker.events.application.port.in.response.PagedLockersResponse;
 import com.jnulocker.events.application.port.out.EventLoadPort;
 import com.jnulocker.events.application.port.out.FloorLoadPort;
 import com.jnulocker.events.application.port.out.LockerLoadPort;
@@ -139,5 +145,91 @@ public class EventQueryService implements EventQuery {
         List<Locker> lockersForFloor =
                 lockersByFloorId.getOrDefault(floor.getId(), List.of()).stream().sorted().toList();
         return FloorWithLockersResponse.of(floor, lockersForFloor);
+    }
+
+    @Override
+    public LockerSummaryResponse getLockerSummary(UUID eventId) {
+        List<FloorWithLockersResponse> floors = getLockersByEventId(eventId);
+
+        int totalLockers = 0;
+        int availableLockers = 0;
+        List<FloorSummary> floorSummaries = new ArrayList<>();
+
+        for (FloorWithLockersResponse floor : floors) {
+            int floorTotal = floor.lockers().size();
+            long floorAvailable =
+                    floor.lockers().stream().filter(LockerResponse::available).count();
+
+            totalLockers += floorTotal;
+            availableLockers += (int) floorAvailable;
+
+            floorSummaries.add(
+                    FloorSummary.of(floor.floorNumber(), floorTotal, (int) floorAvailable));
+        }
+
+        return LockerSummaryResponse.of(totalLockers, availableLockers, floorSummaries);
+    }
+
+    @Override
+    public PagedLockersResponse getLockersByFloor(
+            UUID eventId, Integer floorNumber, Pageable pageable) {
+        List<FloorWithLockersResponse> floors = getLockersByEventId(eventId);
+
+        FloorWithLockersResponse targetFloor =
+                floors.stream()
+                        .filter(f -> f.floorNumber().equals(floorNumber))
+                        .findFirst()
+                        .orElse(null);
+
+        if (targetFloor == null) {
+            return PagedLockersResponse.of(List.of(), 0, 0, 0, "해당 층을 찾을 수 없습니다: " + floorNumber);
+        }
+
+        List<LockerResponse> allLockers = targetFloor.lockers();
+        int pageNum = pageable.getPageNumber();
+        int pageSize = pageable.getPageSize();
+
+        int totalElements = allLockers.size();
+        int totalPages = (int) Math.ceil((double) totalElements / pageSize);
+        int start = pageNum * pageSize;
+        int end = Math.min(start + pageSize, totalElements);
+
+        List<LockerResponse> pagedLockers =
+                start < totalElements ? allLockers.subList(start, end) : List.of();
+
+        return PagedLockersResponse.of(
+                pagedLockers, pageNum, totalPages, totalElements, floorNumber + "층");
+    }
+
+    @Override
+    public AvailableLockersResponse getAvailableLockers(UUID eventId, Pageable pageable) {
+        List<FloorWithLockersResponse> floors = getLockersByEventId(eventId);
+
+        List<LockerWithFloorInfo> availableLockers =
+                floors.stream()
+                        .flatMap(
+                                floor ->
+                                        floor.lockers().stream()
+                                                .filter(LockerResponse::available)
+                                                .map(
+                                                        locker ->
+                                                                LockerWithFloorInfo.of(
+                                                                        locker.lockerId(),
+                                                                        locker.code(),
+                                                                        floor.floorNumber())))
+                        .toList();
+
+        int pageNum = pageable.getPageNumber();
+        int pageSize = pageable.getPageSize();
+
+        int totalElements = availableLockers.size();
+        int totalPages = (int) Math.ceil((double) totalElements / pageSize);
+        int start = pageNum * pageSize;
+        int end = Math.min(start + pageSize, totalElements);
+
+        List<LockerWithFloorInfo> pagedLockers =
+                start < totalElements ? availableLockers.subList(start, end) : List.of();
+
+        return AvailableLockersResponse.of(pagedLockers, pageNum, totalPages, totalElements);
     }
 }
