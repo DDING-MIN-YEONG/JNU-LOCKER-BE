@@ -19,6 +19,8 @@ import org.springframework.core.io.Resource;
 @Configuration
 @RequiredArgsConstructor
 public class AiConfig {
+    private static final Integer TOP_K = 5;
+    private static final Double SIMILARITY_THRESHOLD = 0.5;
 
     private final DetailedLoggingAdvisor detailedLoggingAdvisor;
 
@@ -39,8 +41,8 @@ public class AiConfig {
                         QuestionAnswerAdvisor.builder(vectorStore)
                                 .searchRequest(
                                         SearchRequest.builder()
-                                                .topK(5) // 상위 5개 유사 문서 검색
-                                                .similarityThreshold(0.5)
+                                                .topK(TOP_K) // 상위 5개 유사 문서 검색
+                                                .similarityThreshold(SIMILARITY_THRESHOLD)
                                                 .build())
                                 .build(),
                         detailedLoggingAdvisor)
