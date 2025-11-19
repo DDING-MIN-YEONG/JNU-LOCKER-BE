@@ -20,7 +20,7 @@ import org.springframework.core.io.Resource;
 @RequiredArgsConstructor
 public class AiConfig {
     private static final Integer TOP_K = 5;
-    private static final Double SIMILARITY_THRESHOLD = 0.5;
+    private static final Double SIMILARITY_THRESHOLD = 0.1;
 
     private final DetailedLoggingAdvisor detailedLoggingAdvisor;
 
@@ -37,21 +37,23 @@ public class AiConfig {
             RegistrationTools registrationTools,
             OrganizationTools organizationTools) {
         return builder.defaultSystem(systemTemplate)
-                .defaultAdvisors(
-                        QuestionAnswerAdvisor.builder(vectorStore)
-                                .searchRequest(
-                                        SearchRequest.builder()
-                                                .topK(TOP_K) // 상위 5개 유사 문서 검색
-                                                .similarityThreshold(SIMILARITY_THRESHOLD)
-                                                .build())
-                                .build(),
-                        detailedLoggingAdvisor)
+                .defaultAdvisors(buildQuestionAnswerAdvisor(vectorStore), detailedLoggingAdvisor)
                 .defaultTools(
                         eventTools,
                         announceTools,
                         memberTools,
                         registrationTools,
                         organizationTools)
+                .build();
+    }
+
+    private QuestionAnswerAdvisor buildQuestionAnswerAdvisor(VectorStore vectorStore) {
+        return QuestionAnswerAdvisor.builder(vectorStore)
+                .searchRequest(
+                        SearchRequest.builder()
+                                .topK(TOP_K)
+                                .similarityThreshold(SIMILARITY_THRESHOLD)
+                                .build())
                 .build();
     }
 }
