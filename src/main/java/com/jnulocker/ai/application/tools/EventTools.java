@@ -1,6 +1,7 @@
 package com.jnulocker.ai.application.tools;
 
 import static com.jnulocker.ai.application.tools.AiToolUtils.parseUUID;
+import static com.jnulocker.member.domain.Role.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,13 +15,11 @@ import com.jnulocker.events.application.port.in.response.MyEventCustomPage;
 import com.jnulocker.events.application.port.in.response.PagedLockersResponse;
 import com.jnulocker.member.application.port.in.MemberQuery;
 import com.jnulocker.member.application.port.in.response.MemberInfoResponse;
-import com.jnulocker.member.domain.Role;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
@@ -28,27 +27,22 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class EventTools {
 
-    private static final int DEFAULT_PAGE_SIZE = 20;
-    private static final int MAX_PAGE_SIZE = 100;
-
     private final EventQuery eventQuery;
     private final MemberQuery memberQuery;
     private final ObjectMapper objectMapper;
 
-    @Tool(
-            description =
-                    "[관리자 전용] 현재 관리 중인 조직의 사물함 신청 이벤트 목록을 조회합니다. 진행 중, 예정, 종료된 모든 이벤트를 검색할 수 있습니다.")
+    @Tool(description = "[관리자 전용] 전체 사물함 신청 이벤트 목록을 조회합니다. 진행 중, 예정, 종료된 모든 이벤트를 검색할 수 있습니다.")
     @AiToolMethod
     public String searchEvents(
             @ToolParam(description = "페이지 번호 (0부터 시작, 기본값 0)", required = false) Integer page,
             @ToolParam(description = "페이지 크기 (기본값 10)", required = false) Integer size)
             throws JsonProcessingException {
         MemberInfoResponse currentUser = memberQuery.getMemberInfo();
-        if (currentUser.role() != Role.MANAGER) {
+        if (isNotManager(currentUser)) {
             return objectMapper.writeValueAsString(Map.of("error", "이 기능은 관리자만 사용할 수 있습니다."));
         }
 
-        Pageable pageable = new EventPageable(page, size, null, null).toPageable();
+        Pageable pageable = createPageable(page, size);
         EventCustomPage result = eventQuery.getAllEvents(pageable);
         return objectMapper.writeValueAsString(result);
     }
@@ -58,9 +52,10 @@ public class EventTools {
                     "현재 로그인한 사용자가 참여(신청) 가능한 사물함 신청 이벤트 목록을 조회합니다. 사용자의 소속 학과에 해당하는 이벤트만 표시됩니다.")
     @AiToolMethod
     public String getMyEvents(
-            @ToolParam(description = "페이지 번호 (0부터 시작, 기본값 0)", required = false) Integer page)
+            @ToolParam(description = "페이지 번호 (0부터 시작, 기본값 0)", required = false) Integer page,
+            @ToolParam(description = "페이지 크기 (기본값 10)", required = false) Integer size)
             throws JsonProcessingException {
-        Pageable pageable = new EventPageable(page, null, null, null).toPageable();
+        Pageable pageable = createPageable(page, size);
         MyEventCustomPage result = eventQuery.getMyEvents(pageable);
         return objectMapper.writeValueAsString(result);
     }
@@ -91,7 +86,7 @@ public class EventTools {
             @ToolParam(description = "이벤트 ID (UUID 형식)") String eventId,
             @ToolParam(description = "조회할 층 번호 (예: 1, 2, 3)") Integer floorNumber,
             @ToolParam(description = "페이지 번호 (0부터 시작, 기본값 0)", required = false) Integer page,
-            @ToolParam(description = "페이지 크기 (기본값 20, 최대 100)", required = false) Integer size)
+            @ToolParam(description = "페이지 크기 (기본값 10)", required = false) Integer size)
             throws JsonProcessingException {
         UUID uuid = parseUUID(eventId);
         Pageable pageable = createPageable(page, size);
@@ -105,7 +100,7 @@ public class EventTools {
     public String getAvailableLockers(
             @ToolParam(description = "이벤트 ID (UUID 형식)") String eventId,
             @ToolParam(description = "페이지 번호 (0부터 시작, 기본값 0)", required = false) Integer page,
-            @ToolParam(description = "페이지 크기 (기본값 20, 최대 100)", required = false) Integer size)
+            @ToolParam(description = "페이지 크기 (기본값 10)", required = false) Integer size)
             throws JsonProcessingException {
         UUID uuid = parseUUID(eventId);
         Pageable pageable = createPageable(page, size);
@@ -115,8 +110,10 @@ public class EventTools {
     }
 
     private Pageable createPageable(Integer page, Integer size) {
-        int pageNum = page != null ? page : 0;
-        int pageSize = size != null ? Math.min(size, MAX_PAGE_SIZE) : DEFAULT_PAGE_SIZE;
-        return PageRequest.of(pageNum, pageSize);
+        return new EventPageable(page, size, null, null).toPageable();
+    }
+
+    private boolean isNotManager(MemberInfoResponse currentUser) {
+        return !MANAGER.equals(currentUser.role()) && !ADMIN.equals(currentUser.role());
     }
 }
