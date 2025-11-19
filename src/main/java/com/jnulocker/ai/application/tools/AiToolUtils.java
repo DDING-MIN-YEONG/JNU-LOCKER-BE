@@ -1,5 +1,6 @@
 package com.jnulocker.ai.application.tools;
 
+import com.jnulocker.ai.exception.InvalidUuidFormatException;
 import java.util.UUID;
 import lombok.experimental.UtilityClass;
 
@@ -10,7 +11,7 @@ public final class AiToolUtils {
         try {
             return UUID.fromString(id);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(String.format("ID는 올바른 UUID 형식이어야 합니다: %s", id));
+            throw InvalidUuidFormatException.EXCEPTION;
         }
     }
 }

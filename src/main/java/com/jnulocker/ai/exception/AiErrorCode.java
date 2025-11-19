@@ -25,7 +25,8 @@ public enum AiErrorCode implements ErrorCode {
     EMBEDDING_API_CLIENT_ERROR("AI011", HttpStatus.BAD_REQUEST, "임베딩 API 호출 중 클라이언트 오류가 발생했습니다."),
     EMBEDDING_API_SERVER_ERROR("AI012", HttpStatus.INTERNAL_SERVER_ERROR, "임베딩 API 서버 오류가 발생했습니다."),
     EMPTY_EMBEDDING_RESPONSE("AI013", HttpStatus.INTERNAL_SERVER_ERROR, "임베딩 응답이 비어있습니다."),
-    INVALID_EMBEDDING_INPUT("AI014", HttpStatus.BAD_REQUEST, "임베딩할 텍스트가 비어있습니다.");
+    INVALID_EMBEDDING_INPUT("AI014", HttpStatus.BAD_REQUEST, "임베딩할 텍스트가 비어있습니다."),
+    INVALID_UUID_FORMAT("AI015", HttpStatus.BAD_REQUEST, "올바른 UUID 형식이 아닙니다.");
 
     private final String code;
     private final HttpStatus httpStatus;
