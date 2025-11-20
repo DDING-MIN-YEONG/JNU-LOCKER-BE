@@ -20,7 +20,13 @@ public enum AiErrorCode implements ErrorCode {
     EMPTY_FILE("AI007", HttpStatus.BAD_REQUEST, "파일이 비어있습니다."),
     DOCUMENT_PARSE_FAILED("AI008", HttpStatus.INTERNAL_SERVER_ERROR, "문서 파싱에 실패했습니다."),
     AI_TOOL_EXECUTION_ERROR(
-            "AI009", HttpStatus.INTERNAL_SERVER_ERROR, "AI 도구 실행 중 예상치 못한 오류가 발생했습니다.");
+            "AI009", HttpStatus.INTERNAL_SERVER_ERROR, "AI 도구 실행 중 예상치 못한 오류가 발생했습니다."),
+    EMBEDDING_GENERATION_FAILED("AI010", HttpStatus.INTERNAL_SERVER_ERROR, "임베딩 생성에 실패했습니다."),
+    EMBEDDING_API_CLIENT_ERROR("AI011", HttpStatus.BAD_REQUEST, "임베딩 API 호출 중 클라이언트 오류가 발생했습니다."),
+    EMBEDDING_API_SERVER_ERROR("AI012", HttpStatus.INTERNAL_SERVER_ERROR, "임베딩 API 서버 오류가 발생했습니다."),
+    EMPTY_EMBEDDING_RESPONSE("AI013", HttpStatus.INTERNAL_SERVER_ERROR, "임베딩 응답이 비어있습니다."),
+    INVALID_EMBEDDING_INPUT("AI014", HttpStatus.BAD_REQUEST, "임베딩할 텍스트가 비어있습니다."),
+    INVALID_UUID_FORMAT("AI015", HttpStatus.BAD_REQUEST, "올바른 UUID 형식이 아닙니다.");
 
     private final String code;
     private final HttpStatus httpStatus;

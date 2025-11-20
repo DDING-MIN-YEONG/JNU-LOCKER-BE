@@ -54,7 +54,7 @@ docker compose up -d
 ```
 
 <details>
-<summary> .env파일 예시</summary>
+<summary> .env 파일 예시</summary>
 <div markdown="1">
 
 ```bash
@@ -68,6 +68,17 @@ PGVECTOR_DATABASE=locker
 PGVECTOR_USERNAME=admin
 PGVECTOR_PASSWORD= # TODO: 비밀번호 입력
 PGVECTOR_TABLE_NAME=document_embeddings
+PGVECTOR_DIMENSIONS=1024
+
+# OpenAI API 설정 (Chat 모델용)
+OPENAI_API_KEY= # TODO: OpenAI API 키 입력
+OPENAI_MODEL=gpt-4o-mini
+OPENAI_TEMPERATURE=0.3
+
+# Hugging Face API 설정 (Embedding 모델용 - BGE-m3-ko)
+HUGGINGFACE_API_KEY= # TODO: Hugging Face API 토큰 입력 (https://huggingface.co/settings/tokens)
+HUGGINGFACE_MODEL=nlpai-lab/KURE-v1
+HUGGINGFACE_TIMEOUT=60000
 
 # 로그 설정
 LOGGING_LEVEL=INFO

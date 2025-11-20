@@ -2,6 +2,9 @@ spring:
   application:
     name: jnu-locker
 
+  autoconfigure:
+    exclude: org.springframework.ai.vectorstore.pgvector.autoconfigure.PgVectorStoreAutoConfiguration
+
   datasource:
     url: jdbc:postgresql://${PGVECTOR_HOST}:${PGVECTOR_PORT}/${PGVECTOR_DATABASE}
     username: ${PGVECTOR_USERNAME}
@@ -42,11 +45,15 @@ spring:
         options:
           model: ${OPENAI_MODEL}
           temperature: ${OPENAI_TEMPERATURE:0.2}
+    huggingface:
+      api-key: ${HUGGINGFACE_API_KEY}
+      model: ${HUGGINGFACE_MODEL:nlpai-lab/KURE-v1}
+      timeout: ${HUGGINGFACE_TIMEOUT:60000} # 60초
     vectorstore:
       pgvector:
         table-name: ${PGVECTOR_TABLE_NAME}
+        dimensions: ${PGVECTOR_DIMENSIONS}
         initialize-schema: true
-        dimensions: ${PGVECTOR_DIMENSIONS:1536}
 
   servlet:
     multipart:

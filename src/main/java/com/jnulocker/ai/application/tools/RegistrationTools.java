@@ -1,5 +1,6 @@
 package com.jnulocker.ai.application.tools;
 
+import static com.jnulocker.ai.application.tools.AiToolUtils.parseUUID;
 import static com.jnulocker.member.domain.Role.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -10,6 +11,8 @@ import com.jnulocker.registration.application.port.in.RegistrationQuery;
 import com.jnulocker.registration.application.port.in.response.RegistrationCustomPage;
 import com.jnulocker.registration.application.port.in.response.RegistrationPageable;
 import com.jnulocker.registration.application.port.in.response.RegistrationResponse;
+import com.jnulocker.registration.exception.RegistrationNotFoundException;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.tool.annotation.Tool;
@@ -29,9 +32,13 @@ public class RegistrationTools {
     @AiToolMethod
     public String checkMyRegistration(@ToolParam(description = "이벤트 ID (UUID 형식)") String eventId)
             throws JsonProcessingException {
-        UUID uuid = UUID.fromString(eventId);
-        RegistrationResponse result = registrationQuery.getMyRegistration(uuid);
-        return objectMapper.writeValueAsString(result);
+        try {
+            UUID uuid = parseUUID(eventId);
+            RegistrationResponse result = registrationQuery.getMyRegistration(uuid);
+            return objectMapper.writeValueAsString(result);
+        } catch (RegistrationNotFoundException e) {
+            return objectMapper.writeValueAsString(Map.of("message", "해당 이벤트에 대한 신청 내역이 없습니다."));
+        }
     }
 
     @Tool(
@@ -45,10 +52,10 @@ public class RegistrationTools {
         MemberInfoResponse currentUser = memberQuery.getMemberInfo();
 
         if (isNotManager(currentUser)) {
-            return "이 기능은 관리자만 사용할 수 있습니다.";
+            return objectMapper.writeValueAsString(Map.of("error", "이 기능은 관리자만 사용할 수 있습니다."));
         }
 
-        UUID eventUUID = UUID.fromString(eventId);
+        UUID eventUUID = parseUUID(eventId);
         Pageable pageable = new RegistrationPageable(page, null, "desc", null).toPageable();
         RegistrationCustomPage result = registrationQuery.getRegistrations(eventUUID, pageable);
         return objectMapper.writeValueAsString(result);
