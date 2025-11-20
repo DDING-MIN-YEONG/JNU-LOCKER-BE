@@ -80,6 +80,10 @@ HUGGINGFACE_API_KEY= # TODO: Hugging Face API 토큰 입력 (https://huggingface
 HUGGINGFACE_MODEL=nlpai-lab/KURE-v1
 HUGGINGFACE_TIMEOUT=60000
 
+# RAG (Retrieval-Augmented Generation) 설정
+RAG_TOP_K=5                    # 벡터 검색 시 가져올 문서 개수 (기본값: 5)
+RAG_SIMILARITY_THRESHOLD=0.5   # 유사도 임계값 (0.0~1.0, 기본값: 0.4)
+
 # 로그 설정
 LOGGING_LEVEL=INFO
 LOGGING_DIR=/app/log

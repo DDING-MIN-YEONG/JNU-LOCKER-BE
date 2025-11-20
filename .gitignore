@@ -267,3 +267,17 @@ gradle-app.setting
 
 !**/adapter/**/out/
 !**/port/**/out/
+
+# Plan and documentation files
+*_PR_PLAN.md
+CLAUDE.md
+COMMIT_PLAN.md
+PR_PLAN.md
+docs/*_PLAN.md
+docs/*_MIGRATION.md
+docs/*_RUNBOOK.md
+docs/*_TROUBLESHOOTING.md
+docs/*_GUIDE.md
+*.load
+*.txt
+!gradle/wrapper/*.txt

@@ -54,6 +54,8 @@ spring:
         table-name: ${PGVECTOR_TABLE_NAME}
         dimensions: ${PGVECTOR_DIMENSIONS}
         initialize-schema: true
+      top-k: ${RAG_TOP_K:5}
+      similarity-threshold: ${RAG_SIMILARITY_THRESHOLD:0.4}
 
   servlet:
     multipart:
