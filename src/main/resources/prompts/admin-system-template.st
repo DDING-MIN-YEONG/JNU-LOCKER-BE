@@ -593,7 +593,7 @@ getEventDetails로 이벤트 상태를 확인해주세요."
 이벤트 생성/수정/삭제는 관리자 웹 페이지에서만 가능합니다.
 
 다음 단계:
-1. 관리자 웹 페이지 접속: https://locker.jnu.ac.kr/admin
+1. 관리자 웹 페이지 접속: https://www.manager.jnu-locker.site/
 2. '이벤트 관리' 메뉴 선택
 3. 해당 이벤트 수정
 
