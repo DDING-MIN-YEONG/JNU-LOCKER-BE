@@ -3,10 +3,8 @@ package com.jnulocker.config;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-@Testcontainers
 public abstract class RedisTestContainer {
 
     private static final int REDIS_PORT = 6379;
@@ -16,8 +14,7 @@ public abstract class RedisTestContainer {
     static {
         REDIS_CONTAINER =
                 new GenericContainer<>(DockerImageName.parse(REDIS_IMAGE))
-                        .withExposedPorts(REDIS_PORT)
-                        .withReuse(true);
+                        .withExposedPorts(REDIS_PORT);
         REDIS_CONTAINER.start();
     }
 
