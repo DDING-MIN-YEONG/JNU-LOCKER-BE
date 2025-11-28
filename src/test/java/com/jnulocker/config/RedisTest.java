@@ -6,5 +6,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Import(RedisTestConfig.class)
-public abstract class RedisTest extends RedisTestContainer {}
+@Import({RedisTestConfig.class, TestVectorStoreConfig.class})
+public abstract class RedisTest extends RedisTestContainer {
+}
