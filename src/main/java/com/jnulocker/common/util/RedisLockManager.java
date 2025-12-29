@@ -7,12 +7,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class RedisLockManager {
+
+    @Value("${custom.lock.default-wait-second:5}")
+    private Long defaultWaitSecond;
 
     private final RedissonClient redissonClient;
     private final TransactionForSupplier transactionForSupplier;
@@ -33,6 +37,10 @@ public class RedisLockManager {
                 lock.unlock();
             }
         }
+    }
+
+    public void lock(String key, Runnable runnable) {
+        lock(key, defaultWaitSecond, runnable);
     }
 
     // 반환값이 없는 경우: Runnable 사용

@@ -115,6 +115,7 @@ custom:
   lock:
     watchdog:
       timeout: ${LOCK_WATCHDOG_TIMEOUT:30000} # Watchdog 타임아웃 (밀리초, 기본: 30초)
+    default-wait-second: ${LOCK_DEFAULT_WAIT_SECOND:5}
 
 email:
   sender: ${EMAIL_SENDER}

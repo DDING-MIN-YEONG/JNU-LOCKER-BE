@@ -63,7 +63,6 @@ public class AuthCommandService
 
         redisLockManager.lock(
                 request.email(),
-                5L,
                 () -> {
                     validateDuplicateEmail(request.email());
 
@@ -91,7 +90,6 @@ public class AuthCommandService
 
         redisLockManager.lock(
                 request.email(),
-                5L,
                 () -> {
                     validateDuplicateEmail(request.email());
 
