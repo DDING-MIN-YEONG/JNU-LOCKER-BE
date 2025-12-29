@@ -3,7 +3,6 @@ package com.jnulocker.common.util;
 import com.jnulocker.common.exception.LockAcquisitionFailedException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -11,16 +10,25 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class RedisLockManager {
 
-    @Value("${custom.lock.default-wait-second:5}")
     private final Long defaultWaitSecond;
 
     private final RedissonClient redissonClient;
     private final TransactionForSupplier transactionForSupplier;
     private final TransactionForRunnable transactionForRunnable;
+
+    public RedisLockManager(
+            @Value("${custom.lock.default-wait-second:5}") Long defaultWaitSecond,
+            RedissonClient redissonClient,
+            TransactionForSupplier transactionForSupplier,
+            TransactionForRunnable transactionForRunnable) {
+        this.defaultWaitSecond = defaultWaitSecond;
+        this.redissonClient = redissonClient;
+        this.transactionForSupplier = transactionForSupplier;
+        this.transactionForRunnable = transactionForRunnable;
+    }
 
     // 반환값이 있는 경우: Supplier<T> 사용
     public <T> T lock(String key, Long waitSecond, Supplier<T> supplier) {
