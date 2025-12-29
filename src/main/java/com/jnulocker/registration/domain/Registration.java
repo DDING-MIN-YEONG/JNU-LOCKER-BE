@@ -36,7 +36,7 @@ public class Registration extends BaseEntity {
     private Member member;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "locker_id")
+    @JoinColumn(name = "locker_id", unique = true)
     private Locker locker;
 
     public static Registration create(Member member, Locker locker) {
