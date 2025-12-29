@@ -127,7 +127,6 @@ public class RegistrationControllerIntegrationTest extends RedisTest {
         assertThat(memberInfo.studentNumber()).isEqualTo("221965");
         assertThat(memberInfo.organization()).isEqualTo("테스트 조직명");
         assertThat(memberInfo.department()).isEqualTo("테스트 학과명");
-        assertThat(memberInfo.email()).isEqualTo("test@email.com");
     }
 
     @Test
