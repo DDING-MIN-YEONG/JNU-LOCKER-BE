@@ -19,6 +19,7 @@ import com.jnulocker.auth.exception.UserAlreadyExistException;
 import com.jnulocker.auth.jwt.TokenProvider;
 import com.jnulocker.auth.jwt.exception.JwtException;
 import com.jnulocker.auth.security.SecurityUtils;
+import com.jnulocker.common.util.RedisLockManager;
 import com.jnulocker.common.util.RedisUtil;
 import com.jnulocker.member.application.port.in.MemberCommand;
 import com.jnulocker.member.application.port.in.MemberQuery;
@@ -54,51 +55,60 @@ public class AuthCommandService
     private final TokenRepository tokenRepository;
     private final RegistrationCommand registrationCommand;
     private final ApplicationEventPublisher eventPublisher;
+    private final RedisLockManager redisLockManager;
 
     @Override
-    @Transactional
     public void signupUser(UserSignupRequest request) {
         redisUtil.checkEmailVerified(request.email());
 
-        validateDuplicateEmail(request.email());
+        redisLockManager.lock(
+                request.email(),
+                () -> {
+                    validateDuplicateEmail(request.email());
 
-        String encodedPassword = passwordEncoder.encode(request.password());
+                    String encodedPassword = passwordEncoder.encode(request.password());
 
-        Department department = departmentQuery.getDepartmentByIdOrThrow(request.departmentId());
+                    Department department =
+                            departmentQuery.getDepartmentByIdOrThrow(request.departmentId());
 
-        Member member =
-                Member.createUser(
-                        request.name(),
-                        request.email(),
-                        encodedPassword,
-                        request.phoneNumber(),
-                        request.studentNumber(),
-                        department);
+                    Member member =
+                            Member.createUser(
+                                    request.name(),
+                                    request.email(),
+                                    encodedPassword,
+                                    request.phoneNumber(),
+                                    request.studentNumber(),
+                                    department);
 
-        memberCommand.save(member);
+                    memberCommand.save(member);
+                });
     }
 
     @Override
-    @Transactional
     public void signupManager(ManagerSignupRequest request) {
         redisUtil.checkEmailVerified(request.email());
 
-        validateDuplicateEmail(request.email());
+        redisLockManager.lock(
+                request.email(),
+                () -> {
+                    validateDuplicateEmail(request.email());
 
-        String encodedPassword = passwordEncoder.encode(request.password());
+                    String encodedPassword = passwordEncoder.encode(request.password());
 
-        Department department = departmentQuery.getDepartmentByIdOrThrow(request.departmentId());
+                    Department department =
+                            departmentQuery.getDepartmentByIdOrThrow(request.departmentId());
 
-        Member member =
-                Member.createManager(
-                        request.name(),
-                        request.email(),
-                        encodedPassword,
-                        request.phoneNumber(),
-                        request.studentNumber(),
-                        department);
+                    Member member =
+                            Member.createManager(
+                                    request.name(),
+                                    request.email(),
+                                    encodedPassword,
+                                    request.phoneNumber(),
+                                    request.studentNumber(),
+                                    department);
 
-        memberCommand.save(member);
+                    memberCommand.save(member);
+                });
     }
 
     @Override

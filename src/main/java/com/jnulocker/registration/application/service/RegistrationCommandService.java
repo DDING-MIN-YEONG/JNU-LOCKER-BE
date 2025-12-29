@@ -32,14 +32,12 @@ public class RegistrationCommandService implements RegistrationCommand {
     private final RedisLockManager redisLockManager;
 
     @Override
-    @Transactional
     public void registerForEvent(UUID eventId, RegisterForEventRequest request) {
         Long memberId = SecurityUtils.getCurrentMemberId();
         UUID lockerId = request.lockerId();
 
         redisLockManager.lock(
                 lockerId.toString(),
-                5L,
                 () -> {
                     Member member = memberQuery.findByIdOrThrow(memberId);
 

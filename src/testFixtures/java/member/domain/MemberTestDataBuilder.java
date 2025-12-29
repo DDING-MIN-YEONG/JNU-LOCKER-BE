@@ -4,11 +4,12 @@ import static organization.domain.DepartmentTestDataBuilder.departmentBuilder;
 
 import com.jnulocker.member.domain.Member;
 import com.jnulocker.organization.domain.Department;
+import java.util.UUID;
 
 public class MemberTestDataBuilder {
 
     private String name = "테스트 이름";
-    private String email = "test@email.com";
+    private String email = UUID.randomUUID() + "@test.com";
     private String phoneNumber = "010-1234-5678";
     private String password = "password123";
     private String studentNumber = "221965";
