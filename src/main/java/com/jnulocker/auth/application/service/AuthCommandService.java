@@ -86,7 +86,6 @@ public class AuthCommandService
     }
 
     @Override
-    @Transactional
     public void signupManager(ManagerSignupRequest request) {
         redisUtil.checkEmailVerified(request.email());
 
