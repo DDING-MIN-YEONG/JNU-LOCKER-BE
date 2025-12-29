@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class RedisLockManager {
 
     @Value("${custom.lock.default-wait-second:5}")
-    private Long defaultWaitSecond;
+    private final Long defaultWaitSecond;
 
     private final RedissonClient redissonClient;
     private final TransactionForSupplier transactionForSupplier;
